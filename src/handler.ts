@@ -20,14 +20,17 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
     const secrets: string[] = await getSecret(process.env.SECRET_NAME);
 
     event.Records.forEach((record) => {
-      if (secrets.includes(record.dynamodb.testStationPNumber)) {
-        if (record.dynamodb.testTypeEndTimestamp !== "") {
+      if (secrets.includes(record.dynamodb.testStationPNumber as string)) {
+        if (record.dynamodb.testTypeEndTimestamp !== '') {
           // Send test result
-          let testActivity: TestActivity = dataFormatter(record);
-          logger.info(testActivity)
-        }
-        else {
-          logger.info(`Test result associated with EventID: ${record.eventId} was not completed, event has not been sent to EventBridge`)
+          const testActivity: TestActivity = dataFormatter(record);
+          logger.info(testActivity);
+        } else {
+          logger.info(
+            `Test result associated with EventID: ${
+              record.eventId as string
+            } was not completed, event has not been sent to EventBridge`,
+          );
         }
       }
     });
