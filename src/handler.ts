@@ -2,6 +2,7 @@
 import 'source-map-support/register';
 import { DynamoDBStreamEvent, Context, Callback } from 'aws-lambda';
 import { getSecret } from './utils/filterUtils';
+import { dataFormatter } from './utils/dataFormatter';
 import { TestActivity } from './utils/testActivity';
 import logger from './observability/logger';
 
@@ -19,10 +20,15 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
     const secrets: string[] = await getSecret(process.env.SECRET_NAME);
 
     event.Records.forEach((record) => {
-      // TODO: format record to Test Activity type
-      let testActivity: TestActivity;
-      if (secrets.includes(testActivity.testStationPNumber)) {
-        // Send test result
+      if (secrets.includes(record.dynamodb.testStationPNumber)) {
+        if (record.dynamodb.testTypeEndTimestamp !== "") {
+          // Send test result
+          let testActivity: TestActivity = dataFormatter(record);
+          logger.info(testActivity)
+        }
+        else {
+          logger.info(`Test result associated with EventID: ${record.eventId} was not completed, event has not been sent to EventBridge`)
+        }
       }
     });
 
