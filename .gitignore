@@ -21,11 +21,7 @@ Temporary Items
 node_modules
 jspm_packages
 
-# Serverless directories
-.serverless
-
-# Webpack directories
-.webpack
+# temp directories
 .serverless
 .build
 .artifact
@@ -33,6 +29,7 @@ jspm_packages
 
 # env files
 *.env*
+!.env.example
 
 # Coverage reports
 coverage
@@ -43,4 +40,4 @@ reports
 *.map
 
 # npm audit results
-npm-audit.html
+npm-audit.html 
