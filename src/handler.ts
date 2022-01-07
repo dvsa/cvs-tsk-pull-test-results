@@ -28,7 +28,7 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
         } else {
           logger.info(
             `Test result associated with EventID: ${
-              record.eventId as string
+              record.eventID
             } was not completed, event has not been sent to EventBridge`,
           );
         }
