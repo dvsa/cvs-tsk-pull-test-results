@@ -2,7 +2,7 @@
 import 'source-map-support/register';
 import { DynamoDBStreamEvent, Context, Callback } from 'aws-lambda';
 import { getSecret } from './utils/filterUtils';
-import { dataFormatter } from './utils/dataFormatter';
+import { formatDynamoData } from './utils/dataFormatter';
 import { TestActivity } from './utils/testActivity';
 import logger from './observability/logger';
 
@@ -20,18 +20,12 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
     const secrets: string[] = await getSecret(process.env.SECRET_NAME);
 
     event.Records.forEach((record) => {
-      if (secrets.includes(record.dynamodb.testStationPNumber as string)) {
-        if (record.dynamodb.testTypeEndTimestamp !== '') {
-          // Send test result
-          const testActivity: TestActivity = dataFormatter(record);
-          logger.info(testActivity);
-        } else {
-          logger.info(
-            `Test result associated with EventID: ${
-              record.eventID
-            } was not completed, event has not been sent to EventBridge`,
-          );
-        }
+      const testActivity: TestActivity = formatDynamoData(record);
+      logger.info(testActivity);
+      if (secrets.includes(testActivity.testStationPNumber)) {
+        sendCompletedEvents(testActivity);
+      } else {
+        logger.debug(`Event not sent as non filtered ATF { PNumber: ${testActivity.testStationPNumber} }`);
       }
     });
 
@@ -43,4 +37,13 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
     callback(new Error('Data processed unsuccessfully.'));
   }
 };
+
+function sendCompletedEvents(testActivity: TestActivity) {
+  if (testActivity.testTypeEndTimestamp !== '') {
+    // await sendEvents(testActivity);
+  } else {
+    logger.debug(`Event not sent as not completed { ID: ${testActivity.testResultId} }`);
+  }
+}
+
 export { handler };
