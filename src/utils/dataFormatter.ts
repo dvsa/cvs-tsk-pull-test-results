@@ -9,9 +9,9 @@ export const formatDynamoData = (record: DynamoDBRecord): TestActivity[] => {
   const data = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
   console.log(data);
 
-  let testActivities: Array<TestActivity> = new Array();
+  const testActivities: Array<TestActivity> = [];
 
-  data.testTypes.forEach(testType => {
+  data.testTypes.forEach((testType) => {
     const activityEvent: TestActivity = {
       noOfAxles: data.noOfAxles as number,
       testTypeStartTimestamp: data.testStartTimestamp,

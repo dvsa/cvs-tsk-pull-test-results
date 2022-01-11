@@ -20,12 +20,12 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
     const secrets: string[] = await getSecret(process.env.SECRET_NAME);
 
     event.Records.forEach((record) => {
-      const testActivity: TestActivity = formatDynamoData(record);
-      logger.info(testActivity);
-      if (secrets.includes(testActivity.testStationPNumber)) {
-        sendCompletedEvents(testActivity);
+      if (secrets.includes(record.dynamodb.NewImage.testStationPNumber.S)) {
+        const testActivity: TestActivity[] = formatDynamoData(record);
+        logger.info(testActivity);
+        testActivity.forEach((testResult) => sendCompletedEvents(testResult));
       } else {
-        logger.debug(`Event not sent as non filtered ATF { PNumber: ${testActivity.testStationPNumber} }`);
+        logger.debug(`Event not sent as non filtered ATF { PNumber: ${record.dynamodb.NewImage.testStationPNumber.S} }`);
       }
     });
 
