@@ -52,7 +52,7 @@ describe('Send events', () => {
       await expect(sendEvents(mTestResult)).resolves.toEqual(mSendResponse);
     });
 
-    it('GIVEN an issue with eventbridge WHEN 1 event is sent and 1 fails THEN the failure is in the response.', async () => {
+    it('GIVEN an issue with eventbridge WHEN 6 events are sent and 1 fails THEN the failure is in the response.', async () => {
       const mTestResult: TestActivity[] = Array<TestActivity>(6);
       mTestResult[0] = createTestResult(-1);
       const mSendResponse: SendResponse = { SuccessCount: 5, FailCount: 1 };
