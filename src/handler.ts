@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import 'source-map-support/register';
-import { DynamoDBStreamEvent, Context, Callback } from 'aws-lambda';
+import {
+  DynamoDBStreamEvent, Context, Callback, DynamoDBRecord,
+} from 'aws-lambda';
 import { getSecret } from './utils/filterUtils';
 import { formatDynamoData } from './utils/dataFormatter';
 import { TestActivity } from './utils/testActivity';
@@ -20,7 +22,7 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
     const secrets: string[] = await getSecret(process.env.SECRET_NAME);
 
     event.Records.forEach((record) => {
-      if (secrets.includes(record.dynamodb.NewImage.testStationPNumber.S)) {
+      if (secrets.includes(getTestStationNumber(record))) {
         const testActivity: TestActivity[] = formatDynamoData(record);
         logger.info(testActivity);
         testActivity.forEach((testResult) => sendCompletedEvents(testResult));
@@ -37,6 +39,10 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
     callback(new Error('Data processed unsuccessfully.'));
   }
 };
+
+function getTestStationNumber(record: DynamoDBRecord): string {
+  return record.dynamodb.NewImage.testStationPNumber.S;
+}
 
 function sendCompletedEvents(testActivity: TestActivity) {
   if (testActivity.testTypeEndTimestamp !== '') {
