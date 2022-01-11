@@ -24,7 +24,6 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
     event.Records.forEach((record) => {
       if (secrets.includes(getTestStationNumber(record))) {
         const testActivity: TestActivity[] = formatDynamoData(record);
-        logger.info(testActivity);
         testActivity.forEach((testResult) => sendCompletedEvents(testResult));
       } else {
         logger.debug(`Event not sent as non filtered ATF { PNumber: ${record.dynamodb.NewImage.testStationPNumber.S} }`);
