@@ -9,7 +9,7 @@ export const formatDynamoData = (record: DynamoDBRecord): TestActivity => {
   const data = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
   console.log(data);
 
-  const testTypes = data.testTypes.sort((a, b) => Date.parse(a.lastUpdateAt as string) > Date.parse(b.lastUpdateAt as string));
+  const testTypes = data.testTypes.sort((a, b) => Date.parse(b.lastUpdatedAt as string) - Date.parse(a.lastUpdatedAt as string));
   const latestTest = testTypes[0];
 
   const activityEvent: TestActivity = {
