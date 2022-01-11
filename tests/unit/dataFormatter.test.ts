@@ -60,7 +60,7 @@ describe('DataFormatter', () => {
     it(`GIVEN two test types WHEN data is formated into events THEN expect two events to be generated within an array`, () => {
       DYNAMO_DATA = dynamoEventMultipleTests as DynamoDBRecord;
       TEST_ACTIVITY = formatDynamoData(DYNAMO_DATA);
-      expect(TEST_ACTIVITY.length).toEqual(2);
+      expect(TEST_ACTIVITY).toHaveLength(2);
     });
   });
 });
