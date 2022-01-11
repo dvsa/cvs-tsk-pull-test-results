@@ -32,166 +32,6 @@
           },
           "testTypes": {
               "L": [
-                  {
-                    "M": {
-                      "prohibitionIssued": {
-                          "BOOL": false
-                      },
-                      "testCode": {
-                          "S": "aas"
-                      },
-                      "testNumber": {
-                          "S": "1"
-                      },
-                      "lastUpdatedAt": {
-                          "S": "2019-02-22T08:47:59.269Z"
-                      },
-                      "testAnniversaryDate": {
-                          "S": "2019-12-22T08:47:59.749Z"
-                      },
-                      "testTypeClassification": {
-                          "S": "Annual With Certificate"
-                      },
-                      "customDefects": {
-                          "L": [
-                              {
-                                  "M": {
-                                      "defectNotes": {
-                                          "S": "some defect noe"
-                                      },
-                                      "referenceNumber": {
-                                          "S": "abcd"
-                                      },
-                                      "defectName": {
-                                          "S": "Some custom defect"
-                                      }
-                                  }
-                              }
-                          ]
-                      },
-                      "additionalCommentsForAbandon": {
-                          "S": "none"
-                      },
-                      "numberOfSeatbeltsFitted": {
-                          "N": "2"
-                      },
-                      "testTypeEndTimestamp": {
-                          "S": "2019-01-14T10:36:33.987Z"
-                      },
-                      "reasonForAbandoning": {
-                          "S": "none"
-                      },
-                      "lastSeatbeltInstallationCheckDate": {
-                          "S": "2019-01-14"
-                      },
-                      "deletionFlag": {
-                          "BOOL": true
-                      },
-                      "createdAt": {
-                          "S": "2019-02-22T08:47:59.269Z"
-                      },
-                      "testTypeId": {
-                          "S": "1"
-                      },
-                      "secondaryCertificateNumber": {
-                          "S": "1234"
-                      },
-                      "testTypeStartTimestamp": {
-                          "S": "2019-01-14T10:36:33.987Z"
-                      },
-                      "testTypeName": {
-                          "S": "Annual test"
-                      },
-                      "seatbeltInstallationCheckDate": {
-                          "BOOL": true
-                      },
-                      "additionalNotesRecorded": {
-                          "S": "VEHICLE FRONT REGISTRATION PLATE MISSING"
-                      },
-                      "defects": {
-                          "L": [
-                              {
-                                  "M": {
-                                      "deficiencyCategory": {
-                                          "S": "major"
-                                      },
-                                      "deficiencyText": {
-                                          "S": "missing."
-                                      },
-                                      "prs": {
-                                          "BOOL": false
-                                      },
-                                      "additionalInformation": {
-                                          "M": {
-                                              "notes": {
-                                                  "S": "None"
-                                              },
-                                              "location": {
-                                                  "M": {
-                                                      "axleNumber": {
-                                                          "NULL": true
-                                                      },
-                                                      "horizontal": {
-                                                          "NULL": true
-                                                      },
-                                                      "vertical": {
-                                                          "NULL": true
-                                                      },
-                                                      "longitudinal": {
-                                                          "S": "front"
-                                                      },
-                                                      "rowNumber": {
-                                                          "NULL": true
-                                                      },
-                                                      "lateral": {
-                                                          "NULL": true
-                                                      },
-                                                      "seatNumber": {
-                                                          "NULL": true
-                                                      }
-                                                  }
-                                              }
-                                          }
-                                      },
-                                      "itemNumber": {
-                                          "N": "1"
-                                      },
-                                      "deficiencyRef": {
-                                          "S": "1.1.a"
-                                      },
-                                      "stdForProhibition": {
-                                          "BOOL": false
-                                      },
-                                      "deficiencySubId": {
-                                          "NULL": true
-                                      },
-                                      "imDescription": {
-                                          "S": "Registration Plate"
-                                      },
-                                      "deficiencyId": {
-                                          "S": "a"
-                                      },
-                                      "itemDescription": {
-                                          "S": "A registration plate:"
-                                      },
-                                      "imNumber": {
-                                          "N": "1"
-                                      }
-                                  }
-                              }
-                          ]
-                      },
-                      "name": {
-                          "S": "Annual test"
-                      },
-                      "certificateLink": {
-                          "S": "http://dvsagov.co.uk"
-                      },
-                      "testResult": {
-                          "S": "pass"
-                      }
-                  }
-                },
                 {
               "M": {
                 "prohibitionIssued": {
@@ -254,6 +94,9 @@
                     "S": "1"
                 },
                 "secondaryCertificateNumber": {
+                    "S": "1234"
+                },
+                "certificateNumber": {
                     "S": "1234"
                 },
                 "testTypeStartTimestamp": {
@@ -348,7 +191,7 @@
                     "S": "http://dvsagov.co.uk"
                 },
                 "testResult": {
-                    "S": "pass"
+                    "S": "fail"
                 }
             }
           }
