@@ -29,7 +29,7 @@ mocked(mEventBridgeInstance.putEvents as PutEventsWithParams).mockImplementation
       FailedEntryCount: 0,
       Entries: Array<PutEventsResultEntry>(params.Entries.length),
     };
-    if (params.Entries[0].Detail === '{ "testResult": "{"noOfAxles":-1}') {
+    if (params.Entries[0].Detail === '{ "testResult": "{\\"noOfAxles\\":-1,\\"testTypeStartTimestamp\\":\\"\\",\\"testTypeEndTimestamp\\":\\"\\",\\"testStationType\\":\\"\\",\\"testCode\\":\\"\\",\\"vin\\":\\"\\",\\"vrm\\":\\"\\",\\"testStationPNumber\\":\\"\\",\\"testResult\\":\\"\\",\\"certificateNumber\\":\\"\\",\\"testTypeName\\":\\"\\",\\"vehicleType\\":\\"\\",\\"testerName\\":\\"\\",\\"testerStaffId\\":\\"\\",\\"testResultId\\":\\"\\"}" }') {
       mResultInstance.promise = jest.fn().mockReturnValue(Promise.reject(new Error('Oh no!')));
     } else {
       mResultInstance.promise = jest.fn().mockReturnValue(Promise.resolve(mPutEventsResponse));
@@ -41,15 +41,22 @@ mocked(mEventBridgeInstance.putEvents as PutEventsWithParams).mockImplementation
 describe('Send events', () => {
   describe('Events sent', () => {
     it('GIVEN one event to send WHEN sent THEN one event is returned.', async () => {
-      const mTestResult: TestActivity = createTestResult();
+      const mTestResult: TestActivity[] = Array<TestActivity>(1);
       const mSendResponse: SendResponse = { SuccessCount: 1, FailCount: 0 };
       await expect(sendEvents(mTestResult)).resolves.toEqual(mSendResponse);
     });
 
+    it('GIVEN two events to send WHEN sent THEN two events are returned.', async () => {
+      const mTestResult: TestActivity[] = Array<TestActivity>(2);
+      const mSendResponse: SendResponse = { SuccessCount: 2, FailCount: 0 };
+      await expect(sendEvents(mTestResult)).resolves.toEqual(mSendResponse);
+    });
+
     it('GIVEN an issue with eventbridge WHEN 1 event is sent and 1 fails THEN the failure is in the response.', async () => {
-      const errorTestResult: TestActivity = createTestResult(-1);
-      const mSendResponse: SendResponse = { SuccessCount: 0, FailCount: 1 };
-      await expect(sendEvents(errorTestResult)).resolves.toEqual(mSendResponse);
+      const mTestResult: TestActivity[] = Array<TestActivity>(6);
+      mTestResult[0] = createTestResult(-1);
+      const mSendResponse: SendResponse = { SuccessCount: 5, FailCount: 1 };
+      await expect(sendEvents(mTestResult)).resolves.toEqual(mSendResponse);
     });
   });
 });
