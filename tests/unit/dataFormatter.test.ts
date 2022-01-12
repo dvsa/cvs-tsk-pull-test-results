@@ -25,7 +25,7 @@ describe('DataFormatter', () => {
         testCode: 'aas',
         vin: 'XMGDE02FS0H012303',
         vrm: 'JY58FPP',
-        testStationPNumber: 'P99006',
+        testStationPNumber: 'P99005',
         testResult: 'fail',
         testTypeName: 'Annual test',
         vehicleType: 'psv',
