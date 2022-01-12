@@ -63,7 +63,7 @@ describe('Send events', () => {
       const consoleSpy = jest.spyOn(console._stdout, 'write');
       const mTestResult: TestActivity[] = [createTestResult(0)];
       await sendEvents(mTestResult);
-      expect(consoleSpy).toHaveBeenCalledWith(`info: Event not sent as not completed { ID:  }${EOL}`);
+      expect(consoleSpy).toHaveBeenCalledWith(`info: Event not sent as test is not completed { ID:  }${EOL}`);
     });
 
     it('GIVEN an issue with eventbridge WHEN 6 events are sent and 1 fails THEN the failure is in the response.', async () => {
