@@ -27,7 +27,7 @@ describe('Application entry', () => {
   mocked(getSecret).mockResolvedValue(filters);
 
   afterEach(() => {
-    jest.resetAllMocks().restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('Handler', () => {
@@ -63,7 +63,7 @@ describe('Application entry', () => {
       await handler(event, null, (error: string | Error, result: string) => {
         expect(error).toBeNull();
         expect(result).toEqual('Data processed successfully.');
-        expect(consoleSpy).toHaveBeenCalledWith(`debug: Event not sent as non filtered ATF { PNumber: P99005 }${EOL}`);
+        expect(consoleSpy).toHaveBeenNthCalledWith(2, `debug: Event not sent as non filtered ATF { PNumber: P99005 }${EOL}`);
       });
     });
   });
