@@ -50,7 +50,10 @@ describe('Send events', () => {
     });
 
     it('GIVEN two events to send WHEN sent THEN two events are returned.', async () => {
-      const mTestResult: TestActivity[] = [createTestResult(0, 'A Real Date!'), createTestResult(0, 'Another real Date!')];
+      const mTestResult: TestActivity[] = [
+        createTestResult(0, 'A Real Date!'),
+        createTestResult(0, 'Another real Date!'),
+      ];
       const mSendResponse: SendResponse = { SuccessCount: 2, FailCount: 0 };
       await expect(sendEvents(mTestResult)).resolves.toEqual(mSendResponse);
     });
@@ -64,7 +67,13 @@ describe('Send events', () => {
     });
 
     it('GIVEN an issue with eventbridge WHEN 6 events are sent and 1 fails THEN the failure is in the response.', async () => {
-      const mTestResult: TestActivity[] = [createTestResult(0, 'A Real Date!'), createTestResult(0, 'A Real Date!'), createTestResult(0, 'A Real Date!'), createTestResult(0, 'A Real Date!'), createTestResult(-1, 'A')];
+      const mTestResult: TestActivity[] = [
+        createTestResult(0, 'A Real Date!'),
+        createTestResult(0, 'A Real Date!'),
+        createTestResult(0, 'A Real Date!'),
+        createTestResult(0, 'A Real Date!'),
+        createTestResult(-1, 'A'),
+      ];
       const mSendResponse: SendResponse = { SuccessCount: 4, FailCount: 1 };
       await expect(sendEvents(mTestResult)).resolves.toEqual(mSendResponse);
     });
