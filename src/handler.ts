@@ -6,6 +6,7 @@ import {
 import { getSecret } from './utils/filterUtils';
 import { formatDynamoData } from './utils/dataFormatter';
 import { TestActivity } from './utils/testActivity';
+import { sendEvents } from './eventbridge/send';
 import logger from './observability/logger';
 
 const {
@@ -21,12 +22,15 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
     logger.debug(`Function triggered with '${JSON.stringify(event)}'.`);
     const secrets: string[] = await getSecret(process.env.SECRET_NAME);
 
-    event.Records.forEach((record) => {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    event.Records.forEach(async (record) => {
       if (secrets.includes(getTestStationNumber(record))) {
         const testActivity: TestActivity[] = formatDynamoData(record);
-        testActivity.forEach((testResult) => sendCompletedEvents(testResult));
+        await sendEvents(testActivity);
       } else {
-        logger.debug(`Event not sent as non filtered ATF { PNumber: ${record.dynamodb.NewImage.testStationPNumber.S} }`);
+        logger.debug(
+          `Event not sent as non filtered ATF { PNumber: ${record.dynamodb.NewImage.testStationPNumber.S} }`,
+        );
       }
     });
 
@@ -43,12 +47,4 @@ function getTestStationNumber(record: DynamoDBRecord): string {
   return record.dynamodb.NewImage.testStationPNumber.S;
 }
 
-function sendCompletedEvents(testActivity: TestActivity) {
-  if (testActivity.testTypeEndTimestamp !== '') {
-    // await sendEvents(testActivity);
-  } else {
-    logger.debug(`Event not sent as not completed { ID: ${testActivity.testResultId} }`);
-  }
-}
-
-export { handler };
+export { handler, getTestStationNumber };

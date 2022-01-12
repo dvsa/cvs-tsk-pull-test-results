@@ -32,11 +32,16 @@ const sendEvents = async (testResults: TestActivity[]): Promise<SendResponse> =>
 
     try {
       logger.debug(`event about to be sent: ${JSON.stringify(params)}`);
-      // TODO Make the putEvents run in parallel?
-      // eslint-disable-next-line no-await-in-loop
-      const result = await eventbridge.putEvents(params).promise();
-      logger.info(`${result.Entries.length} ${result.Entries.length === 1 ? 'event' : 'events'} sent to eventbridge.`);
-      sendResponse.SuccessCount++;
+      if (testResults[i].testTypeEndTimestamp !== '') {
+        // eslint-disable-next-line no-await-in-loop
+        const result = await eventbridge.putEvents(params).promise();
+        logger.info(
+          `${result.Entries.length} ${result.Entries.length === 1 ? 'event' : 'events'} sent to eventbridge.`,
+        );
+        sendResponse.SuccessCount++;
+      } else {
+        logger.info(`Event not sent as test is not completed { ID: ${testResults[i].testResultId} }`);
+      }
     } catch (error) {
       logger.error('', error);
       sendResponse.FailCount++;
