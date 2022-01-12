@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import 'source-map-support/register';
 import {
@@ -22,17 +23,16 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
     logger.debug(`Function triggered with '${JSON.stringify(event)}'.`);
     const secrets: string[] = await getSecret(process.env.SECRET_NAME);
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    await Promise.all(
-      event.Records.map(async (record) => {
-        if (secrets.includes(getTestStationNumber(record))) {
-          const testActivity: TestActivity[] = formatDynamoData(record);
-          await sendEvents(testActivity);
-        } else {
-          logger.debug(`Event not sent as non filtered ATF { PNumber: ${getTestStationNumber(record)} }`);
-        }
-      }),
-    );
+    // We want to process these in sequence to maintain order of database changes
+    for (const record of event.Records) {
+      if (secrets.includes(getTestStationNumber(record))) {
+        const testActivity: TestActivity[] = formatDynamoData(record);
+        // eslint-disable-next-line no-await-in-loop
+        await sendEvents(testActivity);
+      } else {
+        logger.debug(`Event not sent as non filtered ATF { PNumber: ${getTestStationNumber(record)} }`);
+      }
+    }
 
     logger.info('Data processed successfully.');
     callback(null, 'Data processed successfully.');
