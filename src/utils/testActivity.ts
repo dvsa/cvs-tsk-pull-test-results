@@ -8,7 +8,7 @@ export interface TestActivity {
   vrm: string;
   testStationPNumber: string;
   testResult: string;
-  certificateNumber: string;
+  certificateNumber?: string;
   testTypeName: string;
   vehicleType: string;
   testerName: string;
