@@ -8,6 +8,7 @@ import { TestActivity } from '../../src/utils/testActivity';
 import dynamoEventWOCert from './data/dynamoEventWithoutCert.json';
 import dynamoEventWCert from './data/dynamoEventWithCert.json';
 import dynamoEventMultipleTests from './data/dynamoEventMultipleTestTypes.json';
+import dynamoEventCancelled from './data/dynamoEventCancelled.json';
 
 describe('DataFormatter', () => {
   let DYNAMO_DATA: DynamoDBRecord;
@@ -61,6 +62,11 @@ describe('DataFormatter', () => {
       DYNAMO_DATA = dynamoEventMultipleTests as DynamoDBRecord;
       TEST_ACTIVITY = formatDynamoData(DYNAMO_DATA);
       expect(TEST_ACTIVITY).toHaveLength(2);
+    });
+    it(`GIVEN a test result WHEN it has a status of cancelled THEN expect no events to be generated`, () => {
+      DYNAMO_DATA = dynamoEventCancelled as DynamoDBRecord;
+      TEST_ACTIVITY = formatDynamoData(DYNAMO_DATA);
+      expect(TEST_ACTIVITY).toHaveLength(0);
     });
   });
 });
