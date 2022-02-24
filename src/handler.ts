@@ -5,7 +5,7 @@ import {
   DynamoDBStreamEvent, Context, Callback, DynamoDBRecord,
 } from 'aws-lambda';
 import { getSecret } from './utils/filterUtils';
-import { formatDynamoData } from './utils/dataFormatter';
+import { extractBillableTestResults } from './utils/extractTestResults';
 import { TestActivity } from './utils/testActivity';
 import { sendEvents } from './eventbridge/send';
 import logger from './observability/logger';
@@ -26,7 +26,7 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
     // We want to process these in sequence to maintain order of database changes
     for (const record of event.Records) {
       if (secrets.includes(getTestStationNumber(record))) {
-        const testActivity: TestActivity[] = formatDynamoData(record);
+        const testActivity: TestActivity[] = extractBillableTestResults(record);
         // eslint-disable-next-line no-await-in-loop
         await sendEvents(testActivity);
       } else {

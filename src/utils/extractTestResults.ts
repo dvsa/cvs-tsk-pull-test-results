@@ -5,7 +5,7 @@ import { DynamoDBRecord } from 'aws-lambda';
 import { DynamoDB } from 'aws-sdk';
 import { TestActivity } from './testActivity';
 
-export const formatDynamoData = (record: DynamoDBRecord): TestActivity[] => {
+export const extractBillableTestResults = (record: DynamoDBRecord): TestActivity[] => {
   const data = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
   const testActivities: TestActivity[] = data.testTypes
     .filter(() => data.testStatus !== 'cancelled')
