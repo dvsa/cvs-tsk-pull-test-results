@@ -10,20 +10,20 @@ import { EOL } from 'os';
 import { handler, getTestStationNumber } from '../../src/handler';
 import { sendEvents } from '../../src/eventbridge/send';
 import { SendResponse } from '../../src/eventbridge/SendResponse';
-import { formatDynamoData } from '../../src/utils/dataFormatter';
+import { extractBillableTestResults } from '../../src/utils/extractTestResults';
 import { TestActivity } from '../../src/utils/testActivity';
 import { getSecret } from '../../src/utils/filterUtils';
 import dynamoRecordFiltered from './data/dynamoEventWithCert.json';
 import dynamoRecordNonFiltered from './data/dynamoEventWithoutCert.json';
 
 jest.mock('../../src/eventbridge/send');
-jest.mock('../../src/utils/dataFormatter');
+jest.mock('../../src/utils/extractTestResults');
 jest.mock('../../src/utils/filterUtils');
 
 describe('Application entry', () => {
   let event: DynamoDBStreamEvent;
   const filters: string[] = new Array<string>('100', 'P99006');
-  mocked(formatDynamoData).mockReturnValue(Array<TestActivity>());
+  mocked(extractBillableTestResults).mockReturnValue(Array<TestActivity>());
   mocked(getSecret).mockResolvedValue(filters);
 
   afterEach(() => {
