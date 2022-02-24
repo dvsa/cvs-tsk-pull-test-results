@@ -21,7 +21,7 @@ provider:
     SERVICE: ${self:service}
 
 functions:
-  processWmsData:
+  pullTestResults:
     handler: src/handler.handler
     events:
       - cloudwatchEvent:
@@ -32,7 +32,7 @@ functions:
               - "Scheduled Event"
             detail:
               task:
-                - "processWmsData"
+                - "pullTestResults"
       
 custom:
   dotenv:
