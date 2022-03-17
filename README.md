@@ -4,9 +4,10 @@ Service for feeding test results from DynamoDB into DynamicsCE.
 
 General overview:
 - ATF engineer performs a vehicle test and records the outcome in the VTA app.
-- The app inserts the data into the DynamoDB table via the test-results lambda.
+- VTA app inserts the data into the DynamoDB table via the test-results lambda.
 - The table is configured to stream activity to the pull-test-results lambda.
-- The pull-test-results lambda extracts the results from the data and inserts into DynamicsCE via an OData endpoint.
+- Pull-test-results lambda extracts the results from the data and send it as events to EventBridge.
+- An EventBridge rule inserts the results into DynamicsCE via an OData endpoint.
 
 ## Dependencies
 
