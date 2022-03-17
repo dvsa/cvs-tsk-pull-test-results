@@ -1,10 +1,10 @@
-# cvs-tsk-pull-test-stations
+# cvs-tsk-pull-test-results
 
 Service for feeding test results from DynamoDB into DynamicsCE.
 
 General overview:
 - ATF engineer performs a vehicle test and records the outcome in the VTA app.
-- The app inserts the data into the DynamoDB table via the test-stations lambda.
+- The app inserts the data into the DynamoDB table via the test-results lambda.
 - The table is configured to stream activity to the pull-test-results lambda.
 - The pull-test-results lambda extracts the results from the data and inserts into DynamicsCE via an OData endpoint.
 
