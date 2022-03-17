@@ -74,7 +74,7 @@ describe('Send events', () => {
       );
     });
 
-    it('GIVEN event WHEN test that has not been completed THEN log info message and error', async () => {
+    it('GIVEN an event WHEN eventbridge could not process it THEN log info message and error', async () => {
       const mTestResult: TestActivity[] = [createTestResult('HandledError')];
       await sendEvents(mTestResult);
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -89,7 +89,7 @@ describe('Send events', () => {
       );
     });
 
-    it('GIVEN an issue with eventbridge WHEN 5 events are sent and 1 fails THEN the failure is in the response.', async () => {
+    it('GIVEN an issue with eventbridge WHEN 5 events are sent and 1 fails THEN the failure is in the response and an error is logged.', async () => {
       const mTestResult: TestActivity[] = [
         createTestResult(),
         createTestResult(),
