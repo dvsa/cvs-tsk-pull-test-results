@@ -8,7 +8,6 @@ import { TestActivity } from './testActivity';
 export const extractBillableTestResults = (record: DynamoDBRecord): TestActivity[] => {
   const data = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
   const testActivities: TestActivity[] = data.testTypes
-    .filter(() => data.testStatus !== 'cancelled')
     .map((testType) => ({
       noOfAxles: data.noOfAxles as number,
       testTypeStartTimestamp: data.testStartTimestamp,

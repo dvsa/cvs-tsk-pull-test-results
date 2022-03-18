@@ -16,10 +16,11 @@ const sendEvents = async (testResults: TestActivity[]): Promise<SendResponse> =>
   };
 
   for (let i = 0; i < testResults.length; i++) {
+    const result = testResults[i];
     const entry: EventEntry = {
       Source: process.env.AWS_EVENT_BUS_SOURCE,
       // eslint-disable-next-line security/detect-object-injection
-      Detail: `{ "testResult": "${JSON.stringify(testResults[i])?.replace(/"/g, '\\"')}" }`,
+      Detail: `{ "testResult": "${JSON.stringify(result)?.replace(/"/g, '\\"')}" }`,
       DetailType: 'CVS ATF Test Result',
       EventBusName: process.env.AWS_EVENT_BUS_NAME,
       Time: new Date(),
@@ -32,17 +33,16 @@ const sendEvents = async (testResults: TestActivity[]): Promise<SendResponse> =>
 
     try {
       logger.debug(`event about to be sent: ${JSON.stringify(params)}`);
-      if (testResults[i].testTypeEndTimestamp !== '') {
-        // eslint-disable-next-line no-await-in-loop
-        const result = await eventbridge.putEvents(params).promise();
-        logger.info(
-          `${result.Entries.length} ${result.Entries.length === 1 ? 'event' : 'events'} sent to eventbridge.`,
-        );
+      // eslint-disable-next-line no-await-in-loop
+      const putResponse = await eventbridge.putEvents(params).promise();
+      if (putResponse.Entries[0].EventId) {
+        logger.info(`Result sent to eventbridge (testResultId: '${result.testResultId}', vin: '${result.vin}')`);
         sendResponse.SuccessCount++;
       } else {
-        logger.info(`Event not sent as test is not completed { ID: ${testResults[i].testResultId} }`);
+        throw new Error(putResponse.Entries[0].ErrorMessage);
       }
     } catch (error) {
+      logger.info(`Failed to send result to eventbridge (testResultId: '${result.testResultId}', vin: '${result.vin}')`);
       logger.error('', error);
       sendResponse.FailCount++;
     }
