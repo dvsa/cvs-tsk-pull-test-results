@@ -5,10 +5,11 @@ import {
   DynamoDBStreamEvent, Context, Callback, DynamoDBRecord,
 } from 'aws-lambda';
 import { getSecret } from './utils/filterUtils';
-import { extractBillableTestResults } from './utils/extractTestResults';
+import { extractBillableTestResults, extractMCTestResults } from './utils/extractTestResults';
 import { TestActivity } from './utils/testActivity';
-import { sendEvents } from './eventbridge/send';
+import { sendEvents, sendMCProhibition } from './eventbridge/send';
 import logger from './observability/logger';
+import { MCRequest } from './utils/MCRequest';
 
 const {
   NODE_ENV, SERVICE, AWS_REGION, AWS_STAGE,
@@ -31,6 +32,21 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
         await sendEvents(testActivity);
       } else {
         logger.debug(`Event not sent as non filtered ATF { PNumber: ${getTestStationNumber(record)} }`);
+      }
+
+      try {
+        console.log('Trying to process testActivity record');
+        const mcRequests: MCRequest[] = extractMCTestResults(record);
+        console.log('Successfully extracted the relevant testActivity fields');
+        console.log(`MCRequests ${mcRequests}`);
+
+        if (mcRequests != null) {
+          console.log('Starting to process to sending the mcRequests');
+          await sendMCProhibition(mcRequests);
+        }
+        // eslint-disable-next-line no-await-in-loop
+      } catch (e) {
+        console.log(`Error when clearing the MC prohibition: ${e}`);
       }
     }
 

@@ -3,14 +3,18 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import { MCRequest } from '../../src/utils/MCRequest';
+
 process.env.LOG_LEVEL = 'debug';
 import { mocked } from 'ts-jest/utils';
 import { DynamoDBRecord, DynamoDBStreamEvent } from 'aws-lambda';
 import { EOL } from 'os';
 import { handler, getTestStationNumber } from '../../src/handler';
-import { sendEvents } from '../../src/eventbridge/send';
+import { sendEvents, sendMCProhibition } from '../../src/eventbridge/send';
 import { SendResponse } from '../../src/eventbridge/SendResponse';
-import { extractBillableTestResults } from '../../src/utils/extractTestResults';
+import {
+  extractBillableTestResults, extractMCTestResults,
+} from '../../src/utils/extractTestResults';
 import { TestActivity } from '../../src/utils/testActivity';
 import { getSecret } from '../../src/utils/filterUtils';
 import dynamoRecordFiltered from './data/dynamoEventWithCert.json';
@@ -24,6 +28,7 @@ describe('Application entry', () => {
   let event: DynamoDBStreamEvent;
   const filters: string[] = new Array<string>('100', 'P99006');
   mocked(extractBillableTestResults).mockReturnValue(Array<TestActivity>());
+  mocked(extractMCTestResults).mockReturnValue(Array<MCRequest>());
   mocked(getSecret).mockResolvedValue(filters);
 
   afterEach(() => {
@@ -71,6 +76,22 @@ describe('Application entry', () => {
     it('GIVEN a valid record to the function WHEN getTestStationNumber is called THEN expect valid testStationPNumber to be returned', () => {
       const testStationPNumber = getTestStationNumber(dynamoRecordFiltered as DynamoDBRecord);
       expect(testStationPNumber).toEqual('P99006');
+    });
+  });
+
+  describe('Mc prohibiton clearance', () => {
+    it('should return a 200 after successfully proccessing the record', async () => {
+      dynamoRecordFiltered.eventName = 'INSERT';
+      event = {
+        Records: [dynamoRecordFiltered as DynamoDBRecord],
+      };
+      const mSendResponse: SendResponse = { SuccessCount: 1, FailCount: 0 };
+      mocked(sendMCProhibition).mockResolvedValue(mSendResponse);
+      await handler(event, null, (error: string | Error, result: string) => {
+        expect(result).toEqual('Data processed successfully.');
+        expect(error).toBeNull();
+        expect(sendEvents).toBeCalledTimes(1);
+      });
     });
   });
 });

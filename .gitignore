@@ -40,4 +40,6 @@ reports
 *.map
 
 # npm audit results
-npm-audit.html 
+npm-audit.html
+
+.idea/
