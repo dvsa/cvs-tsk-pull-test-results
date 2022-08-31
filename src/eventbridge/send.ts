@@ -55,7 +55,7 @@ const sendEvents = async (testResults: TestActivity[]): Promise<SendResponse> =>
   return sendResponse;
 };
 
-async function sendMCProhibition(mcRequests: MCRequest[]) {
+function sendMCProhibition(mcRequests: MCRequest[]) {
   for (const mcRequest of mcRequests) {
     // eslint-disable-next-line security/detect-object-injection
     const data = {

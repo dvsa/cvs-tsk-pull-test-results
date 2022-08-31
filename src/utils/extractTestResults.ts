@@ -41,17 +41,18 @@ export const extractMCTestResults = (record: DynamoDBRecord): MCRequest[] => {
     console.log('Extracting the fields for MC prohibition clearance from dynamo record');
     const data = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
 
-    return data.testTypes
+    const mcRequest: MCRequest[] = data.testTypes
       .filter(() => data.testTypeName.toLowerCase().includes('prohibition clearance'))
       .filter(() => data.testResult.toLowerCase().includes('pass' || 'prs'))
       .filter(() => data.testStatus === 'submitted')
       .map((x) => ({
         vehicleIdentifier: data.vrm,
-        testDate: isoDateFormatter(x.testTypeEndTimestamp),
+        testDate: isoDateFormatter(x.testTypeEndTimestamp as string),
         vin: data.vin,
         testResult: calculateTestResult(x),
         hgvPsvTrailFlag: data.vehicleType.toUpperCase(),
       }));
+    return mcRequest;
   } catch (e) {
     console.log(`ERROR ${e}`);
     return [];
@@ -71,7 +72,7 @@ export const calculateTestResult = (testActivity: TestActivity): string => {
     case 'prs':
       return 'R';
     default:
-      break;
+      return '';
   }
 };
 

@@ -38,11 +38,11 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
         console.log('Trying to process testActivity record');
         const mcRequests: MCRequest[] = extractMCTestResults(record);
         console.log('Successfully extracted the relevant testActivity fields');
-        console.log(`MCRequests ${mcRequests}`);
+        console.log(`MCRequests ${JSON.stringify(mcRequests)}`);
 
         if (mcRequests != null) {
           console.log('Starting to process to sending the mcRequests');
-          await sendMCProhibition(mcRequests);
+          sendMCProhibition(mcRequests);
         }
         // eslint-disable-next-line no-await-in-loop
       } catch (e) {
