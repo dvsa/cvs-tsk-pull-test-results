@@ -3,14 +3,13 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { MCRequest } from '../../src/utils/MCRequest';
 
 process.env.LOG_LEVEL = 'debug';
 import { mocked } from 'ts-jest/utils';
 import { DynamoDBRecord, DynamoDBStreamEvent } from 'aws-lambda';
 import { EOL } from 'os';
 import { handler, getTestStationNumber } from '../../src/handler';
-import { sendEvents, sendMCProhibition } from '../../src/eventbridge/send';
+import { sendEvents } from '../../src/eventbridge/send';
 import { SendResponse } from '../../src/eventbridge/SendResponse';
 import {
   extractBillableTestResults, extractMCTestResults,
@@ -19,6 +18,7 @@ import { TestActivity } from '../../src/utils/testActivity';
 import { getSecret } from '../../src/utils/filterUtils';
 import dynamoRecordFiltered from './data/dynamoEventWithCert.json';
 import dynamoRecordNonFiltered from './data/dynamoEventWithoutCert.json';
+import { MCRequest } from '../../src/utils/MCRequest';
 
 jest.mock('../../src/eventbridge/send');
 jest.mock('../../src/utils/extractTestResults');
@@ -79,19 +79,19 @@ describe('Application entry', () => {
     });
   });
 
-  describe('Mc prohibiton clearance', () => {
-    it('should return a 200 after successfully proccessing the record', async () => {
-      dynamoRecordFiltered.eventName = 'INSERT';
-      event = {
-        Records: [dynamoRecordFiltered as DynamoDBRecord],
-      };
-      const mSendResponse: SendResponse = { SuccessCount: 1, FailCount: 0 };
-      mocked(sendMCProhibition).mockResolvedValue(mSendResponse);
-      await handler(event, null, (error: string | Error, result: string) => {
-        expect(result).toEqual('Data processed successfully.');
-        expect(error).toBeNull();
-        expect(sendEvents).toBeCalledTimes(1);
-      });
-    });
-  });
+  // describe('Mc prohibiton clearance', () => {
+  //   it('should return a 200 after successfully proccessing the record', async () => {
+  //     dynamoRecordFiltered.eventName = 'INSERT';
+  //     event = {
+  //       Records: [dynamoRecordFiltered as DynamoDBRecord],
+  //     };
+  //     const mSendResponse: SendResponse = { SuccessCount: 1, FailCount: 0 };
+  //     mocked(sendMCProhibition).mockResolvedValue(mSendResponse);
+  //     await handler(event, null, (error: string | Error, result: string) => {
+  //       expect(result).toEqual('Data processed successfully.');
+  //       expect(error).toBeNull();
+  //       expect(sendEvents).toBeCalledTimes(1);
+  //     });
+  //   });
+  // });
 });

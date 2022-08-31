@@ -56,14 +56,14 @@ const sendEvents = async (testResults: TestActivity[]): Promise<SendResponse> =>
 };
 
 function sendMCProhibition(mcRequests: MCRequest[]) {
-  for (const mcRequest of mcRequests) {
+  for (let i = 0; i < mcRequests.length; i++) {
     // eslint-disable-next-line security/detect-object-injection
     const data = {
-      VehicleIdentifier: mcRequest.vehicleIdentifier,
-      testDate: mcRequest.testDate,
-      vin: mcRequest.vin,
-      testResult: mcRequest.testResult,
-      hgvPsvTrailFlag: mcRequest.hgvPsvTrailFlag,
+      VehicleIdentifier: mcRequests[i].vehicleIdentifier,
+      testDate: mcRequests[i].testDate,
+      vin: mcRequests[i].vin,
+      testResult: mcRequests[i].testResult,
+      hgvPsvTrailFlag: mcRequests[i].hgvPsvTrailFlag,
     };
     const entry: EventEntry = {
       Source: process.env.AWS_EVENT_BUS_SOURCE_MC,
@@ -79,7 +79,7 @@ function sendMCProhibition(mcRequests: MCRequest[]) {
     params.Entries.push(entry);
     try {
       logger.debug(`event about to be sent: ${JSON.stringify(params)}`);
-      if (mcRequest.testDate !== '') {
+      if (mcRequests[i].testDate !== '') {
         // eslint-disable-next-line no-await-in-loop
         // TODO comment out when testing
         // const result = await eventbridge.putEvents(params).promise();
@@ -88,7 +88,7 @@ function sendMCProhibition(mcRequests: MCRequest[]) {
         // );
         sendResponse.SuccessCount++;
       } else {
-        logger.info(`Event not sent as test is not completed { ID: ${mcRequest.vehicleIdentifier} }`);
+        logger.info(`Event not sent as test is not completed { ID: ${mcRequests[i].vehicleIdentifier} }`);
       }
     } catch (error) {
       logger.error('', error);

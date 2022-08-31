@@ -46,6 +46,7 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
         }
         // eslint-disable-next-line no-await-in-loop
       } catch (e) {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         console.log(`Error when clearing the MC prohibition: ${e}`);
       }
     }
