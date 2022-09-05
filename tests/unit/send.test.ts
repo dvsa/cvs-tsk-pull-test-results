@@ -4,9 +4,10 @@ import { EventBridge, Request } from 'aws-sdk';
 import { mocked } from 'ts-jest/utils';
 import { PutEventsResponse, PutEventsRequest, PutEventsResultEntry } from 'aws-sdk/clients/eventbridge';
 import { EOL } from 'os';
-import { sendEvents } from '../../src/eventbridge/send';
+import { sendEvents, sendMCProhibition } from '../../src/eventbridge/send';
 import { SendResponse } from '../../src/eventbridge/SendResponse';
 import { TestActivity } from '../../src/utils/testActivity';
+import { MCRequest } from '../../src/utils/MCRequest';
 
 jest.mock('aws-sdk', () => {
   const mEventBridgeInstance = {
@@ -77,6 +78,30 @@ describe('Send events', () => {
       const mSendResponse: SendResponse = { SuccessCount: 7, FailCount: 1 };
       await expect(sendEvents(mTestResult)).resolves.toEqual(mSendResponse);
     });
+  });
+});
+
+describe('Events sent', () => {
+  it('GIVEN one event to send WHEN sent THEN one event is returned.', async () => {
+    const mcRequests: MCRequest[] = [
+      {
+        vehicleIdentifier: 'JY58FPP',
+        testDate: '14/01/2019',
+        vin: 'XMGDE02FS0H012303',
+        testResult: 'R',
+        hgvPsvTrailFlag: 'PSV',
+      },
+      {
+        vehicleIdentifier: 'JY58FPP',
+        testDate: '14/01/2019',
+        vin: 'XMGDE02FS0H012303',
+        testResult: 'R',
+        hgvPsvTrailFlag: 'PSV',
+      },
+    ];
+
+    const mSendResponse: SendResponse = { SuccessCount: 9, FailCount: 1 };
+    await expect(sendMCProhibition(mcRequests)).resolves.toEqual(mSendResponse);
   });
 });
 

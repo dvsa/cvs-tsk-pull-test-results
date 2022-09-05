@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { DynamoDBRecord } from 'aws-lambda';
 import { DynamoDB } from 'aws-sdk';
-import luxon from 'luxon';
+import { DateTime } from 'luxon';
 import { TestActivity } from './testActivity';
 import { MCRequest } from './MCRequest';
 
@@ -42,12 +42,13 @@ export const extractMCTestResults = (record: DynamoDBRecord): MCRequest[] => {
     const data = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
     const mcRequest: MCRequest[] = data.testTypes
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      .filter(() => data.testTypeName.toLowerCase().includes('prohibition clearance'))
-      .filter(() => data.testResult === ('pass' || 'prs'))
+      .filter((x) => x.testTypeName.toLowerCase().includes('prohibition clearance'))
+      .filter((x) => (x.testResult === ('pass') || x.testResult === ('prs')))
       .filter(() => data.testStatus === 'submitted')
       .map((x) => ({
         vehicleIdentifier: data.vrm,
-        testDate: isoDateFormatter(x.testTypeEndTimestamp as string),
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        testDate: isoDateFormatter(x.testTypeEndTimestamp),
         vin: data.vin,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         testResult: calculateTestResult(x),
@@ -67,19 +68,22 @@ export const extractMCTestResults = (record: DynamoDBRecord): MCRequest[] => {
  */
 export const calculateTestResult = (testActivity: TestActivity): string => {
   console.log('Converting the test result into a single character.');
-  switch (testActivity.testResult.toLowerCase()) {
-    case 'pass':
-      return 'S';
-      // TODO check that logic, expect to be same as above
-    case 'prs':
-      return 'R';
-    default:
-      return '';
-  }
+  return testActivity.testResult.toLowerCase() === 'pass' ? 'S' : 'R';
+  // if(testActivity.testResult.toLowerCase() == 'pass') {
+  //   return 'S'
+  // } else if (testActivity.testResult.toLowerCase() == 'pass')
+  //   case 'prs':
+  //     return 'R';
+  // default:
+  //   return '';
+  // }
 };
 
 /**
  * This method is used to change the format of an iso string to be formatted as yyyy/MM/dd
  * @param date
  */
-export const isoDateFormatter = (date: string): string => luxon.DateTime.fromISO(date).toFormat('dd/MM/yyyy');
+export const isoDateFormatter = (date: string): string => {
+  console.log('entered iso date formatter');
+  return DateTime.fromISO(date).toFormat('dd/MM/yyyy');
+};

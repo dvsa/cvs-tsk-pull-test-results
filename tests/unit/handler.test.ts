@@ -78,20 +78,4 @@ describe('Application entry', () => {
       expect(testStationPNumber).toEqual('P99006');
     });
   });
-
-  // describe('Mc prohibiton clearance', () => {
-  //   it('should return a 200 after successfully proccessing the record', async () => {
-  //     dynamoRecordFiltered.eventName = 'INSERT';
-  //     event = {
-  //       Records: [dynamoRecordFiltered as DynamoDBRecord],
-  //     };
-  //     const mSendResponse: SendResponse = { SuccessCount: 1, FailCount: 0 };
-  //     mocked(sendMCProhibition).mockResolvedValue(mSendResponse);
-  //     await handler(event, null, (error: string | Error, result: string) => {
-  //       expect(result).toEqual('Data processed successfully.');
-  //       expect(error).toBeNull();
-  //       expect(sendEvents).toBeCalledTimes(1);
-  //     });
-  //   });
-  // });
 });

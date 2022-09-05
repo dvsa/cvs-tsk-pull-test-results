@@ -100,7 +100,7 @@
                           "S": "2019-01-14T10:36:33.987Z"
                       },
                       "testTypeName": {
-                          "S": "Annual test"
+                          "S": "Prohibition Clearance with certificate"
                       },
                       "seatbeltInstallationCheckDate": {
                           "BOOL": true
@@ -260,7 +260,7 @@
                     "S": "2019-01-14T10:36:33.987Z"
                 },
                 "testTypeName": {
-                    "S": "Annual test"
+                    "S": "Prohibition Clearance with certificate"
                 },
                 "seatbeltInstallationCheckDate": {
                     "BOOL": true
@@ -348,7 +348,7 @@
                     "S": "http://dvsagov.co.uk"
                 },
                 "testResult": {
-                    "S": "fail"
+                    "S": "pass"
                 }
             }
           }
@@ -520,7 +520,7 @@
                               "S": "2019-01-14T10:36:33.987Z"
                           },
                           "testTypeName": {
-                              "S": "Annual test"
+                              "S": "Prohibition Clearance with certificate"
                           },
                           "seatbeltInstallationCheckDate": {
                               "BOOL": true
@@ -679,7 +679,7 @@
                         "S": "2019-01-14T10:36:33.987Z"
                     },
                     "testTypeName": {
-                        "S": "Annual test"
+                        "S": "prohibition clearance two"
                     },
                     "seatbeltInstallationCheckDate": {
                         "BOOL": true

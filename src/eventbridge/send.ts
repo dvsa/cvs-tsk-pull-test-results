@@ -55,7 +55,8 @@ const sendEvents = async (testResults: TestActivity[]): Promise<SendResponse> =>
   return sendResponse;
 };
 
-function sendMCProhibition(mcRequests: MCRequest[]) {
+// eslint-disable-next-line @typescript-eslint/require-await
+const sendMCProhibition = async (mcRequests: MCRequest[]): Promise<SendResponse> => {
   for (let i = 0; i < mcRequests.length; i++) {
     // eslint-disable-next-line security/detect-object-injection
     const data = {
@@ -80,8 +81,8 @@ function sendMCProhibition(mcRequests: MCRequest[]) {
     try {
       logger.debug(`event about to be sent: ${JSON.stringify(params)}`);
       if (mcRequests[i].testDate !== '') {
-        // eslint-disable-next-line no-await-in-loop
         // TODO comment out when testing
+        // eslint-disable-next-line no-await-in-loop
         // const result = await eventbridge.putEvents(params).promise();
         // logger.info(
         //   `${result.Entries.length} ${result.Entries.length === 1 ? 'event' : 'events'} sent to eventbridge.`,
@@ -96,6 +97,6 @@ function sendMCProhibition(mcRequests: MCRequest[]) {
     }
   }
   return sendResponse;
-}
+};
 
 export { sendEvents, sendMCProhibition };

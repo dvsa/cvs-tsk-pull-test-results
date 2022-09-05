@@ -3,16 +3,19 @@
 /* eslint-disable @typescript-eslint/quotes */
 /* eslint-disable quote-props */
 import { DynamoDBRecord } from 'aws-lambda';
-import { extractBillableTestResults } from '../../src/utils/extractTestResults';
+import { extractBillableTestResults, extractMCTestResults } from '../../src/utils/extractTestResults';
 import { TestActivity } from '../../src/utils/testActivity';
 import dynamoEventWOCert from './data/dynamoEventWithoutCert.json';
 import dynamoEventWCert from './data/dynamoEventWithCert.json';
 import dynamoEventMultipleTests from './data/dynamoEventMultipleTestTypes.json';
+import dynamoEventMultipleTests2 from './data/dynamoEventMultipleTestTypes2.json';
 import dynamoEventCancelled from './data/dynamoEventCancelled.json';
+import { MCRequest } from "../../src/utils/MCRequest";
 
 describe('extractTestResults', () => {
   let DYNAMO_DATA: DynamoDBRecord;
   let TEST_ACTIVITY: TestActivity[];
+  let MC_RESULT: MCRequest[];
 
   it(`GIVEN data WITHOUT a certificate number issued WHEN the test result is extracted into an event THEN the event doesn't have a certificate number`, () => {
     DYNAMO_DATA = dynamoEventWOCert as DynamoDBRecord;
@@ -69,5 +72,23 @@ describe('extractTestResults', () => {
     DYNAMO_DATA = dynamoEventCancelled as DynamoDBRecord;
     TEST_ACTIVITY = extractBillableTestResults(DYNAMO_DATA);
     expect(TEST_ACTIVITY).toHaveLength(0);
+  });
+  // TODO rename tests
+  it(`sGIVEN data WHEN it has a status of cancelled THEN expect no events to be generated`, () => {
+    DYNAMO_DATA = dynamoEventCancelled as DynamoDBRecord;
+    MC_RESULT = extractMCTestResults(DYNAMO_DATA);
+    expect(MC_RESULT).toHaveLength(0);
+  });
+  it(`aGIVEN data with two test types WHEN test results are extracted into events THEN expect two events to be generated`, () => {
+    DYNAMO_DATA = dynamoEventMultipleTests as DynamoDBRecord;
+    MC_RESULT = extractMCTestResults(DYNAMO_DATA);
+    console.log(MC_RESULT);
+    expect(MC_RESULT).toHaveLength(2);
+  });
+  it(`wGIVEN data with two test types WHEN test results are extracted into events THEN expect two events to be generated`, () => {
+    DYNAMO_DATA = dynamoEventMultipleTests2 as DynamoDBRecord;
+    MC_RESULT = extractMCTestResults(DYNAMO_DATA);
+    console.log(MC_RESULT);
+    expect(MC_RESULT).toHaveLength(1);
   });
 });

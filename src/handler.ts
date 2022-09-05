@@ -42,7 +42,8 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
 
         if (mcRequests != null) {
           console.log('Starting to process to sending the mcRequests');
-          sendMCProhibition(mcRequests);
+          // eslint-disable-next-line no-await-in-loop
+          await sendMCProhibition(mcRequests);
         }
         // eslint-disable-next-line no-await-in-loop
       } catch (e) {
