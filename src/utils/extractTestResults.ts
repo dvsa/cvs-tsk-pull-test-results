@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import {DynamoDBRecord} from 'aws-lambda';
-import {DynamoDB} from 'aws-sdk';
-import {DateTime} from 'luxon';
-import {TestActivity} from './testActivity';
-import {MCRequest} from './MCRequest';
-import logger from "../observability/logger";
+import { DynamoDBRecord } from 'aws-lambda';
+import { DynamoDB } from 'aws-sdk';
+import { DateTime } from 'luxon';
+import { TestActivity } from './testActivity';
+import { MCRequest } from './MCRequest';
+import logger from '../observability/logger';
 
 export const extractBillableTestResults = (record: DynamoDBRecord): TestActivity[] => {
   const data = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
@@ -39,8 +39,8 @@ export const extractBillableTestResults = (record: DynamoDBRecord): TestActivity
  */
 export const extractMCTestResults = (record: DynamoDBRecord): MCRequest[] => {
   try {
-    logger.info('Filtering record and fields for MC prohibition clearance from dynamo record');
     const data = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
+    logger.info(`Starting MC processing for ${JSON.stringify(data.vehicleId)}`);
     const mcRequest: MCRequest[] = data.testTypes
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       .filter((x) => x.testTypeName.toLowerCase().includes('prohibition clearance'))
@@ -53,31 +53,43 @@ export const extractMCTestResults = (record: DynamoDBRecord): MCRequest[] => {
         vin: data.vin,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         testResult: calculateTestResult(x),
-        hgvPsvTrailFlag: data.vehicleType.toUpperCase(),
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        hgvPsvTrailFlag: calculateTrailFlag(data.vehicleType),
       }));
-    logger.info('Successfully processed: ');
-    logger.info(JSON.stringify(mcRequest));
+    logger.info(`Successfully processed for: ${JSON.stringify(mcRequest)}`);
     return mcRequest;
   } catch (e) {
-    logger.error('', e);
+    logger.error('Unsuccessfully processed');
+    logger.error(e);
     return null;
   }
 };
 
 /**
- * This method is used to change th e test result to be a single, uppercase character
+ * This method is used to convert the trail flag into a single uppercase character
+ * @param vehicleType
+ */
+// eslint-disable-next-line consistent-return
+export const calculateTrailFlag = (vehicleType: string): string => {
+  if (vehicleType.toLowerCase() === 'hgv') {
+    return 'H';
+  }
+  if (vehicleType.toLowerCase() === 'psv') {
+    return 'P';
+  }
+  if (vehicleType.toLowerCase() === 'trl') {
+    return 'T';
+  }
+};
+
+/**
+ * This method is used to change the test result to be a single, uppercase character
  * @param testActivity
  */
-export const calculateTestResult = (testActivity: TestActivity): string => {
-  logger.info('Converting the test result into a single character.');
-  return testActivity.testResult.toLowerCase() === 'pass' ? 'S' : 'R';
-};
+export const calculateTestResult = (testActivity: TestActivity): string => (testActivity.testResult.toLowerCase() === 'pass' ? 'S' : 'R');
 
 /**
  * This method is used to change the format of an iso string to be formatted as yyyy/MM/dd
  * @param date
  */
-export const isoDateFormatter = (date: string): string => {
-  logger.info('Processing date format');
-  return DateTime.fromISO(date).toFormat('dd/MM/yyyy');
-};
+export const isoDateFormatter = (date: string): string => DateTime.fromISO(date).toFormat('dd/MM/yyyy');
