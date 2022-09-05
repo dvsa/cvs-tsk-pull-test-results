@@ -58,7 +58,6 @@ const sendEvents = async (testResults: TestActivity[]): Promise<SendResponse> =>
 // eslint-disable-next-line @typescript-eslint/require-await
 const sendMCProhibition = async (mcRequests: MCRequest[]): Promise<SendResponse> => {
   for (let i = 0; i < mcRequests.length; i++) {
-    // eslint-disable-next-line security/detect-object-injection
     const data = {
       VehicleIdentifier: mcRequests[i].vehicleIdentifier,
       testDate: mcRequests[i].testDate,
@@ -68,7 +67,6 @@ const sendMCProhibition = async (mcRequests: MCRequest[]): Promise<SendResponse>
     };
     const entry: EventEntry = {
       Source: process.env.AWS_EVENT_BUS_SOURCE_MC,
-      // eslint-disable-next-line security/detect-object-injection
       Detail: `{ "testResult": "${JSON.stringify(data)?.replace(/"/g, '\\"')}" }`,
       DetailType: 'CVS MC Clear Prohibition',
       EventBusName: process.env.AWS_EVENT_BUS_NAME,
@@ -80,7 +78,7 @@ const sendMCProhibition = async (mcRequests: MCRequest[]): Promise<SendResponse>
     params.Entries.push(entry);
     try {
       logger.debug(`event about to be sent: ${JSON.stringify(params)}`);
-      if (mcRequests[i].testDate !== '') {
+      if (mcRequests[i].vehicleIdentifier !== '') {
         // TODO comment out when testing
         // eslint-disable-next-line no-await-in-loop
         // const result = await eventbridge.putEvents(params).promise();

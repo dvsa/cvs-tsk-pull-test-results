@@ -35,20 +35,19 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
       }
 
       try {
-        console.log('Trying to process testActivity record');
+        logger.info('Trying to process testActivity record');
         const mcRequests: MCRequest[] = extractMCTestResults(record);
-        console.log('Successfully extracted the relevant testActivity fields');
-        console.log(`MCRequests ${JSON.stringify(mcRequests)}`);
+        logger.info('Successfully extracted the relevant testActivity fields');
+        logger.info(`MCRequests ${JSON.stringify(mcRequests)}`);
 
         if (mcRequests != null) {
-          console.log('Starting to process to sending the mcRequests');
+          logger.info('Starting to process to sending the mcRequests');
           // eslint-disable-next-line no-await-in-loop
           await sendMCProhibition(mcRequests);
         }
-        // eslint-disable-next-line no-await-in-loop
       } catch (e) {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.log(`Error when clearing the MC prohibition: ${e}`);
+        logger.error('Error when clearing the MC prohibition:', e);
       }
     }
 

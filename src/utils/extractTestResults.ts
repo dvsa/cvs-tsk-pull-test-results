@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { DynamoDBRecord } from 'aws-lambda';
-import { DynamoDB } from 'aws-sdk';
-import { DateTime } from 'luxon';
-import { TestActivity } from './testActivity';
-import { MCRequest } from './MCRequest';
+import {DynamoDBRecord} from 'aws-lambda';
+import {DynamoDB} from 'aws-sdk';
+import {DateTime} from 'luxon';
+import {TestActivity} from './testActivity';
+import {MCRequest} from './MCRequest';
+import logger from "../observability/logger";
 
 export const extractBillableTestResults = (record: DynamoDBRecord): TestActivity[] => {
   const data = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
@@ -38,7 +39,7 @@ export const extractBillableTestResults = (record: DynamoDBRecord): TestActivity
  */
 export const extractMCTestResults = (record: DynamoDBRecord): MCRequest[] => {
   try {
-    console.log('Extracting the fields for MC prohibition clearance from dynamo record');
+    logger.info('Filtering record and fields for MC prohibition clearance from dynamo record');
     const data = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
     const mcRequest: MCRequest[] = data.testTypes
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -54,11 +55,12 @@ export const extractMCTestResults = (record: DynamoDBRecord): MCRequest[] => {
         testResult: calculateTestResult(x),
         hgvPsvTrailFlag: data.vehicleType.toUpperCase(),
       }));
+    logger.info('Successfully processed: ');
+    logger.info(JSON.stringify(mcRequest));
     return mcRequest;
   } catch (e) {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    console.log(`ERROR ${e}`);
-    return [];
+    logger.error('', e);
+    return null;
   }
 };
 
@@ -67,16 +69,8 @@ export const extractMCTestResults = (record: DynamoDBRecord): MCRequest[] => {
  * @param testActivity
  */
 export const calculateTestResult = (testActivity: TestActivity): string => {
-  console.log('Converting the test result into a single character.');
+  logger.info('Converting the test result into a single character.');
   return testActivity.testResult.toLowerCase() === 'pass' ? 'S' : 'R';
-  // if(testActivity.testResult.toLowerCase() == 'pass') {
-  //   return 'S'
-  // } else if (testActivity.testResult.toLowerCase() == 'pass')
-  //   case 'prs':
-  //     return 'R';
-  // default:
-  //   return '';
-  // }
 };
 
 /**
@@ -84,6 +78,6 @@ export const calculateTestResult = (testActivity: TestActivity): string => {
  * @param date
  */
 export const isoDateFormatter = (date: string): string => {
-  console.log('entered iso date formatter');
+  logger.info('Processing date format');
   return DateTime.fromISO(date).toFormat('dd/MM/yyyy');
 };
