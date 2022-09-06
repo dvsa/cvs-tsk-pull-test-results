@@ -1,6 +1,6 @@
 {
   "eventID": "mock-id",
-  "eventName": "MODIFY",
+  "eventName": "CREATE",
   "eventVersion": "1.1",
   "eventSource": "aws:dynamodb",
   "awsRegion": "eu-west-1",

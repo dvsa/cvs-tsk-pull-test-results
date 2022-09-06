@@ -1,6 +1,6 @@
 {
   "eventID": "mock-id",
-  "eventName": "MODIFY",
+  "eventName": "CREATE",
   "eventVersion": "1.1",
   "eventSource": "aws:dynamodb",
   "awsRegion": "eu-west-1",
@@ -28,7 +28,7 @@
               "S": "2019-01-14T10:36:33.987Z"
           },
           "testStatus": {
-              "S": "cancelled"
+              "S": "submitted"
           },
           "testTypes": {
               "L": [

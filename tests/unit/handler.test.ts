@@ -13,8 +13,8 @@ import { SendResponse } from '../../src/eventbridge/SendResponse';
 import { extractBillableTestResults } from '../../src/utils/extractTestResults';
 import { TestActivity } from '../../src/utils/testActivity';
 import { getSecret } from '../../src/utils/filterUtils';
-import dynamoRecordFiltered from './data/dynamoEventWithCert.json';
-import dynamoRecordNonFiltered from './data/dynamoEventWithoutCert.json';
+import dynamoRecordFiltered from './data/CREATE/dynamoEventWithCertCreate.json';
+import dynamoRecordNonFiltered from './data/CREATE/dynamoEventWithoutCertCreate.json';
 
 jest.mock('../../src/eventbridge/send');
 jest.mock('../../src/utils/extractTestResults');
@@ -63,7 +63,10 @@ describe('Application entry', () => {
       await handler(event, null, (error: string | Error, result: string) => {
         expect(error).toBeNull();
         expect(result).toEqual('Data processed successfully.');
-        expect(consoleSpy).toHaveBeenNthCalledWith(2, `debug: Event not sent as non filtered ATF { PNumber: P99005 }${EOL}`);
+        expect(consoleSpy).toHaveBeenNthCalledWith(
+          2,
+          `debug: Event not sent as non filtered ATF { PNumber: P99005 }${EOL}`,
+        );
       });
     });
   });

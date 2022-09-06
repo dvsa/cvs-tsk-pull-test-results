@@ -4,13 +4,21 @@
 import { DynamoDBRecord } from 'aws-lambda';
 import { DynamoDB } from 'aws-sdk';
 import { TestActivity } from './testActivity';
+import { TestResultModel } from './testResult';
 
 export const extractBillableTestResults = (record: DynamoDBRecord): TestActivity[] => {
-  const data = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
+  const data = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage) as TestResultModel;
+
+  if (record.eventName === 'MODIFY') {
+    if (isSameRecordDetails(record)) {
+      return [];
+    }
+  }
+
   const testActivities: TestActivity[] = data.testTypes
     .filter(() => data.testStatus !== 'cancelled')
     .map((testType) => ({
-      noOfAxles: data.noOfAxles as number,
+      noOfAxles: data.noOfAxles,
       testTypeStartTimestamp: data.testStartTimestamp,
       testTypeEndTimestamp: data.testEndTimestamp,
       testStationType: data.testStationType,
@@ -28,3 +36,20 @@ export const extractBillableTestResults = (record: DynamoDBRecord): TestActivity
     }));
   return testActivities;
 };
+
+function isSameRecordDetails(record: DynamoDBRecord): boolean {
+  const data = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage) as TestResultModel;
+  const previousdata = DynamoDB.Converter.unmarshall(record.dynamodb.OldImage) as TestResultModel;
+
+  if (data.testTypes.length !== previousdata.testTypes.length) {
+    return false;
+  }
+
+  const currentTestTypeIdArray: string[] = data.testTypes.map((testType) => testType.testTypeId).sort();
+  const previousTestTypeIdArray: string[] = previousdata.testTypes.map((testType) => testType.testTypeId).sort();
+
+  const testTypeSame: boolean = currentTestTypeIdArray.every((val, idx) => val === previousTestTypeIdArray[idx])
+    && currentTestTypeIdArray.length === previousTestTypeIdArray.length;
+
+  return testTypeSame && data.testStationPNumber === previousdata.testStationPNumber;
+}

@@ -32,7 +32,10 @@ mocked(mEventBridgeInstance.putEvents as PutEventsWithParams).mockImplementation
       FailedEntryCount: 0,
       Entries: Array<PutEventsResultEntry>(params.Entries.length),
     };
-    if (params.Entries[0].Detail === '{ "testResult": "{\\"noOfAxles\\":-1,\\"testTypeStartTimestamp\\":\\"\\",\\"testTypeEndTimestamp\\":\\"A\\",\\"testStationType\\":\\"\\",\\"testCode\\":\\"\\",\\"vin\\":\\"\\",\\"vrm\\":\\"\\",\\"testStationPNumber\\":\\"\\",\\"testResult\\":\\"\\",\\"certificateNumber\\":\\"\\",\\"testTypeName\\":\\"\\",\\"vehicleType\\":\\"\\",\\"testerName\\":\\"\\",\\"testerStaffId\\":\\"\\",\\"testResultId\\":\\"\\"}" }') {
+    if (
+      params.Entries[0].Detail
+      === '{ "testResult": "{\\"noOfAxles\\":-1,\\"testTypeStartTimestamp\\":\\"\\",\\"testTypeEndTimestamp\\":\\"A\\",\\"testStationType\\":\\"\\",\\"testCode\\":\\"\\",\\"vin\\":\\"\\",\\"vrm\\":\\"\\",\\"testStationPNumber\\":\\"\\",\\"testResult\\":\\"\\",\\"certificateNumber\\":\\"\\",\\"testTypeName\\":\\"\\",\\"vehicleType\\":\\"\\",\\"testerName\\":\\"\\",\\"testerStaffId\\":\\"\\",\\"testResultId\\":\\"\\"}" }'
+    ) {
       mResultInstance.promise = jest.fn().mockReturnValue(Promise.reject(new Error('Oh no!')));
     } else {
       mResultInstance.promise = jest.fn().mockReturnValue(Promise.resolve(mPutEventsResponse));
