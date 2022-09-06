@@ -1,12 +1,10 @@
 export interface TestResultModel {
   testTypes: TestType[];
   noOfAxles: number;
-
   testStationType: string;
   vin: string;
   vrm: string;
   testStationPNumber: string;
-
   testStartTimestamp: string;
   testEndTimestamp: string;
   vehicleType: string;
