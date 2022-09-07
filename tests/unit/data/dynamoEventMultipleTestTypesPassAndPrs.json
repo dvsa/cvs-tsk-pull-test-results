@@ -232,7 +232,7 @@
         "S": "united kingdom"
       },
       "vehicleType": {
-        "S": "hgv"
+        "S": "lgv"
       },
       "preparerId": {
         "S": "ak4434"
@@ -650,7 +650,7 @@
         "S": "united kingdom"
       },
       "vehicleType": {
-        "S": "hgv"
+        "S": "lgv"
       },
       "preparerId": {
         "S": "ak4434"

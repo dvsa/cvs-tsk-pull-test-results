@@ -8,7 +8,7 @@ import { TestActivity } from '../../src/utils/testActivity';
 import dynamoEventWOCert from './data/dynamoEventWithoutCert.json';
 import dynamoEventWCert from './data/dynamoEventWithCert.json';
 import dynamoEventMultipleTests from './data/dynamoEventMultipleTestTypes.json';
-import dynamoEventMultipleTests2 from './data/dynamoEventMultipleTestTypesPassAndPrs.json';
+import dynamoEventMultipleTestTypesPassAndPrs from './data/dynamoEventMultipleTestTypesPassAndPrs.json';
 import dynamoEventCancelled from './data/dynamoEventCancelled.json';
 import { MCRequest } from "../../src/utils/MCRequest";
 
@@ -85,7 +85,7 @@ describe('extractTestResults', () => {
     expect(MC_RESULT).toHaveLength(2);
   });
   it(`wGIVEN data with two test types WHEN test results are extracted into events THEN expect two events to be generated`, () => {
-    DYNAMO_DATA = dynamoEventMultipleTests2 as DynamoDBRecord;
+    DYNAMO_DATA = dynamoEventMultipleTestTypesPassAndPrs as DynamoDBRecord;
     MC_RESULT = extractMCTestResults(DYNAMO_DATA);
     expect(MC_RESULT).toHaveLength(1);
   });

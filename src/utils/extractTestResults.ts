@@ -45,6 +45,7 @@ export const extractMCTestResults = (record: DynamoDBRecord): MCRequest[] => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       .filter((x) => x.testTypeName.toLowerCase().includes('prohibition clearance'))
       .filter((x) => (x.testResult === ('pass') || x.testResult === ('prs')))
+      .filter((x) => (x.vehicleType !== 'hgv') || x.vehicleType !== 'psv' || x.vehicleType !== 'trl')
       .filter(() => data.testStatus === 'submitted')
       .map((x) => ({
         vehicleIdentifier: data.vrm,
