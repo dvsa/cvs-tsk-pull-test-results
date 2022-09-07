@@ -103,7 +103,7 @@
                 "S": "2019-01-14T10:36:33.987Z"
               },
               "testTypeName": {
-                "S": "prohibition clearance"
+                "S": "Paid prohibition clearance (full inspection with certificate)"
               },
               "seatbeltInstallationCheckDate": {
                 "BOOL": true
@@ -232,7 +232,7 @@
         "S": "united kingdom"
       },
       "vehicleType": {
-        "S": "lgv"
+        "S": "hgv"
       },
       "preparerId": {
         "S": "ak4434"
@@ -363,7 +363,7 @@
                 "S": "2019-01-14T10:36:33.987Z"
               },
               "testTypeName": {
-                "S": "prohibition clearance"
+                "S": "Paid prohibition clearance (full inspection with certificate)"
               },
               "seatbeltInstallationCheckDate": {
                 "BOOL": true
@@ -522,7 +522,7 @@
               "S": "2019-01-14T10:36:33.987Z"
             },
             "testTypeName": {
-              "S": "prohibition clearance"
+              "S": "Paid prohibition clearance (full inspection with certificate)"
             },
             "seatbeltInstallationCheckDate": {
               "BOOL": true
@@ -610,7 +610,7 @@
               "S": "http://dvsagov.co.uk"
             },
             "testResult": {
-              "S": "prs"
+              "S": "pass"
             }
           }
         ]

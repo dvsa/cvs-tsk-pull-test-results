@@ -73,20 +73,23 @@ describe('extractTestResults', () => {
     TEST_ACTIVITY = extractBillableTestResults(DYNAMO_DATA);
     expect(TEST_ACTIVITY).toHaveLength(0);
   });
-  // TODO rename tests
-  it(`sGIVEN data WHEN it has a status of cancelled THEN expect no events to be generated`, () => {
+  it(`GIVEN data WHEN it has a status of cancelled THEN expect no mc requests are to be generated`, () => {
     DYNAMO_DATA = dynamoEventCancelled as DynamoDBRecord;
     MC_RESULT = extractMCTestResults(DYNAMO_DATA);
     expect(MC_RESULT).toHaveLength(0);
   });
-  it(`aGIVEN data with two test types WHEN test results are extracted into events THEN expect two events to be generated`, () => {
+  it(`GIVEN data with two test types WHEN test results are extracted into events THEN expect two mc requests are to be generated`, () => {
     DYNAMO_DATA = dynamoEventMultipleTests as DynamoDBRecord;
     MC_RESULT = extractMCTestResults(DYNAMO_DATA);
     expect(MC_RESULT).toHaveLength(2);
   });
-  it(`wGIVEN data with two test types WHEN test results are extracted into events THEN expect two events to be generated`, () => {
+  it(`GIVEN data with two test types WHEN test results are extracted into events THEN expect one mc requests are to be generated`, () => {
     DYNAMO_DATA = dynamoEventMultipleTestTypesPassAndPrs as DynamoDBRecord;
     MC_RESULT = extractMCTestResults(DYNAMO_DATA);
     expect(MC_RESULT).toHaveLength(1);
+  });
+  it(`GIVEN null WHEN test results are extracted into events THEN produce error`, () => {
+    MC_RESULT = extractMCTestResults(null);
+    expect(MC_RESULT).toBeNull();
   });
 });
