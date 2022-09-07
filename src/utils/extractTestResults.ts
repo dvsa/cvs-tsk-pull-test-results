@@ -42,8 +42,8 @@ function isSameRecordDetails(record: DynamoDBRecord): boolean {
     return false;
   }
 
-  const currentTestTypeIdArray: string[] = data.testTypes.map((testType) => testType.testTypeId).sort();
-  const previousTestTypeIdArray: string[] = previousdata.testTypes.map((testType) => testType.testTypeId).sort();
+  const currentTestTypeIdArray: string[] = data.testTypes.map((testType) => testType.testCode).sort();
+  const previousTestTypeIdArray: string[] = previousdata.testTypes.map((testType) => testType.testCode).sort();
 
   const testTypeSame: boolean =
     currentTestTypeIdArray.every((val, idx) => val === previousTestTypeIdArray[idx]) &&
