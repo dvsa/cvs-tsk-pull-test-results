@@ -12,6 +12,7 @@ export interface TestResultModel {
   testResultId: string;
   testerName: string;
   testStatus: string;
+  reasonForCreation?: string;
 }
 
 export interface TestType {
@@ -22,4 +23,5 @@ export interface TestType {
   testTypeEndTimeStamp: string;
   name: string;
   certificateNumber: string;
+  testNumber: string;
 }

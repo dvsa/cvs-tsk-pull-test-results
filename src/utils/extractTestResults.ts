@@ -7,9 +7,6 @@ import { TestActivity } from './testActivity';
 import { TestResultModel } from './testResult';
 
 export const extractBillableTestResults = (record: DynamoDBRecord): TestActivity[] => {
-  if (record.eventName === 'MODIFY' && isSameRecordDetails(record)) {
-    return [];
-  }
   const data = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage) as TestResultModel;
 
   const testActivities: TestActivity[] = data.testTypes
@@ -33,21 +30,3 @@ export const extractBillableTestResults = (record: DynamoDBRecord): TestActivity
     }));
   return testActivities;
 };
-
-function isSameRecordDetails(record: DynamoDBRecord): boolean {
-  const data = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage) as TestResultModel;
-  const previousdata = DynamoDB.Converter.unmarshall(record.dynamodb.OldImage) as TestResultModel;
-
-  if (data.testTypes.length !== previousdata.testTypes.length) {
-    return false;
-  }
-
-  const currentTestTypeIdArray: string[] = data.testTypes.map((testType) => testType.testCode).sort();
-  const previousTestTypeIdArray: string[] = previousdata.testTypes.map((testType) => testType.testCode).sort();
-
-  const testTypeSame: boolean =
-    currentTestTypeIdArray.every((val, idx) => val === previousTestTypeIdArray[idx]) &&
-    currentTestTypeIdArray.length === previousTestTypeIdArray.length;
-
-  return testTypeSame && data.testStationPNumber === previousdata.testStationPNumber;
-}
