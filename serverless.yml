@@ -21,19 +21,32 @@ provider:
     SERVICE: ${self:service}
 
 functions:
-  pullTestResults:
-    handler: src/handler.handler
+  pullTestResultsInsert:
+    handler: src/insert.handler
     events:
       - cloudwatchEvent:
           event:
             source:
-              - "aws.events"
+              - 'aws.events'
             detail-type:
-              - "Scheduled Event"
+              - 'Scheduled Event'
             detail:
               task:
-                - "pullTestResults"
-      
+                - 'pullTestResults'
+
+  pullTestResultsModify:
+    handler: src/modify.handler
+    events:
+      - cloudwatchEvent:
+          event:
+            source:
+              - 'aws.events'
+            detail-type:
+              - 'Scheduled Event'
+            detail:
+              task:
+                - 'pullTestResults'
+
 custom:
   dotenv:
     basePath: './'

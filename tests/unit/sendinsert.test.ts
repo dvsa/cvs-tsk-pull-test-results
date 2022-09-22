@@ -4,7 +4,7 @@ import { EventBridge, Request } from 'aws-sdk';
 import { mocked } from 'ts-jest/utils';
 import { PutEventsResponse, PutEventsRequest, PutEventsResultEntry } from 'aws-sdk/clients/eventbridge';
 import { EOL } from 'os';
-import { sendEvents } from '../../src/eventbridge/send';
+import { sendEvents } from '../../src/eventbridge/sendinsert';
 import { SendResponse } from '../../src/eventbridge/SendResponse';
 import { TestActivity } from '../../src/utils/testActivity';
 
@@ -34,7 +34,7 @@ mocked(mEventBridgeInstance.putEvents as PutEventsWithParams).mockImplementation
     };
     if (
       params.Entries[0].Detail
-      === '{ "testResult": "{\\"noOfAxles\\":-1,\\"testTypeStartTimestamp\\":\\"\\",\\"testTypeEndTimestamp\\":\\"A\\",\\"testStationType\\":\\"\\",\\"testCode\\":\\"\\",\\"vin\\":\\"\\",\\"vrm\\":\\"\\",\\"testStationPNumber\\":\\"\\",\\"testResult\\":\\"\\",\\"certificateNumber\\":\\"\\",\\"testTypeName\\":\\"\\",\\"vehicleType\\":\\"\\",\\"testerName\\":\\"\\",\\"testerStaffId\\":\\"\\",\\"testResultId\\":\\"\\"}" }'
+      === '{ "testResult": "{\\"noOfAxles\\":-1,\\"testTypeEndTimestamp\\":\\"A\\",\\"testResultId\\":\\"\\"}", "type": "completion" }'
     ) {
       mResultInstance.promise = jest.fn().mockReturnValue(Promise.reject(new Error('Oh no!')));
     } else {
@@ -84,22 +84,10 @@ describe('Send events', () => {
 });
 
 function createTestResult(axels?: number, testTypeEndTimestamp?: string): TestActivity {
-  const activityEvent: TestActivity = {
+  const activityEvent = {
     noOfAxles: axels || 0,
-    testTypeStartTimestamp: '',
     testTypeEndTimestamp: testTypeEndTimestamp || '',
-    testStationType: '',
-    testCode: '',
-    vin: '',
-    vrm: '',
-    testStationPNumber: '',
-    testResult: '',
-    certificateNumber: '',
-    testTypeName: '',
-    vehicleType: '',
-    testerName: '',
-    testerStaffId: '',
     testResultId: '',
-  };
+  } as TestActivity;
   return activityEvent;
 }
