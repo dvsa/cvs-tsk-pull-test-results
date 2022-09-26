@@ -18,7 +18,7 @@ describe('formatModifyPayload', () => {
     } as TestResultModel;
     expect(formatModifyPayload(currentRecord, previousRecord)).toEqual([]);
   });
-  it('should return an empty array if the changes in the testResult are not relevant to billing', () => {
+  it('should return an empty array if the changes in the testTypes are not relevant to billing', () => {
     const currentRecord = {
       testTypes: [{ testCode: 'foo', testNumber: 'bar', name: 'foo' }],
     } as TestResultModel;
