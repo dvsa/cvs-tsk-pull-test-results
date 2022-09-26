@@ -6,7 +6,7 @@
 process.env.LOG_LEVEL = 'debug';
 import { mocked } from 'ts-jest/utils';
 import { DynamoDBRecord, DynamoDBStreamEvent } from 'aws-lambda';
-import { handler } from '../../src/modify';
+import { checkNonFilteredATF, handler } from '../../src/modify';
 import { sendModifyEvents } from '../../src/eventbridge/sendmodify';
 import { SendResponse } from '../../src/eventbridge/SendResponse';
 import { getSecret } from '../../src/utils/filterUtils';
@@ -51,6 +51,29 @@ describe('Application entry', () => {
         expect(result).toBeUndefined();
         expect(sendModifyEvents).toBeCalledTimes(1);
       });
+    });
+  });
+
+  describe('checkNonFilteredATF', () => {
+    it('should return true if the current station is in the secrets', () => {
+      const mockRecord = { dynamodb: { NewImage: { testStationPNumber: { S: 'foo' } } } } as DynamoDBRecord;
+      const mockSecrets = ['foo'];
+      expect(checkNonFilteredATF(mockRecord, mockSecrets)).toBe(true);
+    });
+    it('should return true if the previous station is in the secrets', () => {
+      const mockRecord = {
+        dynamodb: { OldImage: { testStationPNumber: { S: 'foo' } }, NewImage: { testStationPNumber: { S: 'bar' } } },
+      } as DynamoDBRecord;
+      const mockSecrets = ['foo'];
+      expect(checkNonFilteredATF(mockRecord, mockSecrets)).toBe(true);
+    });
+
+    it('should return false if the current and the previous station are not in the secrets', () => {
+      const mockRecord = {
+        dynamodb: { OldImage: { testStationPNumber: { S: 'foo' } }, NewImage: { testStationPNumber: { S: 'bar' } } },
+      } as DynamoDBRecord;
+      const mockSecrets = ['foobar'];
+      expect(checkNonFilteredATF(mockRecord, mockSecrets)).toBe(false);
     });
   });
 });

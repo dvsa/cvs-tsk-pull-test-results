@@ -1,48 +1,42 @@
-import { formatModifyPayload, isSameRecordDetails } from '../../src/utils/compareTestResults';
+import { formatModifyPayload } from '../../src/utils/compareTestResults';
 import { Differences } from '../../src/utils/differences';
 import { TestResultModel } from '../../src/utils/testResult';
 
-describe('isSameRecordDetails', () => {
-  it('should return false if the testTypes are not the same length', () => {
-    expect(
-      isSameRecordDetails({ testTypes: [{}, {}] } as TestResultModel, { testTypes: [{}] } as TestResultModel),
-    ).toBe(false);
-  });
-  it('should return false if the testCodes are different', () => {
-    expect(
-      isSameRecordDetails(
-        { testTypes: [{ testCode: 'foo' }] } as TestResultModel,
-        {
-          testTypes: [{ testCode: 'bar' }],
-        } as TestResultModel,
-      ),
-    ).toBe(false);
-  });
-  it('should return false if the testStationPNumber has changed', () => {
-    expect(
-      isSameRecordDetails(
-        { testStationPNumber: 'foo', testTypes: [] } as TestResultModel,
-        { testStationPNumber: 'bar', testTypes: [] } as TestResultModel,
-      ),
-    ).toBe(false);
-  });
-  it('should return true if the changes are not relevant to billing amendments', () => {
-    expect(
-      isSameRecordDetails(
-        { testTypes: [], testResultId: 'foo' } as TestResultModel,
-        { testTypes: [], testResultId: 'bar' } as TestResultModel,
-      ),
-    ).toBe(true);
-  });
-});
-
 describe('formatModifyPayload', () => {
+  it('should return an empty array if nothing has changed', () => {
+    const currentRecord = { testTypes: [{ testCode: 'foo', testNumber: 'bar' }] } as TestResultModel;
+    expect(formatModifyPayload(currentRecord, currentRecord)).toEqual([]);
+  });
+  it('should return an empty array if the changes in the testResult are not relevant to billing', () => {
+    const currentRecord = {
+      testResultId: 'foo',
+      testTypes: [{ testCode: 'foo', testNumber: 'bar' }],
+    } as TestResultModel;
+    const previousRecord = {
+      testResultId: 'bar',
+      testTypes: [{ testCode: 'foo', testNumber: 'bar' }],
+    } as TestResultModel;
+    expect(formatModifyPayload(currentRecord, previousRecord)).toEqual([]);
+  });
+  it('should return an empty array if the changes in the testResult are not relevant to billing', () => {
+    const currentRecord = {
+      testTypes: [{ testCode: 'foo', testNumber: 'bar', name: 'foo' }],
+    } as TestResultModel;
+    const previousRecord = {
+      testTypes: [{ testCode: 'foo', testNumber: 'bar', name: 'bar' }],
+    } as TestResultModel;
+    expect(formatModifyPayload(currentRecord, previousRecord)).toEqual([]);
+  });
   it('should the test types to check values to the payload if they have changed', () => {
     const currentRecord = {
+      vin: '123',
+      vrm: 'B18 123',
       testTypes: [{ testCode: 'foo', testNumber: 'bar' }],
       reasonForCreation: 'foo',
     } as TestResultModel;
     const previousRecord = {
+      vin: '123',
+      vrm: 'B18 123',
       testTypes: [{ testCode: 'bar', testNumber: 'bar' }],
       reasonForCreation: 'bar',
     } as TestResultModel;
@@ -54,6 +48,16 @@ describe('formatModifyPayload', () => {
             fieldname: 'testCode',
             oldvalue: previousRecord.testTypes[0].testCode,
             newvalue: currentRecord.testTypes[0].testCode,
+          },
+          {
+            fieldname: 'vin',
+            oldvalue: previousRecord.vin,
+            newvalue: currentRecord.vin,
+          },
+          {
+            fieldname: 'vrm',
+            oldvalue: previousRecord.vrm,
+            newvalue: currentRecord.vrm,
           },
         ],
       },
@@ -96,6 +100,16 @@ describe('formatModifyPayload', () => {
             oldvalue: previousRecord.testTypes[0].testCode,
             newvalue: currentRecord.testTypes[0].testCode,
           },
+          {
+            fieldname: 'vin',
+            oldvalue: previousRecord.vin,
+            newvalue: currentRecord.vin,
+          },
+          {
+            fieldname: 'vrm',
+            oldvalue: previousRecord.vrm,
+            newvalue: currentRecord.vrm,
+          },
         ],
       },
     ];
@@ -113,6 +127,16 @@ describe('formatModifyPayload', () => {
             fieldname: 'testStationPNumber',
             oldvalue: previousRecord.testStationPNumber,
             newvalue: currentRecord.testStationPNumber,
+          },
+          {
+            fieldname: 'vin',
+            oldvalue: previousRecord.vin,
+            newvalue: currentRecord.vin,
+          },
+          {
+            fieldname: 'vrm',
+            oldvalue: previousRecord.vrm,
+            newvalue: currentRecord.vrm,
           },
         ],
       },
@@ -144,14 +168,19 @@ describe('formatModifyPayload', () => {
         reason: currentRecord.reasonForCreation,
         fields: [
           {
+            fieldname: 'testStationPNumber',
+            oldvalue: previousRecord.testStationPNumber,
+            newvalue: currentRecord.testStationPNumber,
+          },
+          {
             fieldname: 'vin',
             oldvalue: previousRecord.vin,
             newvalue: currentRecord.vin,
           },
           {
-            fieldname: 'testStationPNumber',
-            oldvalue: previousRecord.testStationPNumber,
-            newvalue: currentRecord.testStationPNumber,
+            fieldname: 'vrm',
+            oldvalue: previousRecord.vrm,
+            newvalue: currentRecord.vrm,
           },
         ],
       },
@@ -177,14 +206,19 @@ describe('formatModifyPayload', () => {
         reason: currentRecord.reasonForCreation,
         fields: [
           {
+            fieldname: 'testStationPNumber',
+            oldvalue: previousRecord.testStationPNumber,
+            newvalue: currentRecord.testStationPNumber,
+          },
+          {
             fieldname: 'vin',
             oldvalue: previousRecord.vin,
             newvalue: currentRecord.vin,
           },
           {
-            fieldname: 'testStationPNumber',
-            oldvalue: previousRecord.testStationPNumber,
-            newvalue: currentRecord.testStationPNumber,
+            fieldname: 'vrm',
+            oldvalue: previousRecord.vrm,
+            newvalue: currentRecord.vrm,
           },
         ],
       },
