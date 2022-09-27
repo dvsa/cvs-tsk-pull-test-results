@@ -1,3 +1,4 @@
+import logger from '../observability/logger';
 import { Differences, DifferencesEntries } from './differences';
 import { TestResultModel, TestType } from './testResult';
 
@@ -45,12 +46,15 @@ export const formatModifyPayload = (currentRecord: TestResultModel, previousReco
         });
       });
 
+      logger.debug(`Fields changed for testResultId: ${currentRecord.testResultId}: ${JSON.stringify(fields)}`);
+
       fieldsChanged.push({
         reason: currentRecord.reasonForCreation,
         fields,
       });
     }
   });
+  logger.debug(`Fields have changed: ${JSON.stringify(fieldsChanged)}`);
 
   return fieldsChanged;
 };
