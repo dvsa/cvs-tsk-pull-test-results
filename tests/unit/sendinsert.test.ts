@@ -3,10 +3,9 @@
 import { EventBridge, Request } from 'aws-sdk';
 import { mocked } from 'ts-jest/utils';
 import { PutEventsResponse, PutEventsRequest, PutEventsResultEntry } from 'aws-sdk/clients/eventbridge';
-import { EOL } from 'os';
-import { sendEvents } from '../../src/eventbridge/sendinsert';
 import { SendResponse } from '../../src/eventbridge/SendResponse';
 import { TestActivity } from '../../src/utils/testActivity';
+import { sendEvents } from '../../src/eventbridge/send';
 
 jest.mock('aws-sdk', () => {
   const mEventBridgeInstance = {
@@ -32,10 +31,7 @@ mocked(mEventBridgeInstance.putEvents as PutEventsWithParams).mockImplementation
       FailedEntryCount: 0,
       Entries: Array<PutEventsResultEntry>(params.Entries.length),
     };
-    if (
-      params.Entries[0].Detail
-      === '{ "testResult": "{\\"noOfAxles\\":-1,\\"testTypeEndTimestamp\\":\\"A\\",\\"testResultId\\":\\"\\"}", "type": "completion" }'
-    ) {
+    if (params.Entries[0].Detail.includes('throw an error')) {
       mResultInstance.promise = jest.fn().mockReturnValue(Promise.reject(new Error('Oh no!')));
     } else {
       mResultInstance.promise = jest.fn().mockReturnValue(Promise.resolve(mPutEventsResponse));
@@ -49,7 +45,7 @@ describe('Send events', () => {
     it('GIVEN one event to send WHEN sent THEN one event is returned.', async () => {
       const mTestResult: TestActivity[] = [createTestResult(0, 'A Real Date!')];
       const mSendResponse: SendResponse = { SuccessCount: 1, FailCount: 0 };
-      await expect(sendEvents(mTestResult)).resolves.toEqual(mSendResponse);
+      await expect(sendEvents(mTestResult, 'completion')).resolves.toEqual(mSendResponse);
     });
 
     it('GIVEN two events to send WHEN sent THEN two events are returned.', async () => {
@@ -58,15 +54,7 @@ describe('Send events', () => {
         createTestResult(0, 'Another real Date!'),
       ];
       const mSendResponse: SendResponse = { SuccessCount: 2, FailCount: 0 };
-      await expect(sendEvents(mTestResult)).resolves.toEqual(mSendResponse);
-    });
-
-    it('GIVEN event WHEN test that has not been completed THEN log info message', async () => {
-      // @ts-ignore
-      const consoleSpy = jest.spyOn(console._stdout, 'write');
-      const mTestResult: TestActivity[] = [createTestResult(0)];
-      await sendEvents(mTestResult);
-      expect(consoleSpy).toHaveBeenCalledWith(`info: Event not sent as test is not completed { ID:  }${EOL}`);
+      await expect(sendEvents(mTestResult, 'completion')).resolves.toEqual(mSendResponse);
     });
 
     it('GIVEN an issue with eventbridge WHEN 6 events are sent and 1 fails THEN the failure is in the response.', async () => {
@@ -75,10 +63,10 @@ describe('Send events', () => {
         createTestResult(0, 'A Real Date!'),
         createTestResult(0, 'A Real Date!'),
         createTestResult(0, 'A Real Date!'),
-        createTestResult(-1, 'A'),
+        createTestResult(-1, 'throw an error'),
       ];
       const mSendResponse: SendResponse = { SuccessCount: 4, FailCount: 1 };
-      await expect(sendEvents(mTestResult)).resolves.toEqual(mSendResponse);
+      await expect(sendEvents(mTestResult, 'completion')).resolves.toEqual(mSendResponse);
     });
   });
 });

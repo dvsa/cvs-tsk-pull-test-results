@@ -22,6 +22,6 @@ export interface TestType {
   testTypeStartTimeStamp: string;
   testTypeEndTimeStamp: string;
   name: string;
-  certificateNumber: string;
+  certificateNumber?: string;
   testNumber: string;
 }

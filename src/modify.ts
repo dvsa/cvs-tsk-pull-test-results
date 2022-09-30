@@ -1,16 +1,9 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import 'source-map-support/register';
-import {
-  DynamoDBStreamEvent, Context, Callback, DynamoDBRecord,
-} from 'aws-lambda';
-import { DynamoDB } from 'aws-sdk';
-import { getSecret } from './utils/filterUtils';
+import { DynamoDBStreamEvent, Context, Callback } from 'aws-lambda';
 import logger from './observability/logger';
-import { formatModifyPayload } from './utils/compareTestResults';
-import { TestResultModel } from './utils/testResult';
-import { Differences } from './utils/differences';
-import { sendModifyEvents } from './eventbridge/sendmodify';
+import { eventHandler } from './eventHandler';
 
 const {
   NODE_ENV, SERVICE, AWS_REGION, AWS_STAGE,
@@ -24,20 +17,9 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
   try {
     logger.debug(`Function triggered with '${JSON.stringify(event)}'.`);
     if (!process.env.NO_MODIFY) {
-      const secrets: string[] = await getSecret(process.env.SECRET_NAME);
-
-      // We want to process these in sequence to maintain order of database changes
-      for (const record of event.Records) {
-        if (checkNonFilteredATF(record, secrets)) {
-          const currentRecord = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage) as TestResultModel;
-          const previousRecord = DynamoDB.Converter.unmarshall(record.dynamodb.OldImage) as TestResultModel;
-          const amendmentChanges: Differences[] = formatModifyPayload(currentRecord, previousRecord);
-          // eslint-disable-next-line no-await-in-loop
-          await sendModifyEvents(amendmentChanges);
-        } else {
-          logger.debug('Event not sent as non filtered ATF');
-        }
-      }
+      await eventHandler(event);
+    } else {
+      logger.debug('Not handling modify events.');
     }
 
     logger.info('Data processed successfully.');
@@ -49,14 +31,4 @@ const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: 
   }
 };
 
-function checkNonFilteredATF(record: DynamoDBRecord, secrets: string[]): boolean {
-  if (
-    secrets.includes(record.dynamodb.NewImage.testStationPNumber.S)
-    || secrets.includes(record.dynamodb.OldImage.testStationPNumber.S)
-  ) {
-    return true;
-  }
-  return false;
-}
-
-export { handler, checkNonFilteredATF };
+export { handler };

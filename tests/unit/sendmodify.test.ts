@@ -5,7 +5,7 @@ import { mocked } from 'ts-jest/utils';
 import { PutEventsResponse, PutEventsRequest, PutEventsResultEntry } from 'aws-sdk/clients/eventbridge';
 import { SendResponse } from '../../src/eventbridge/SendResponse';
 import { Differences } from '../../src/utils/differences';
-import { sendModifyEvents } from '../../src/eventbridge/sendmodify';
+import { sendEvents } from '../../src/eventbridge/send';
 
 jest.mock('aws-sdk', () => {
   const mEventBridgeInstance = {
@@ -45,13 +45,13 @@ describe('Send events', () => {
     it('GIVEN one event to send WHEN sent THEN one event is returned.', async () => {
       const mDifferences: Differences[] = [createDifferences(1)];
       const mSendResponse: SendResponse = { SuccessCount: 1, FailCount: 0 };
-      await expect(sendModifyEvents(mDifferences)).resolves.toEqual(mSendResponse);
+      await expect(sendEvents(mDifferences, 'amendment')).resolves.toEqual(mSendResponse);
     });
 
     it('GIVEN two events to send WHEN sent THEN two events are returned.', async () => {
       const mDifferences: Differences[] = [createDifferences(1), createDifferences(2)];
       const mSendResponse: SendResponse = { SuccessCount: 2, FailCount: 0 };
-      await expect(sendModifyEvents(mDifferences)).resolves.toEqual(mSendResponse);
+      await expect(sendEvents(mDifferences, 'amendment')).resolves.toEqual(mSendResponse);
     });
 
     it('GIVEN an issue with eventbridge WHEN 6 events are sent and 1 fails THEN the failure is in the response.', async () => {
@@ -63,7 +63,7 @@ describe('Send events', () => {
         createDifferences(1, 'please throw an error'),
       ];
       const mSendResponse: SendResponse = { SuccessCount: 4, FailCount: 1 };
-      await expect(sendModifyEvents(mDifferences)).resolves.toEqual(mSendResponse);
+      await expect(sendEvents(mDifferences, 'amendment')).resolves.toEqual(mSendResponse);
     });
   });
 });

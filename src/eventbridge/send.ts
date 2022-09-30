@@ -4,22 +4,23 @@ import { Entries } from './Entries';
 import { SendResponse } from './SendResponse';
 import logger from '../observability/logger';
 import { Differences } from '../utils/differences';
+import { TestActivity } from '../utils/testActivity';
 
 const eventbridge = new EventBridge();
-const sendModifyEvents = async (differences: Differences[]): Promise<SendResponse> => {
+const sendEvents = async (events: Array<Differences | TestActivity>, type: string): Promise<SendResponse> => {
   logger.info('sendEvents starting');
-  logger.info(`${differences.length} ${differences.length === 1 ? 'event' : 'events'} ready to send to eventbridge.`);
+  logger.info(`${events.length} ${events.length === 1 ? 'event' : 'events'} ready to send to eventbridge.`);
 
   const sendResponse: SendResponse = {
     SuccessCount: 0,
     FailCount: 0,
   };
 
-  for (let i = 0; i < differences.length; i++) {
+  for (let i = 0; i < events.length; i++) {
+    const event = events[i];
     const entry: EventEntry = {
       Source: process.env.AWS_EVENT_BUS_SOURCE,
-      // eslint-disable-next-line security/detect-object-injection
-      Detail: `{ "testResult": "${JSON.stringify(differences[i])?.replace(/"/g, '\\"')}" }, type: "Amendment"`,
+      Detail: `{ "testResult": "${JSON.stringify(event)?.replace(/"/g, '\\"')}" }, type: ${type}`,
       DetailType: 'CVS ATF Test Result',
       EventBusName: process.env.AWS_EVENT_BUS_NAME,
       Time: new Date(),
@@ -47,4 +48,4 @@ const sendModifyEvents = async (differences: Differences[]): Promise<SendRespons
   return sendResponse;
 };
 
-export { sendModifyEvents };
+export { sendEvents };

@@ -5,75 +5,51 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 process.env.LOG_LEVEL = 'debug';
 import { mocked } from 'ts-jest/utils';
-import { DynamoDBRecord, DynamoDBStreamEvent } from 'aws-lambda';
-import { checkNonFilteredATF, handler } from '../../src/modify';
-import { sendModifyEvents } from '../../src/eventbridge/sendmodify';
-import { SendResponse } from '../../src/eventbridge/SendResponse';
-import { getSecret } from '../../src/utils/filterUtils';
-import dynamoRecordFiltered from './data/CREATE/dynamoEventWithCertCreate.json';
-import { formatModifyPayload } from '../../src/utils/compareTestResults';
-import { Differences } from '../../src/utils/differences';
+import { handler } from '../../src/modify';
+import { eventHandler } from '../../src/eventHandler';
 
-jest.mock('../../src/eventbridge/sendmodify');
-jest.mock('../../src/utils/compareTestResults');
-jest.mock('../../src/utils/filterUtils');
+jest.mock('../../src/eventHandler');
 
 describe('Application entry', () => {
-  let event: DynamoDBStreamEvent;
-  const filters: string[] = new Array<string>('100', 'P99006');
-  mocked(formatModifyPayload).mockReturnValue(Array<Differences>());
-  mocked(getSecret).mockResolvedValue(filters);
-
+  const mockEvent = { Records: [{ awsRegion: 'bar' }] };
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   describe('Handler', () => {
-    it('GIVEN event with filtered PNumber WHEN events are processed succesfully THEN a callback result is returned.', async () => {
-      event = {
-        Records: [dynamoRecordFiltered as DynamoDBRecord],
-      };
-      const mSendResponse: SendResponse = { SuccessCount: 1, FailCount: 0 };
-      mocked(sendModifyEvents).mockResolvedValue(mSendResponse);
-      await handler(event, null, (error: string | Error, result: string) => {
-        expect(result).toEqual('Data processed successfully.');
+    it('should process the data successfully when the event handler resolves', async () => {
+      process.env.NO_MODIFY = '';
+      const mockEventHandler = jest.fn().mockReturnValue(Promise.resolve());
+      mocked(eventHandler).mockImplementation(mockEventHandler);
+      await handler(mockEvent, null, (error: string | Error, result: string) => {
         expect(error).toBeNull();
-        expect(sendModifyEvents).toBeCalledTimes(1);
+        expect(result).toEqual('Data processed successfully.');
       });
+      expect(mockEventHandler).toHaveBeenCalled();
+      expect(mockEventHandler).toHaveBeenCalledWith(mockEvent);
     });
-    it('GIVEN event with filtered PNumber WHEN events are processed unsuccesfully THEN a callback error is returned.', async () => {
-      event = {
-        Records: [dynamoRecordFiltered as DynamoDBRecord],
-      };
-      mocked(sendModifyEvents).mockRejectedValue(new Error('Oh no!'));
-      await handler(event, null, (error: string | Error, result: string) => {
+
+    it('should not process the data successfully when the event handler throws an error', async () => {
+      process.env.NO_MODIFY = '';
+      const mockEventHandler = jest.fn().mockReturnValue(Promise.reject());
+      mocked(eventHandler).mockImplementation(mockEventHandler);
+      await handler(mockEvent, null, (error: string | Error, result: string) => {
         expect(error).toEqual(new Error('Data processed unsuccessfully.'));
         expect(result).toBeUndefined();
-        expect(sendModifyEvents).toBeCalledTimes(1);
       });
-    });
-  });
-
-  describe('checkNonFilteredATF', () => {
-    it('should return true if the current station is in the secrets', () => {
-      const mockRecord = { dynamodb: { NewImage: { testStationPNumber: { S: 'foo' } } } } as DynamoDBRecord;
-      const mockSecrets = ['foo'];
-      expect(checkNonFilteredATF(mockRecord, mockSecrets)).toBe(true);
-    });
-    it('should return true if the previous station is in the secrets', () => {
-      const mockRecord = {
-        dynamodb: { OldImage: { testStationPNumber: { S: 'foo' } }, NewImage: { testStationPNumber: { S: 'bar' } } },
-      } as DynamoDBRecord;
-      const mockSecrets = ['foo'];
-      expect(checkNonFilteredATF(mockRecord, mockSecrets)).toBe(true);
+      expect(mockEventHandler).toHaveBeenCalled();
+      expect(mockEventHandler).toHaveBeenCalledWith(mockEvent);
     });
 
-    it('should return false if the current and the previous station are not in the secrets', () => {
-      const mockRecord = {
-        dynamodb: { OldImage: { testStationPNumber: { S: 'foo' } }, NewImage: { testStationPNumber: { S: 'bar' } } },
-      } as DynamoDBRecord;
-      const mockSecrets = ['foobar'];
-      expect(checkNonFilteredATF(mockRecord, mockSecrets)).toBe(false);
+    it('should not send billing amendments if NO_MODIFY environment variable is defined', async () => {
+      process.env.NO_MODIFY = 'foo';
+      const mockEventHandler = jest.fn().mockReturnValue(Promise.resolve());
+      mocked(eventHandler).mockImplementation(mockEventHandler);
+      await handler(mockEvent, null, (error: string | Error, result: string) => {
+        expect(error).toBeNull();
+        expect(result).toEqual('Data processed successfully.');
+      });
+      expect(mockEventHandler).not.toHaveBeenCalled();
     });
   });
 });
