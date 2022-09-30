@@ -3,11 +3,12 @@ import { Differences } from '../../src/utils/differences';
 import { TestResultModel } from '../../src/utils/testResult';
 
 describe('formatModifyPayload', () => {
-  it('should return an empty array if nothing has changed', () => {
+  it('GIVEN no changes where made to the record WHEN it should return an empty array', () => {
     const currentRecord = { testTypes: [{ testCode: 'foo', testNumber: 'bar' }] } as TestResultModel;
-    expect(formatModifyPayload(currentRecord, currentRecord)).toEqual([]);
+    const previousRecord = { testTypes: [{ testCode: 'foo', testNumber: 'bar' }] } as TestResultModel;
+    expect(formatModifyPayload(currentRecord, previousRecord)).toEqual([]);
   });
-  it('should return an empty array if the changes in the testResult are not relevant to billing', () => {
+  it('GIVEN changes made to the test record WHEN changes are not relevant to billing THEN it should return an empty array', () => {
     const currentRecord = {
       testResultId: 'foo',
       testTypes: [{ testCode: 'foo', testNumber: 'bar' }],
@@ -18,7 +19,7 @@ describe('formatModifyPayload', () => {
     } as TestResultModel;
     expect(formatModifyPayload(currentRecord, previousRecord)).toEqual([]);
   });
-  it('should return an empty array if the changes in the testTypes are not relevant to billing', () => {
+  it('GIVEN changes to the test types WHEN the changes are not relevant to billing THEN it should return an empty array', () => {
     const currentRecord = {
       testTypes: [{ testCode: 'foo', testNumber: 'bar', name: 'foo' }],
     } as TestResultModel;
@@ -27,7 +28,7 @@ describe('formatModifyPayload', () => {
     } as TestResultModel;
     expect(formatModifyPayload(currentRecord, previousRecord)).toEqual([]);
   });
-  it('should the test types to check values to the payload if they have changed', () => {
+  it('GIVEN changes to the test record WHEN changes made to the test types are relevant to billing THEN it should add that field to the payload', () => {
     const currentRecord = {
       vin: '123',
       vrm: 'B18 123',
@@ -64,7 +65,7 @@ describe('formatModifyPayload', () => {
     ];
     expect(formatModifyPayload(currentRecord, previousRecord)).toEqual(expected);
   });
-  it('should not add the test types to check values to the payload if they have not changed', () => {
+  it('GIVEN changes to the test record WHEN values relevant to billing have not changed THEN they are not added to payload', () => {
     const currentRecord = {
       testTypes: [{ testCode: 'bar', testNumber: 'bar' }],
       reasonForCreation: 'foo',
@@ -76,7 +77,7 @@ describe('formatModifyPayload', () => {
     const expected: Differences[] = [];
     expect(formatModifyPayload(currentRecord, previousRecord)).toEqual(expected);
   });
-  it('should only add the test types values to check for the test types that have changed', () => {
+  it('GIVEN changes to one test type WHEN one of the values on one of the test types that has changed is relevant to billing THEN they are added to the payload', () => {
     const currentRecord = {
       testTypes: [
         { testCode: 'foo', testNumber: 'bar' },
@@ -116,7 +117,7 @@ describe('formatModifyPayload', () => {
     expect(formatModifyPayload(currentRecord, previousRecord)).toEqual(expected);
   });
 
-  it('should add the test result values to check if they have changed', () => {
+  it('GIVEN changes to a test record WHEN the changes happen in the test result AND they are relevant to billing THEN it should add those fields to the payload', () => {
     const currentRecord = { reasonForCreation: 'foo', testStationPNumber: 'foo', testTypes: [{}] } as TestResultModel;
     const previousRecord = { reasonForCreation: 'bar', testStationPNumber: 'bar', testTypes: [{}] } as TestResultModel;
     const expected: Differences[] = [
@@ -144,51 +145,13 @@ describe('formatModifyPayload', () => {
     expect(formatModifyPayload(currentRecord, previousRecord)).toEqual(expected);
   });
 
-  it('should not add the test result values to check if they have not changed', () => {
+  it('GIVEN changes to a test record WHEN the changes happen in the test result AND they are not relevant to billing THEN it should return empty array', () => {
     const currentRecord = { reasonForCreation: 'foo', testStationPNumber: 'foo', testTypes: [{}] } as TestResultModel;
     const previousRecord = { reasonForCreation: 'bar', testStationPNumber: 'foo', testTypes: [{}] } as TestResultModel;
     const expected: Differences[] = [];
     expect(formatModifyPayload(currentRecord, previousRecord)).toEqual(expected);
   });
-  it('should add the test result values to add if they have changed', () => {
-    const currentRecord = {
-      reasonForCreation: 'foo',
-      vin: 'foo',
-      testTypes: [{}],
-      testStationPNumber: 'foo',
-    } as TestResultModel;
-    const previousRecord = {
-      reasonForCreation: 'bar',
-      vin: 'bar',
-      testTypes: [{}],
-      testStationPNumber: 'bar',
-    } as TestResultModel;
-    const expected: Differences[] = [
-      {
-        reason: currentRecord.reasonForCreation,
-        fields: [
-          {
-            fieldname: 'testStationPNumber',
-            oldvalue: previousRecord.testStationPNumber,
-            newvalue: currentRecord.testStationPNumber,
-          },
-          {
-            fieldname: 'vin',
-            oldvalue: previousRecord.vin,
-            newvalue: currentRecord.vin,
-          },
-          {
-            fieldname: 'vrm',
-            oldvalue: previousRecord.vrm,
-            newvalue: currentRecord.vrm,
-          },
-        ],
-      },
-    ];
-
-    expect(formatModifyPayload(currentRecord, previousRecord)).toEqual(expected);
-  });
-  it('should add the test result values to add even if they have not changed', () => {
+  it('GIVEN changes to a test record WHEN the changes are relevant to billing THEN it should add required fields even if they have not changed', () => {
     const currentRecord = {
       reasonForCreation: 'foo',
       vin: 'foo',

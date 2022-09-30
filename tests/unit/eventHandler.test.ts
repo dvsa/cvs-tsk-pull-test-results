@@ -103,7 +103,7 @@ describe('eventHandler', () => {
     expect(extractBillableTestResults).not.toHaveBeenCalled();
     expect(consoleSpy).toHaveBeenCalledWith(`error: Unhandled event {event: foo}${EOL}`);
   });
-  it('GIVEN a handled event WHEN the event is sent as an unfiltered atd THEN a debug message is logged to the console', async () => {
+  it('GIVEN a handled event WHEN the event is sent as an unfiltered atf THEN a debug message is logged to the console', async () => {
     event = ({
       Records: [
         {

@@ -17,26 +17,24 @@ describe('Application entry', () => {
   });
 
   describe('Handler', () => {
-    it('should process the data successfully when the event handler resolves', async () => {
-      const mockEventHandler = jest.fn().mockReturnValue(Promise.resolve());
-      mocked(eventHandler).mockImplementation(mockEventHandler);
+    it('GIVEN an event WHEN the eventHandler resolves THEN a callback result is returned', async () => {
+      mocked(eventHandler).mockReturnValue(Promise.resolve());
       await handler(mockEvent, null, (error: string | Error, result: string) => {
         expect(error).toBeNull();
         expect(result).toEqual('Data processed successfully.');
       });
-      expect(mockEventHandler).toHaveBeenCalled();
-      expect(mockEventHandler).toHaveBeenCalledWith(mockEvent);
+      expect(eventHandler).toHaveBeenCalled();
+      expect(eventHandler).toHaveBeenCalledWith(mockEvent);
     });
 
-    it('should not process the data successfully when the event handler throws an error', async () => {
-      const mockEventHandler = jest.fn().mockReturnValue(Promise.reject());
-      mocked(eventHandler).mockImplementation(mockEventHandler);
+    it('GIVEN an event WHEN the eventHanlder throws an error THEN a call back error is returned', async () => {
+      mocked(eventHandler).mockReturnValue(Promise.reject());
       await handler(mockEvent, null, (error: string | Error, result: string) => {
         expect(error).toEqual(new Error('Data processed unsuccessfully.'));
         expect(result).toBeUndefined();
       });
-      expect(mockEventHandler).toHaveBeenCalled();
-      expect(mockEventHandler).toHaveBeenCalledWith(mockEvent);
+      expect(eventHandler).toHaveBeenCalled();
+      expect(eventHandler).toHaveBeenCalledWith(mockEvent);
     });
   });
 });

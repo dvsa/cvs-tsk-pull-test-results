@@ -17,39 +17,36 @@ describe('Application entry', () => {
   });
 
   describe('Handler', () => {
-    it('should process the data successfully when the event handler resolves', async () => {
+    it('GIVEN an event WHEN the eventHandler resolves THEN a callback result is returned', async () => {
       process.env.NO_MODIFY = '';
-      const mockEventHandler = jest.fn().mockReturnValue(Promise.resolve());
-      mocked(eventHandler).mockImplementation(mockEventHandler);
+      mocked(eventHandler).mockReturnValue(Promise.resolve());
       await handler(mockEvent, null, (error: string | Error, result: string) => {
         expect(error).toBeNull();
         expect(result).toEqual('Data processed successfully.');
       });
-      expect(mockEventHandler).toHaveBeenCalled();
-      expect(mockEventHandler).toHaveBeenCalledWith(mockEvent);
+      expect(eventHandler).toHaveBeenCalled();
+      expect(eventHandler).toHaveBeenCalledWith(mockEvent);
     });
 
-    it('should not process the data successfully when the event handler throws an error', async () => {
+    it('GIVEN an event WHEN the eventHandler throws an THEN a callback error is returned', async () => {
       process.env.NO_MODIFY = '';
-      const mockEventHandler = jest.fn().mockReturnValue(Promise.reject());
-      mocked(eventHandler).mockImplementation(mockEventHandler);
+      mocked(eventHandler).mockReturnValue(Promise.reject());
       await handler(mockEvent, null, (error: string | Error, result: string) => {
         expect(error).toEqual(new Error('Data processed unsuccessfully.'));
         expect(result).toBeUndefined();
       });
-      expect(mockEventHandler).toHaveBeenCalled();
-      expect(mockEventHandler).toHaveBeenCalledWith(mockEvent);
+      expect(eventHandler).toHaveBeenCalled();
+      expect(eventHandler).toHaveBeenCalledWith(mockEvent);
     });
 
-    it('should not send billing amendments if NO_MODIFY environment variable is defined', async () => {
+    it('GIVEN an event WHEN the environment variable NO_MODIFY is truthy THEN a callback result is returned AND the eventHandler is not called', async () => {
       process.env.NO_MODIFY = 'foo';
-      const mockEventHandler = jest.fn().mockReturnValue(Promise.resolve());
-      mocked(eventHandler).mockImplementation(mockEventHandler);
+      mocked(eventHandler).mockReturnValue(Promise.resolve());
       await handler(mockEvent, null, (error: string | Error, result: string) => {
         expect(error).toBeNull();
         expect(result).toEqual('Data processed successfully.');
       });
-      expect(mockEventHandler).not.toHaveBeenCalled();
+      expect(eventHandler).not.toHaveBeenCalled();
     });
   });
 });
