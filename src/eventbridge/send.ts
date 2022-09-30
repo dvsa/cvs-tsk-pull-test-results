@@ -54,7 +54,7 @@ const sendEvents = async (events: Array<Differences | TestActivity>, type: strin
 };
 
 const buildDebugMessage = (event: Differences | TestActivity): string => (isActivity(event)
-  ? ` (testResultId: '${event.testResultId}', vin: '${event.vin}).`
+  ? ` (testResultId: '${event.testResultId}', vin: '${event.vin}').`
   : ` (reasonForCreation: '${event.reason}').`);
 
 // eslint-disable-next-line no-prototype-builtins
