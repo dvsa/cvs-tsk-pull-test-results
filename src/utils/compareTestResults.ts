@@ -52,9 +52,10 @@ export const formatModifyPayload = (currentRecord: TestResultModel, previousReco
         reason: currentRecord.reasonForCreation,
         fields,
       });
+    } else {
+      logger.debug('No fields have changed which are relevant to billing');
     }
   });
-  logger.debug(`Fields have changed: ${JSON.stringify(fieldsChanged)}`);
 
   return fieldsChanged;
 };

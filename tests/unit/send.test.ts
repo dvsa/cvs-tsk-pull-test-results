@@ -7,6 +7,7 @@ import { SendResponse } from '../../src/eventbridge/SendResponse';
 import { TestActivity } from '../../src/utils/testActivity';
 import { sendEvents } from '../../src/eventbridge/send';
 import { Differences } from '../../src/utils/differences';
+import { EventType } from '../../src/utils/eventType';
 
 jest.mock('aws-sdk', () => {
   const mEventBridgeInstance = {
@@ -53,13 +54,13 @@ describe('Send events', () => {
     it('GIVEN one activities event to send WHEN sent THEN one event is returned.', async () => {
       const mTestResult: TestActivity[] = [createTestResult()];
       const mSendResponse: SendResponse = { SuccessCount: 1, FailCount: 0 };
-      await expect(sendEvents(mTestResult, 'completion')).resolves.toEqual(mSendResponse);
+      await expect(sendEvents(mTestResult, EventType.COMPLETION)).resolves.toEqual(mSendResponse);
     });
 
     it('GIVEN two activities events to send WHEN sent THEN two events are returned and two infos logged.', async () => {
       const mTestResult: TestActivity[] = [createTestResult('Result1'), createTestResult('Result2')];
       const mSendResponse: SendResponse = { SuccessCount: 2, FailCount: 0 };
-      await expect(sendEvents(mTestResult, 'completion')).resolves.toEqual(mSendResponse);
+      await expect(sendEvents(mTestResult, EventType.COMPLETION)).resolves.toEqual(mSendResponse);
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining(
           `info: Result sent to eventbridge (testResultId: 'Result1', vin: '${mTestResult[0].vin}')`,
@@ -74,7 +75,7 @@ describe('Send events', () => {
 
     it('GIVEN an activities event WHEN eventbridge could not process it THEN log info message and error', async () => {
       const mTestResult: TestActivity[] = [createTestResult('HandledError')];
-      await sendEvents(mTestResult, 'completion');
+      await sendEvents(mTestResult, EventType.COMPLETION);
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining(
           `info: Failed to send to eventbridge (testResultId: '${mTestResult[0].testResultId}', vin: '${mTestResult[0].vin}')`,
@@ -92,7 +93,7 @@ describe('Send events', () => {
         createTestResult('UnhandledError'),
       ];
       const mSendResponse: SendResponse = { SuccessCount: 4, FailCount: 1 };
-      await expect(sendEvents(mTestResult, 'completion')).resolves.toEqual(mSendResponse);
+      await expect(sendEvents(mTestResult, EventType.COMPLETION)).resolves.toEqual(mSendResponse);
       expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Error: Oh no!'));
     });
   });
@@ -101,13 +102,13 @@ describe('Send events', () => {
     it('GIVEN one differences event to send WHEN sent THEN one event is returned.', async () => {
       const mDifferences: Differences[] = [createDifferences(1)];
       const mSendResponse: SendResponse = { SuccessCount: 1, FailCount: 0 };
-      await expect(sendEvents(mDifferences, 'amendment')).resolves.toEqual(mSendResponse);
+      await expect(sendEvents(mDifferences, EventType.AMENDMENT)).resolves.toEqual(mSendResponse);
     });
 
     it('GIVEN two differences events to send WHEN sent THEN two events are returned.', async () => {
       const mDifferences: Differences[] = [createDifferences(1), createDifferences(2)];
       const mSendResponse: SendResponse = { SuccessCount: 2, FailCount: 0 };
-      await expect(sendEvents(mDifferences, 'amendment')).resolves.toEqual(mSendResponse);
+      await expect(sendEvents(mDifferences, EventType.AMENDMENT)).resolves.toEqual(mSendResponse);
     });
 
     it('GIVEN an issue with eventbridge WHEN 6 differences events are sent and 1 fails THEN the failure is in the response.', async () => {
@@ -119,7 +120,7 @@ describe('Send events', () => {
         createDifferences(1, 'HandledError'),
       ];
       const mSendResponse: SendResponse = { SuccessCount: 4, FailCount: 1 };
-      await expect(sendEvents(mDifferences, 'amendment')).resolves.toEqual(mSendResponse);
+      await expect(sendEvents(mDifferences, EventType.AMENDMENT)).resolves.toEqual(mSendResponse);
     });
   });
 });

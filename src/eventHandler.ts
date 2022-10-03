@@ -9,6 +9,7 @@ import { extractBillableTestResults } from './utils/extractTestResults';
 import { getSecret } from './utils/filterUtils';
 import { TestActivity } from './utils/testActivity';
 import { TestResultModel } from './utils/testResult';
+import { EventType } from './utils/eventType';
 
 const eventHandler = async (event: DynamoDBStreamEvent) => {
   const secrets: string[] = await getSecret(process.env.SECRET_NAME);
@@ -20,14 +21,14 @@ const eventHandler = async (event: DynamoDBStreamEvent) => {
         case 'INSERT': {
           const testActivity: TestActivity[] = extractBillableTestResults(currentRecord);
           /* eslint-disable no-await-in-loop */
-          await sendEvents(testActivity, 'completion');
+          await sendEvents(testActivity, EventType.COMPLETION);
           break;
         }
         case 'MODIFY': {
           const previousRecord = DynamoDB.Converter.unmarshall(record.dynamodb.OldImage) as TestResultModel;
           const amendmentChanges: Differences[] = formatModifyPayload(currentRecord, previousRecord);
           /* eslint-disable no-await-in-loop */
-          await sendEvents(amendmentChanges, 'amendment');
+          await sendEvents(amendmentChanges, EventType.AMENDMENT);
           break;
         }
         default:

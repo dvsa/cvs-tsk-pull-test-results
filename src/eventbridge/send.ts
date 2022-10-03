@@ -5,9 +5,10 @@ import { SendResponse } from './SendResponse';
 import logger from '../observability/logger';
 import { Differences } from '../utils/differences';
 import { TestActivity } from '../utils/testActivity';
+import { EventType } from '../utils/eventType';
 
 const eventbridge = new EventBridge();
-const sendEvents = async (events: Array<Differences | TestActivity>, type: string): Promise<SendResponse> => {
+const sendEvents = async (events: Array<Differences | TestActivity>, type: EventType): Promise<SendResponse> => {
   logger.info('sendEvents starting');
   logger.info(`${events.length} ${events.length === 1 ? 'event' : 'events'} ready to send to eventbridge.`);
 
@@ -16,8 +17,8 @@ const sendEvents = async (events: Array<Differences | TestActivity>, type: strin
     FailCount: 0,
   };
 
-  for (let i = 0; i < events.length; i++) {
-    const event = events[i];
+  // eslint-disable-next-line no-restricted-syntax
+  for (const event of events) {
     const entry: EventEntry = {
       Source: process.env.AWS_EVENT_BUS_SOURCE,
       Detail: `{ "testResult": "${JSON.stringify(event)?.replace(/"/g, '\\"')}" }, type: ${type}`,
