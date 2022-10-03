@@ -2,7 +2,7 @@ import logger from '../observability/logger';
 import { Differences, DifferencesEntries } from './differences';
 import { TestResultModel, TestType } from './testResult';
 
-export const formatModifyPayload = (currentRecord: TestResultModel, previousRecord: TestResultModel) => {
+export const extractAmendedBillableTestResults = (currentRecord: TestResultModel, previousRecord: TestResultModel) => {
   const testTypeValuesToCheck = ['testCode'] as const;
   const testResultValuesToCheck = ['testStationPNumber', 'testStationType'] as const;
   const testResultValuesToAdd = ['vin', 'vrm'] as const;

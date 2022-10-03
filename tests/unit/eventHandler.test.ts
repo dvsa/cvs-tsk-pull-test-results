@@ -9,21 +9,21 @@ import { mocked } from 'ts-jest/utils';
 import { sendEvents } from '../../src/eventbridge/send';
 import { SendResponse } from '../../src/eventbridge/SendResponse';
 import { checkNonFilteredATF, eventHandler } from '../../src/eventHandler';
-import { formatModifyPayload } from '../../src/utils/compareTestResults';
+import { extractAmendedBillableTestResults } from '../../src/utils/extractAmendedBillableTestResults';
 import { extractBillableTestResults } from '../../src/utils/extractTestResults';
 import { getSecret } from '../../src/utils/filterUtils';
 
 jest.mock('../../src/utils/filterUtils');
 jest.mock('../../src/eventbridge/send');
 jest.mock('../../src/utils/extractTestResults');
-jest.mock('../../src/utils/compareTestResults');
+jest.mock('../../src/utils/extractAmendedBillableTestResults');
 
 describe('eventHandler', () => {
   let event: DynamoDBStreamEvent;
   const filters = ['foo'];
   mocked(getSecret).mockResolvedValue(filters);
   mocked(extractBillableTestResults).mockReturnValue([]);
-  mocked(formatModifyPayload).mockReturnValue([]);
+  mocked(extractAmendedBillableTestResults).mockReturnValue([]);
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -77,8 +77,11 @@ describe('eventHandler', () => {
     await eventHandler(event);
     expect(sendEvents).toHaveBeenCalledTimes(1);
     expect(unmarshallSpy).toHaveBeenCalledTimes(2);
-    expect(formatModifyPayload).toHaveBeenCalledTimes(1);
-    expect(formatModifyPayload).toHaveBeenCalledWith({ testStationPNumber: 'foo' }, { testStationPNumber: 'bar' });
+    expect(extractAmendedBillableTestResults).toHaveBeenCalledTimes(1);
+    expect(extractAmendedBillableTestResults).toHaveBeenCalledWith(
+      { testStationPNumber: 'foo' },
+      { testStationPNumber: 'bar' },
+    );
   });
   it('GIVEN an unhandled event THEN error in logged to the console', async () => {
     event = ({
@@ -99,7 +102,7 @@ describe('eventHandler', () => {
     const consoleSpy = jest.spyOn(console._stdout, 'write');
     await eventHandler(event);
     expect(sendEvents).not.toHaveBeenCalled();
-    expect(formatModifyPayload).not.toHaveBeenCalled();
+    expect(extractAmendedBillableTestResults).not.toHaveBeenCalled();
     expect(extractBillableTestResults).not.toHaveBeenCalled();
     expect(consoleSpy).toHaveBeenCalledWith(`error: Unhandled event {event: foo}${EOL}`);
   });
@@ -127,7 +130,7 @@ describe('eventHandler', () => {
     const consoleSpy = jest.spyOn(console._stdout, 'write');
     await eventHandler(event);
     expect(sendEvents).not.toHaveBeenCalled();
-    expect(formatModifyPayload).not.toHaveBeenCalled();
+    expect(extractAmendedBillableTestResults).not.toHaveBeenCalled();
     expect(extractBillableTestResults).not.toHaveBeenCalled();
     expect(consoleSpy).toHaveBeenCalledWith(`debug: Event not sent as non filtered ATF${EOL}`);
   });

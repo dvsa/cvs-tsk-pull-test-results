@@ -3,7 +3,7 @@ import { DynamoDBRecord, DynamoDBStreamEvent } from 'aws-lambda';
 import { DynamoDB } from 'aws-sdk';
 import { sendEvents } from './eventbridge/send';
 import logger from './observability/logger';
-import { formatModifyPayload } from './utils/compareTestResults';
+import { extractAmendedBillableTestResults } from './utils/extractAmendedBillableTestResults';
 import { Differences } from './utils/differences';
 import { extractBillableTestResults } from './utils/extractTestResults';
 import { getSecret } from './utils/filterUtils';
@@ -26,7 +26,7 @@ const eventHandler = async (event: DynamoDBStreamEvent) => {
         }
         case 'MODIFY': {
           const previousRecord = DynamoDB.Converter.unmarshall(record.dynamodb.OldImage) as TestResultModel;
-          const amendmentChanges: Differences[] = formatModifyPayload(currentRecord, previousRecord);
+          const amendmentChanges: Differences[] = extractAmendedBillableTestResults(currentRecord, previousRecord);
           /* eslint-disable no-await-in-loop */
           await sendEvents(amendmentChanges, EventType.AMENDMENT);
           break;

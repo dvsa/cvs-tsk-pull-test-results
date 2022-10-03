@@ -27,7 +27,7 @@ describe('Application entry', () => {
       expect(eventHandler).toHaveBeenCalledWith(mockEvent);
     });
 
-    it('GIVEN an event WHEN the eventHanlder throws an error THEN a call back error is returned', async () => {
+    it('GIVEN an event WHEN the eventHandler throws an error THEN a call back error is returned', async () => {
       mocked(eventHandler).mockReturnValue(Promise.reject());
       await handler(mockEvent, null, (error: string | Error, result: string) => {
         expect(error).toEqual(new Error('Data processed unsuccessfully.'));
