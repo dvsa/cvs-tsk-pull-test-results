@@ -149,9 +149,9 @@ function createDifferences(qty: number, reasonForCreation = 'foo'): Differences 
   const fields = [];
   for (let i = 0; i < qty; i++) {
     fields.push({
-      fieldname: Math.random().toString(),
-      oldvalue: Math.random().toString(),
-      newValue: Math.random().toString(),
+      fieldname: 'foo',
+      oldvalue: 'bar',
+      newValue: 'foobar',
     });
   }
   return { reason: reasonForCreation, fields };
