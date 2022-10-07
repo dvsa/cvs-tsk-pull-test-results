@@ -21,7 +21,7 @@ const sendEvents = async (events: Array<Differences | TestActivity>, type: Event
   for (const event of events) {
     const entry: EventEntry = {
       Source: process.env.AWS_EVENT_BUS_SOURCE,
-      Detail: `{ "testResult": "${JSON.stringify(event)?.replace(/"/g, '\\"')}" }, type: ${type}`,
+      Detail: `{ "testResult": "${JSON.stringify(event)?.replace(/"/g, '\\"')}" , "type": "${type}"}`,
       DetailType: 'CVS ATF Test Result',
       EventBusName: process.env.AWS_EVENT_BUS_NAME,
       Time: new Date(),
