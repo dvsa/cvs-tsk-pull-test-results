@@ -1,5 +1,5 @@
 export enum EventType {
-  CONTINGENCY = 'contingency',
-  AMENDMENT = 'amendment',
+  CONTINGENCY = 510720002,
+  AMENDMENT = 510720001,
   COMPLETION = 'completion',
 }
