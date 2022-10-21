@@ -13,6 +13,7 @@ export interface TestResultModel {
   testerName: string;
   testStatus: string;
   reasonForCreation?: string;
+  typeOfTest?: TypeOfTest;
 }
 
 export interface TestType {
@@ -24,4 +25,9 @@ export interface TestType {
   name: string;
   certificateNumber?: string;
   testNumber: string;
+}
+
+export enum TypeOfTest {
+  CONTINGENCY = 'contingency',
+  DESK_BASED = 'desk-based',
 }

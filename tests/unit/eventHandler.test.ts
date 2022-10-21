@@ -9,9 +9,11 @@ import { mocked } from 'ts-jest/utils';
 import { sendEvents } from '../../src/eventbridge/send';
 import { SendResponse } from '../../src/eventbridge/SendResponse';
 import { checkNonFilteredATF, eventHandler } from '../../src/eventHandler';
+import { EventType } from '../../src/utils/eventType';
 import { extractAmendedBillableTestResults } from '../../src/utils/extractAmendedBillableTestResults';
 import { extractBillableTestResults } from '../../src/utils/extractTestResults';
 import { getSecret } from '../../src/utils/filterUtils';
+import { TypeOfTest } from '../../src/utils/testResult';
 
 jest.mock('../../src/utils/filterUtils');
 jest.mock('../../src/eventbridge/send');
@@ -47,9 +49,41 @@ describe('eventHandler', () => {
     mocked(sendEvents).mockResolvedValue(mSendResponse);
     await eventHandler(event);
     expect(sendEvents).toHaveBeenCalledTimes(1);
+    expect(sendEvents).toHaveBeenCalledWith([], EventType.COMPLETION);
     expect(unmarshallSpy).toHaveBeenCalledTimes(1);
     expect(extractBillableTestResults).toHaveBeenCalledTimes(1);
     expect(extractBillableTestResults).toHaveBeenCalledWith({ testStationPNumber: 'foo' });
+  });
+  it('GIVEN an insert event for a contingency test THEN billable details should be extracted and event sent to eventbridge.', async () => {
+    event = {
+      Records: [
+        {
+          eventName: 'INSERT',
+          dynamodb: {
+            NewImage: {
+              testStationPNumber: {
+                S: 'foo',
+              },
+              typeOfTest: {
+                S: TypeOfTest.CONTINGENCY,
+              },
+            },
+          },
+        },
+      ],
+    };
+    const unmarshallSpy = jest.spyOn(DynamoDB.Converter, 'unmarshall');
+    const mSendResponse: SendResponse = { SuccessCount: 1, FailCount: 0 };
+    mocked(sendEvents).mockResolvedValue(mSendResponse);
+    await eventHandler(event);
+    expect(sendEvents).toHaveBeenCalledTimes(1);
+    expect(sendEvents).toHaveBeenCalledWith([], EventType.CONTINGENCY);
+    expect(unmarshallSpy).toHaveBeenCalledTimes(1);
+    expect(extractBillableTestResults).toHaveBeenCalledTimes(1);
+    expect(extractBillableTestResults).toHaveBeenCalledWith({
+      testStationPNumber: 'foo',
+      typeOfTest: TypeOfTest.CONTINGENCY,
+    });
   });
   it('GIVEN an modify event THEN billable details should be extracted and event sent to eventbridge.', async () => {
     event = {
@@ -76,6 +110,7 @@ describe('eventHandler', () => {
     mocked(sendEvents).mockResolvedValue(mSendResponse);
     await eventHandler(event);
     expect(sendEvents).toHaveBeenCalledTimes(1);
+    expect(sendEvents).toHaveBeenCalledWith([], EventType.AMENDMENT);
     expect(unmarshallSpy).toHaveBeenCalledTimes(2);
     expect(extractAmendedBillableTestResults).toHaveBeenCalledTimes(1);
     expect(extractAmendedBillableTestResults).toHaveBeenCalledWith(

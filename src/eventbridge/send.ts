@@ -54,9 +54,10 @@ const sendEvents = async (events: Array<Differences | TestActivity>, type: Event
   return sendResponse;
 };
 
-const buildDebugMessage = (event: Differences | TestActivity): string => (isActivity(event)
-  ? ` (testResultId: '${event.testResultId}', vin: '${event.vin}').`
-  : ` (reasonForCreation: '${event.reason}').`);
+const buildDebugMessage = (event: Differences | TestActivity): string =>
+  isActivity(event)
+    ? ` (testResultId: '${event.testResultId}', vin: '${event.vin}').`
+    : ` (reasonForCreation: '${event.reason}').`;
 
 // eslint-disable-next-line no-prototype-builtins
 const isActivity = (event: Differences | TestActivity): event is TestActivity => event.hasOwnProperty('vin');
