@@ -47,18 +47,18 @@ describe('formatModifyPayload', () => {
         fields: [
           {
             fieldname: 'testCode',
-            oldvalue: previousRecord.testTypes[0].testCode,
-            newvalue: currentRecord.testTypes[0].testCode,
+            oldValue: previousRecord.testTypes[0].testCode,
+            newValue: currentRecord.testTypes[0].testCode,
           },
           {
             fieldname: 'vin',
-            oldvalue: previousRecord.vin,
-            newvalue: currentRecord.vin,
+            oldValue: previousRecord.vin,
+            newValue: currentRecord.vin,
           },
           {
             fieldname: 'vrm',
-            oldvalue: previousRecord.vrm,
-            newvalue: currentRecord.vrm,
+            oldValue: previousRecord.vrm,
+            newValue: currentRecord.vrm,
           },
         ],
       },
@@ -98,18 +98,18 @@ describe('formatModifyPayload', () => {
         fields: [
           {
             fieldname: 'testCode',
-            oldvalue: previousRecord.testTypes[0].testCode,
-            newvalue: currentRecord.testTypes[0].testCode,
+            oldValue: previousRecord.testTypes[0].testCode,
+            newValue: currentRecord.testTypes[0].testCode,
           },
           {
             fieldname: 'vin',
-            oldvalue: previousRecord.vin,
-            newvalue: currentRecord.vin,
+            oldValue: previousRecord.vin,
+            newValue: currentRecord.vin,
           },
           {
             fieldname: 'vrm',
-            oldvalue: previousRecord.vrm,
-            newvalue: currentRecord.vrm,
+            oldValue: previousRecord.vrm,
+            newValue: currentRecord.vrm,
           },
         ],
       },
@@ -126,18 +126,18 @@ describe('formatModifyPayload', () => {
         fields: [
           {
             fieldname: 'testStationPNumber',
-            oldvalue: previousRecord.testStationPNumber,
-            newvalue: currentRecord.testStationPNumber,
+            oldValue: previousRecord.testStationPNumber,
+            newValue: currentRecord.testStationPNumber,
           },
           {
             fieldname: 'vin',
-            oldvalue: previousRecord.vin,
-            newvalue: currentRecord.vin,
+            oldValue: previousRecord.vin,
+            newValue: currentRecord.vin,
           },
           {
             fieldname: 'vrm',
-            oldvalue: previousRecord.vrm,
-            newvalue: currentRecord.vrm,
+            oldValue: previousRecord.vrm,
+            newValue: currentRecord.vrm,
           },
         ],
       },
@@ -170,18 +170,18 @@ describe('formatModifyPayload', () => {
         fields: [
           {
             fieldname: 'testStationPNumber',
-            oldvalue: previousRecord.testStationPNumber,
-            newvalue: currentRecord.testStationPNumber,
+            oldValue: previousRecord.testStationPNumber,
+            newValue: currentRecord.testStationPNumber,
           },
           {
             fieldname: 'vin',
-            oldvalue: previousRecord.vin,
-            newvalue: currentRecord.vin,
+            oldValue: previousRecord.vin,
+            newValue: currentRecord.vin,
           },
           {
             fieldname: 'vrm',
-            oldvalue: previousRecord.vrm,
-            newvalue: currentRecord.vrm,
+            oldValue: previousRecord.vrm,
+            newValue: currentRecord.vrm,
           },
         ],
       },

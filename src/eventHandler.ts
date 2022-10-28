@@ -43,8 +43,8 @@ const eventHandler = async (event: DynamoDBStreamEvent) => {
 
 function checkNonFilteredATF(record: DynamoDBRecord, secrets: string[]): boolean {
   return (
-    secrets.includes(record?.dynamodb?.NewImage?.testStationPNumber?.S)
-    || secrets.includes(record?.dynamodb?.OldImage?.testStationPNumber?.S)
+    secrets.includes(record?.dynamodb?.NewImage?.testStationPNumber?.S) ||
+    secrets.includes(record?.dynamodb?.OldImage?.testStationPNumber?.S)
   );
 }
 
