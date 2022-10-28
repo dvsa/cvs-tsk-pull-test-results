@@ -21,8 +21,8 @@ export const extractAmendedBillableTestResults = (currentRecord: TestResultModel
       if (oldTestType[key] !== testType[key]) {
         fields.push({
           fieldname: key,
-          oldvalue: oldTestType[key as TestTypesValues],
-          newvalue: testType[key as TestTypesValues],
+          oldValue: oldTestType[key as TestTypesValues],
+          newValue: testType[key as TestTypesValues],
         });
       }
     });
@@ -31,8 +31,8 @@ export const extractAmendedBillableTestResults = (currentRecord: TestResultModel
       if (currentRecord[key] !== previousRecord[key]) {
         fields.push({
           fieldname: key,
-          oldvalue: previousRecord[key as TestResultValues],
-          newvalue: currentRecord[key as TestResultValues],
+          oldValue: previousRecord[key as TestResultValues],
+          newValue: currentRecord[key as TestResultValues],
         });
       }
     });
@@ -41,8 +41,8 @@ export const extractAmendedBillableTestResults = (currentRecord: TestResultModel
       testResultValuesToAdd.forEach((key) => {
         fields.push({
           fieldname: key,
-          oldvalue: previousRecord[key as TestResultValues],
-          newvalue: currentRecord[key as TestResultValues],
+          oldValue: previousRecord[key as TestResultValues],
+          newValue: currentRecord[key as TestResultValues],
         });
       });
 

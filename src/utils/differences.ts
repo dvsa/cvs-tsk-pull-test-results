@@ -1,7 +1,7 @@
 export interface DifferencesEntries {
   fieldname: string;
-  oldvalue: string | number;
-  newvalue: string | number;
+  oldValue: string | number;
+  newValue: string | number;
 }
 
 export interface Differences {
