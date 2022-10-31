@@ -20,7 +20,8 @@ const eventHandler = async (event: DynamoDBStreamEvent) => {
       switch (record.eventName) {
         case 'INSERT': {
           const testActivity: TestActivity[] = extractBillableTestResults(currentRecord);
-          const eventType = currentRecord.typeOfTest === TypeOfTest.CONTINGENCY ? EventType.CONTINGENCY : EventType.COMPLETION;
+          const eventType =
+            currentRecord.typeOfTest === TypeOfTest.CONTINGENCY ? EventType.CONTINGENCY : EventType.COMPLETION;
           /* eslint-disable no-await-in-loop */
           await sendEvents(testActivity, eventType);
           break;
@@ -44,8 +45,8 @@ const eventHandler = async (event: DynamoDBStreamEvent) => {
 
 function checkNonFilteredATF(record: DynamoDBRecord, secrets: string[]): boolean {
   return (
-    secrets.includes(record?.dynamodb?.NewImage?.testStationPNumber?.S)
-    || secrets.includes(record?.dynamodb?.OldImage?.testStationPNumber?.S)
+    secrets.includes(record?.dynamodb?.NewImage?.testStationPNumber?.S) ||
+    secrets.includes(record?.dynamodb?.OldImage?.testStationPNumber?.S)
   );
 }
 

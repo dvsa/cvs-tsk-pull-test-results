@@ -150,7 +150,7 @@ function createDifferences(qty: number, reasonForCreation = 'foo'): Differences 
   const fields = [];
   for (let i = 0; i < qty; i++) {
     fields.push({
-      fieldname: 'foo',
+      fieldName: 'foo',
       oldvalue: 'bar',
       newValue: 'foobar',
     });

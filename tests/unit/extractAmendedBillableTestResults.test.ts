@@ -46,17 +46,17 @@ describe('formatModifyPayload', () => {
         reason: currentRecord.reasonForCreation,
         fields: [
           {
-            fieldname: 'testCode',
+            fieldName: 'testCode',
             oldValue: previousRecord.testTypes[0].testCode,
             newValue: currentRecord.testTypes[0].testCode,
           },
           {
-            fieldname: 'vin',
+            fieldName: 'vin',
             oldValue: previousRecord.vin,
             newValue: currentRecord.vin,
           },
           {
-            fieldname: 'vrm',
+            fieldName: 'vrm',
             oldValue: previousRecord.vrm,
             newValue: currentRecord.vrm,
           },
@@ -97,17 +97,17 @@ describe('formatModifyPayload', () => {
         reason: currentRecord.reasonForCreation,
         fields: [
           {
-            fieldname: 'testCode',
+            fieldName: 'testCode',
             oldValue: previousRecord.testTypes[0].testCode,
             newValue: currentRecord.testTypes[0].testCode,
           },
           {
-            fieldname: 'vin',
+            fieldName: 'vin',
             oldValue: previousRecord.vin,
             newValue: currentRecord.vin,
           },
           {
-            fieldname: 'vrm',
+            fieldName: 'vrm',
             oldValue: previousRecord.vrm,
             newValue: currentRecord.vrm,
           },
@@ -125,17 +125,17 @@ describe('formatModifyPayload', () => {
         reason: currentRecord.reasonForCreation,
         fields: [
           {
-            fieldname: 'testStationPNumber',
+            fieldName: 'testStationPNumber',
             oldValue: previousRecord.testStationPNumber,
             newValue: currentRecord.testStationPNumber,
           },
           {
-            fieldname: 'vin',
+            fieldName: 'vin',
             oldValue: previousRecord.vin,
             newValue: currentRecord.vin,
           },
           {
-            fieldname: 'vrm',
+            fieldName: 'vrm',
             oldValue: previousRecord.vrm,
             newValue: currentRecord.vrm,
           },
@@ -169,17 +169,17 @@ describe('formatModifyPayload', () => {
         reason: currentRecord.reasonForCreation,
         fields: [
           {
-            fieldname: 'testStationPNumber',
+            fieldName: 'testStationPNumber',
             oldValue: previousRecord.testStationPNumber,
             newValue: currentRecord.testStationPNumber,
           },
           {
-            fieldname: 'vin',
+            fieldName: 'vin',
             oldValue: previousRecord.vin,
             newValue: currentRecord.vin,
           },
           {
-            fieldname: 'vrm',
+            fieldName: 'vrm',
             oldValue: previousRecord.vrm,
             newValue: currentRecord.vrm,
           },
