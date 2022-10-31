@@ -4,8 +4,8 @@ import { TestResultModel, TestType } from './testResult';
 
 export const extractAmendedBillableTestResults = (currentRecord: TestResultModel, previousRecord: TestResultModel) => {
   const testTypeValuesToCheck = ['testCode'] as const;
-  const testResultValuesToCheck = ['testStationPNumber', 'testStationType'] as const;
   const testResultValuesToAdd = ['vin', 'vrm'] as const;
+  const testResultValuesToCheck = ['testStationPNumber', ...testResultValuesToAdd] as const;
 
   type TestTypesValues = typeof testTypeValuesToCheck[number];
   type TestResultValues = typeof testResultValuesToCheck[number] | typeof testResultValuesToAdd[number];
@@ -39,11 +39,13 @@ export const extractAmendedBillableTestResults = (currentRecord: TestResultModel
 
     if (fields.length) {
       testResultValuesToAdd.forEach((key) => {
-        fields.push({
-          fieldName: key,
-          oldValue: previousRecord[key as TestResultValues],
-          newValue: currentRecord[key as TestResultValues],
-        });
+        if (!fields.find((field) => field.fieldName === key)) {
+          fields.push({
+            fieldName: key,
+            oldValue: previousRecord[key as TestResultValues],
+            newValue: currentRecord[key as TestResultValues],
+          });
+        }
       });
 
       logger.debug(`Fields changed for testResultId: ${currentRecord.testResultId}: ${JSON.stringify(fields)}`);

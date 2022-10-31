@@ -188,4 +188,38 @@ describe('formatModifyPayload', () => {
     ];
     expect(extractAmendedBillableTestResults(currentRecord, previousRecord)).toEqual(expected);
   });
+  it('GIVEN changes to the vrm THEN it should the vrm and the vin to the payload', () => {
+    const currentRecord = {
+      reasonForCreation: 'foo',
+      vin: 'foo',
+      testTypes: [{}],
+      vrm: 'bar',
+      testStationPNumber: 'foo',
+    } as TestResultModel;
+    const previousRecord = {
+      reasonForCreation: 'bar',
+      vin: 'foo',
+      testTypes: [{}],
+      vrm: 'foo',
+      testStationPNumber: 'foo',
+    } as TestResultModel;
+    const expected: Differences[] = [
+      {
+        reason: currentRecord.reasonForCreation,
+        fields: [
+          {
+            fieldName: 'vrm',
+            oldValue: previousRecord.vrm,
+            newValue: currentRecord.vrm,
+          },
+          {
+            fieldName: 'vin',
+            oldValue: previousRecord.vin,
+            newValue: currentRecord.vin,
+          },
+        ],
+      },
+    ];
+    expect(extractAmendedBillableTestResults(currentRecord, previousRecord)).toEqual(expected);
+  });
 });
