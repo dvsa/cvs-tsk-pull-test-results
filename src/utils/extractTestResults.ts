@@ -1,29 +1,26 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { DynamoDBRecord } from 'aws-lambda';
-import { DynamoDB } from 'aws-sdk';
 import { TestActivity } from './testActivity';
+import { TestResultModel } from './testResult';
 
-export const extractBillableTestResults = (record: DynamoDBRecord): TestActivity[] => {
-  const data = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
-  const testActivities: TestActivity[] = data.testTypes
-    .map((testType) => ({
-      noOfAxles: data.noOfAxles as number,
-      testTypeStartTimestamp: data.testStartTimestamp,
-      testTypeEndTimestamp: data.testEndTimestamp,
-      testStationType: data.testStationType,
-      testCode: testType.testCode,
-      vin: data.vin,
-      vrm: data.vrm,
-      testStationPNumber: data.testStationPNumber,
-      testResult: testType.testResult,
-      certificateNumber: testType.certificateNumber,
-      testTypeName: testType.name,
-      vehicleType: data.vehicleType,
-      testerName: data.testerName,
-      testerStaffId: data.testerStaffId,
-      testResultId: data.testResultId,
-    }));
+export const extractBillableTestResults = (record: TestResultModel): TestActivity[] => {
+  const testActivities: TestActivity[] = record.testTypes.map((testType) => ({
+    noOfAxles: record.noOfAxles,
+    testTypeStartTimestamp: record.testStartTimestamp,
+    testTypeEndTimestamp: record.testEndTimestamp,
+    testStationType: record.testStationType,
+    testCode: testType.testCode,
+    vin: record.vin,
+    vrm: record.vrm,
+    testStationPNumber: record.testStationPNumber,
+    testResult: testType.testResult,
+    certificateNumber: testType.certificateNumber,
+    testTypeName: testType.name,
+    vehicleType: record.vehicleType,
+    testerName: record.testerName,
+    testerStaffId: record.testerStaffId,
+    testResultId: record.testResultId,
+  }));
   return testActivities;
 };
