@@ -25,7 +25,7 @@ const eventHandler = async (event: DynamoDBStreamEvent) => {
           }
 
           const testActivity: TestActivity[] = extractBillableTestResults(currentRecord);
-          const eventType = TestTypeToEvent.get(currentRecord.typeOfTest) ?? EventType.COMPLETION;
+          const eventType = eventTypeMap.get(currentRecord.typeOfTest) ?? EventType.COMPLETION;
 
           /* eslint-disable no-await-in-loop */
           await sendEvents(testActivity, eventType);
@@ -48,7 +48,7 @@ const eventHandler = async (event: DynamoDBStreamEvent) => {
   }
 };
 
-const TestTypeToEvent = new Map<TypeOfTest, EventType>([
+const eventTypeMap = new Map<TypeOfTest, EventType>([
   [TypeOfTest.CONTINGENCY, EventType.CONTINGENCY],
   [TypeOfTest.DESK_BASED, EventType.DESK_BASED],
 ]);
