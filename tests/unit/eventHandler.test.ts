@@ -11,10 +11,10 @@ import { SendResponse, EventType } from '../../src/interfaces/EventBridge';
 import { checkNonFilteredATF, eventHandler } from '../../src/eventHandler';
 import { extractAmendedBillableTestResults } from '../../src/utils/extractAmendedBillableTestResults';
 import { extractBillableTestResults } from '../../src/utils/extractTestResults';
-import { getSecret } from '../../src/utils/filterUtils';
+import { getSecret } from '../../src/utils/getSecret';
 import { TypeOfTest } from '../../src/interfaces/TestResult';
 
-jest.mock('../../src/utils/filterUtils');
+jest.mock('../../src/utils/getSecret');
 jest.mock('../../src/eventbridge/send');
 jest.mock('../../src/utils/extractTestResults');
 jest.mock('../../src/utils/extractAmendedBillableTestResults');
@@ -28,7 +28,13 @@ describe('eventHandler', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-  it('GIVEN an insert event THEN billable details should be extracted and event sent to eventbridge.', async () => {
+
+  it.each([
+    ['VTA', undefined, EventType.COMPLETION],
+    ['contingency', TypeOfTest.CONTINGENCY, EventType.CONTINGENCY],
+    ['desk based', TypeOfTest.DESK_BASED, EventType.DESK_BASED],
+  ])('GIVEN %p test result insert THEN billable details should be extracted and event sent to eventbridge.', async (_scenario, typeOfTest, eventType) => {
+    if (typeOfTest === TypeOfTest.CONTINGENCY) process.env.PROCESS_DESK_BASED_TESTS = 'true'
     event = {
       Records: [
         {
@@ -38,6 +44,9 @@ describe('eventHandler', () => {
               testStationPNumber: {
                 S: 'foo',
               },
+              typeOfTest: typeOfTest ? {
+                S: typeOfTest,
+              } : undefined,
             },
           },
         },
@@ -48,12 +57,13 @@ describe('eventHandler', () => {
     mocked(sendEvents).mockResolvedValue(mSendResponse);
     await eventHandler(event);
     expect(sendEvents).toHaveBeenCalledTimes(1);
-    expect(sendEvents).toHaveBeenCalledWith([], EventType.COMPLETION);
+    expect(sendEvents).toHaveBeenCalledWith([], eventType);
     expect(unmarshallSpy).toHaveBeenCalledTimes(1);
     expect(extractBillableTestResults).toHaveBeenCalledTimes(1);
-    expect(extractBillableTestResults).toHaveBeenCalledWith({ testStationPNumber: 'foo' });
+    expect(extractBillableTestResults).toHaveBeenCalledWith({ testStationPNumber: 'foo', typeOfTest });
   });
-  it('GIVEN an insert event for a contingency test THEN billable details should be extracted and event sent to eventbridge.', async () => {
+  it('GIVEN a desk based test result insert WHEN feature toggle is set to false THEN dont handle event', async () => {
+    process.env.PROCESS_DESK_BASED_TESTS = 'false'
     event = {
       Records: [
         {
@@ -64,7 +74,7 @@ describe('eventHandler', () => {
                 S: 'foo',
               },
               typeOfTest: {
-                S: TypeOfTest.CONTINGENCY,
+                S: 'desk-based',
               },
             },
           },
@@ -72,51 +82,11 @@ describe('eventHandler', () => {
       ],
     };
     const unmarshallSpy = jest.spyOn(DynamoDB.Converter, 'unmarshall');
-    const mSendResponse: SendResponse = { SuccessCount: 1, FailCount: 0 };
-    mocked(sendEvents).mockResolvedValue(mSendResponse);
     await eventHandler(event);
-    expect(sendEvents).toHaveBeenCalledTimes(1);
-    expect(sendEvents).toHaveBeenCalledWith([], EventType.CONTINGENCY);
     expect(unmarshallSpy).toHaveBeenCalledTimes(1);
-    expect(extractBillableTestResults).toHaveBeenCalledTimes(1);
-    expect(extractBillableTestResults).toHaveBeenCalledWith({
-      testStationPNumber: 'foo',
-      typeOfTest: TypeOfTest.CONTINGENCY,
-    });
-  });
-  it('GIVEN an modify event THEN billable details should be extracted and event sent to eventbridge.', async () => {
-    event = {
-      Records: [
-        {
-          eventName: 'MODIFY',
-          dynamodb: {
-            NewImage: {
-              testStationPNumber: {
-                S: 'foo',
-              },
-            },
-            OldImage: {
-              testStationPNumber: {
-                S: 'bar',
-              },
-            },
-          },
-        },
-      ],
-    };
-    const unmarshallSpy = jest.spyOn(DynamoDB.Converter, 'unmarshall');
-    const mSendResponse: SendResponse = { SuccessCount: 1, FailCount: 0 };
-    mocked(sendEvents).mockResolvedValue(mSendResponse);
-    await eventHandler(event);
-    expect(sendEvents).toHaveBeenCalledTimes(1);
-    expect(sendEvents).toHaveBeenCalledWith([], EventType.AMENDMENT);
-    expect(unmarshallSpy).toHaveBeenCalledTimes(2);
-    expect(extractAmendedBillableTestResults).toHaveBeenCalledTimes(1);
-    expect(extractAmendedBillableTestResults).toHaveBeenCalledWith(
-      { testStationPNumber: 'foo' },
-      { testStationPNumber: 'bar' },
-    );
-  });
+    expect(sendEvents).toHaveBeenCalledTimes(0);
+    expect(extractBillableTestResults).toHaveBeenCalledTimes(0);
+  })
   it('GIVEN an unhandled event THEN error in logged to the console', async () => {
     event = ({
       Records: [

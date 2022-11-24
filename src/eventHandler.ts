@@ -6,7 +6,7 @@ import logger from './observability/logger';
 import { extractAmendedBillableTestResults } from './utils/extractAmendedBillableTestResults';
 import { TestAmendment } from './interfaces/TestAmendment';
 import { extractBillableTestResults } from './utils/extractTestResults';
-import { getSecret } from './utils/filterUtils';
+import { getSecret } from './utils/getSecret';
 import { TestActivity } from './interfaces/TestActivity';
 import { TestResultModel, TypeOfTest } from './interfaces/TestResult';
 import { EventType } from './interfaces/EventBridge';
@@ -19,6 +19,11 @@ const eventHandler = async (event: DynamoDBStreamEvent) => {
       const currentRecord = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage) as TestResultModel;
       switch (record.eventName) {
         case 'INSERT': {
+          if (process.env.PROCESS_DESK_BASED_TESTS !== 'true' && currentRecord.typeOfTest === TypeOfTest.DESK_BASED) {
+            logger.info('Ignoring desk based test');
+            return;
+          }
+
           const testActivity: TestActivity[] = extractBillableTestResults(currentRecord);
           const eventType = TestTypeToEvent.get(currentRecord.typeOfTest) ?? EventType.COMPLETION;
 
