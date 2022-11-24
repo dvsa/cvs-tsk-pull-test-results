@@ -1,10 +1,10 @@
-export interface DifferencesEntries {
+export interface FieldChange {
   fieldName: string;
   oldValue: string | number;
   newValue: string | number;
 }
 
-export interface Differences {
+export interface TestAmendment {
   reason?: string;
-  fields: DifferencesEntries[];
+  fields: FieldChange[];
 }

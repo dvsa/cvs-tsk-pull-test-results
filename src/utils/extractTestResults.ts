@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { TestActivity } from './testActivity';
-import { TestResultModel } from './testResult';
+import { TestActivity } from '../interfaces/TestActivity';
+import { TestResultModel } from '../interfaces/TestResult';
 
 export const extractBillableTestResults = (record: TestResultModel): TestActivity[] => {
   const testActivities: TestActivity[] = record.testTypes.map((testType) => ({

@@ -7,13 +7,12 @@ import { DynamoDB } from 'aws-sdk';
 import { EOL } from 'os';
 import { mocked } from 'ts-jest/utils';
 import { sendEvents } from '../../src/eventbridge/send';
-import { SendResponse } from '../../src/eventbridge/SendResponse';
+import { SendResponse, EventType } from '../../src/interfaces/EventBridge';
 import { checkNonFilteredATF, eventHandler } from '../../src/eventHandler';
-import { EventType } from '../../src/utils/eventType';
 import { extractAmendedBillableTestResults } from '../../src/utils/extractAmendedBillableTestResults';
 import { extractBillableTestResults } from '../../src/utils/extractTestResults';
 import { getSecret } from '../../src/utils/filterUtils';
-import { TypeOfTest } from '../../src/utils/testResult';
+import { TypeOfTest } from '../../src/interfaces/TestResult';
 
 jest.mock('../../src/utils/filterUtils');
 jest.mock('../../src/eventbridge/send');
