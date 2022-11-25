@@ -141,7 +141,7 @@ describe('eventHandler', () => {
     expect(sendEvents).not.toHaveBeenCalled();
     expect(extractAmendedBillableTestResults).not.toHaveBeenCalled();
     expect(extractBillableTestResults).not.toHaveBeenCalled();
-    expect(consoleSpy).toHaveBeenCalledWith(`debug: Event not sent as non filtered ATF${EOL}`);
+    expect(consoleSpy).toHaveBeenCalledWith(`info: Event not sent as non filtered ATF${EOL}`);
   });
 });
 
