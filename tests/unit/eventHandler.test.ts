@@ -144,9 +144,11 @@ describe('eventHandler', () => {
     expect(consoleSpy).toHaveBeenCalledWith(`info: Event not sent as non filtered ATF${EOL}`);
   });
   it.each([
-    ['MODIFY','INSERT', 'true', 2],
+    ['MODIFY', 'INSERT', 'true', 2],
     ['MODIFY', 'INSERT', 'false', 1],
-  ])('GIVEN a handled event contains a %p stream event and a desk-based test %p stream event WHEN PROCESS_DESK_BASED_TESTS is set to %p THEN %p event should be processed', async (eventName1, eventName2, processDeskBasedTests, eventsProcessed) => {
+    ['INSERT', 'INSERT', 'true', 2],
+    ['INSERT', 'INSERT', 'false', 1],
+  ])('GIVEN a handled event contains a contingency %p stream event and a desk-based test %p stream event WHEN PROCESS_DESK_BASED_TESTS is set to %p THEN %p event should be processed', async (eventName1, eventName2, processDeskBasedTests, eventsProcessed) => {
     process.env.PROCESS_DESK_BASED_TESTS = processDeskBasedTests;
     event = ({
       Records: [
@@ -157,10 +159,16 @@ describe('eventHandler', () => {
               testStationPNumber: {
                 S: 'foo',
               },
+              typeOfTest: {
+                S: 'contingency',
+              },
             },
             OldImage: {
               testStationPNumber: {
                 S: 'foo',
+              },
+              typeOfTest: {
+                S: 'contingency',
               },
             },
           },
@@ -173,7 +181,7 @@ describe('eventHandler', () => {
                 S: 'foo',
               },
               typeOfTest: {
-                S: 'desk-based'
+                S: 'desk-based',
               },
             },
           },
@@ -187,7 +195,6 @@ describe('eventHandler', () => {
     expect(sendEvents).toHaveBeenCalledTimes(eventsProcessed);
   });
 });
-
 
 describe('checkNonFilteredATF', () => {
   it('should return true if the current station is in the secrets', () => {
