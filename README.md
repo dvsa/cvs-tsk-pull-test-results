@@ -1,29 +1,41 @@
 # cvs-tsk-pull-test-results
 
-Service for feeding test results from DynamoDB into DynamicsCE.
+This repo contains the source code for two AWS Lambdas that send vehicle test result data to Dynamics CE
 
-General overview:
-- ATF engineer performs a vehicle test and records the outcome in the VTA app.
-- VTA app inserts the data into the DynamoDB table via the test-results lambda.
-- The table is configured to stream activity to the pull-test-results lambda.
-- Pull-test-results lambda extracts the results from the data and send it as events to EventBridge.
-- An EventBridge rule inserts the results into DynamicsCE via an OData endpoint.
+### pull-test-results
+1. Receives INSERT events from the `test-results` DynamoDB which are a result of a vehicle test being performed in either VTA or VTM.
+2. Extracts the necessary information to be sent to Dynamics CE to bill the ATF for the test activity
+3. Sends the test activity details to EventBridge to be subsequently sent to Dynamics CE via HTTPS
 
+### pull-test-results-modify
+1. Receives MODIFY events from the `test-results` DynamoDB which are caused by ammendments of a test result made in VTM.
+2. Identifies the values that have changed within the test result record.
+3. Sends the test amendment details to EventBridge to be subsequently sent to Dynamics CE via HTTPS to create a billing amendment on the original test activity
+
+![Pull test result lambdas architectural diagram](./docs/Architecture.png)
+
+---
+
+## Feature toggles
+Both lambdas utilise environment variables to enable specific functionality:
+- pull-test-results 
+  - `PROCESS_MODIFY_EVENTS` - Toggles whether the lambda processes MODIFY DynamoDB stream events (must be set to `'true'` to enable functionality)
+- pull-test-results-modify 
+  - `PROCESS_DESK_BASED_TESTS` - Toggles whether the lambda processeses desk based tests (must be set to `'true'` to enable functionality)
+
+---
 ## Dependencies
 
-The project runs on node 14.x with typescript and serverless framework. For further details about project dependencies, please refer to the `package.json` file.
+The project runs on node 16.x with typescript and serverless framework. For further details about project dependencies, please refer to the `package.json` file.
 [nvm](https://github.com/nvm-sh/nvm/blob/master/README.md) is used to manage node versions and configuration is per project using an `.npmrc` file.
 
+---
 ## Running the project
 
 Before running the project, the dependencies need to be installed using `npm install`. Once the dependencies are installed, you will be required to copy the `.env.example` file to `.env.local` in the root of the project. See these for information about [variables](https://www.serverless.com/framework/docs/providers/aws/guide/variables/) and [environment variables](https://www.serverless.com/framework/docs/environment-variables/) with serverless.
 Please note that multiple `.env` files can be created, one per environment. Our current development environment is 'local'.
 
 The application runs on port `:3001` by default.
-
-## Packaging the project locally
-
-The `package` npm script takes a ZIP_NAME variable. To set the variable when running manually use `ZIP_NAME=zipName npm run package`. This will produce a file called zipName.zip.
 
 ### Environments
 
@@ -68,8 +80,10 @@ The following scripts are available, for further information please refer to the
 Serverless-offline is used to run the project locally. Use `npm run start` script to do so. The endpoints below are available.
 
 ```
-(POST) http://localhost:3002/2015-03-31/functions/cvs-tsk-pull-test-results-local-pullTestResults/invocations
-(POST) http://localhost:3002/2014-11-13/functions/cvs-tsk-pull-test-results-local-pullTestResults/invoke-async/
+(POST) http://localhost:3002/2015-03-31/functions/cvs-tsk-pull-test-results-local-pullTestResultsInsert/invocations
+(POST) http://localhost:3002/2014-11-13/functions/cvs-tsk-pull-test-results-local-pullTestResultsInsert/invoke-async/
+(POST) http://localhost:3002/2015-03-31/functions/cvs-tsk-pull-test-results-local-pullTestResultsModify/invocations
+(POST) http://localhost:3002/2014-11-13/functions/cvs-tsk-pull-test-results-local-pullTestResultsModify/invoke-async/
 ```
 
 The function expects a DynamoDB stream event.
@@ -117,17 +131,17 @@ The following variables are supported in the `.env.<NODE_ENV>` file.
 - AWS_SERVER_PORT=3009
 - AWS_EVENT_BUS_NAME=default
 - AWS_EVENT_BUS_SOURCE=eventBusName
+- PROCESS_MODIFY_EVENTS=false
+- PROCESS_DESK_BASED_TESTS=false
 
+---
 ## Testing
 
 ### Unit
 
 Jest is used for unit testing. Jest mocks have been added for external services and other dependencies when needed. Debugging tests is possible using the two options configured in ./vscode/launch.json `Jest Debug all tests` and `Jest Debug opened file`. Using the Jest vscode extension is also a very good option. Please refer to the [Jest documentation](https://jestjs.io/docs/en/getting-started) for further details.
 
-### Integration
-
-TBC
-
+---
 ## Infrastructure
 
 ### Release
@@ -144,6 +158,7 @@ The script `npm run release` will automatically trigger the release in CI. To ma
 
 Publishing and artifacts are managed separately by the pipeline.
 
+---
 ## Contributing
 
 To facilitate the standardisation of the code, a few helpers and tools have been adopted for this repository.

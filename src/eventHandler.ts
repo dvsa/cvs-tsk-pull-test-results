@@ -21,7 +21,7 @@ const eventHandler = async (event: DynamoDBStreamEvent) => {
         case 'INSERT': {
           if (process.env.PROCESS_DESK_BASED_TESTS !== 'true' && currentRecord.typeOfTest === TypeOfTest.DESK_BASED) {
             logger.info('Ignoring desk based test');
-            return;
+            break;
           }
 
           const testActivity: TestActivity[] = extractBillableTestResults(currentRecord);
@@ -43,7 +43,7 @@ const eventHandler = async (event: DynamoDBStreamEvent) => {
           break;
       }
     } else {
-      logger.debug('Event not sent as non filtered ATF');
+      logger.info('Event not sent as non filtered ATF');
     }
   }
 };
