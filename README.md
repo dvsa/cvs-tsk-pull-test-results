@@ -11,10 +11,8 @@ This repo contains the source code for two AWS Lambdas that send vehicle test re
 1. Receives MODIFY events from the `test-results` DynamoDB which are caused by ammendments of a test result made in VTM.
 2. Identifies the values that have changed within the test result record.
 3. Sends the test amendment details to EventBridge to be subsequently sent to Dynamics CE via HTTPS to create a billing amendment on the original test activity
-
+<br></br>
 ![Pull test result lambdas architectural diagram](./docs/Architecture.png)
-
----
 
 ## Feature toggles
 Both lambdas utilise environment variables to enable specific functionality:
@@ -23,13 +21,11 @@ Both lambdas utilise environment variables to enable specific functionality:
 - pull-test-results-modify 
   - `PROCESS_DESK_BASED_TESTS` - Toggles whether the lambda processeses desk based tests (must be set to `'true'` to enable functionality)
 
----
 ## Dependencies
 
 The project runs on node 16.x with typescript and serverless framework. For further details about project dependencies, please refer to the `package.json` file.
 [nvm](https://github.com/nvm-sh/nvm/blob/master/README.md) is used to manage node versions and configuration is per project using an `.npmrc` file.
 
----
 ## Running the project
 
 Before running the project, the dependencies need to be installed using `npm install`. Once the dependencies are installed, you will be required to copy the `.env.example` file to `.env.local` in the root of the project. See these for information about [variables](https://www.serverless.com/framework/docs/providers/aws/guide/variables/) and [environment variables](https://www.serverless.com/framework/docs/environment-variables/) with serverless.
@@ -134,14 +130,12 @@ The following variables are supported in the `.env.<NODE_ENV>` file.
 - PROCESS_MODIFY_EVENTS=false
 - PROCESS_DESK_BASED_TESTS=false
 
----
 ## Testing
 
 ### Unit
 
 Jest is used for unit testing. Jest mocks have been added for external services and other dependencies when needed. Debugging tests is possible using the two options configured in ./vscode/launch.json `Jest Debug all tests` and `Jest Debug opened file`. Using the Jest vscode extension is also a very good option. Please refer to the [Jest documentation](https://jestjs.io/docs/en/getting-started) for further details.
 
----
 ## Infrastructure
 
 ### Release
@@ -158,7 +152,6 @@ The script `npm run release` will automatically trigger the release in CI. To ma
 
 Publishing and artifacts are managed separately by the pipeline.
 
----
 ## Contributing
 
 To facilitate the standardisation of the code, a few helpers and tools have been adopted for this repository.
