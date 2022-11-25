@@ -143,7 +143,51 @@ describe('eventHandler', () => {
     expect(extractBillableTestResults).not.toHaveBeenCalled();
     expect(consoleSpy).toHaveBeenCalledWith(`info: Event not sent as non filtered ATF${EOL}`);
   });
+  it.each([
+    ['MODIFY','INSERT', 'true', 2],
+    ['MODIFY', 'INSERT', 'false', 1],
+  ])('GIVEN a handled event contains a %p stream event and a desk-based test %p stream event WHEN PROCESS_DESK_BASED_TESTS is set to %p THEN %p event should be processed', async (eventName1, eventName2, processDeskBasedTests, eventsProcessed) => {
+    process.env.PROCESS_DESK_BASED_TESTS = processDeskBasedTests;
+    event = ({
+      Records: [
+        {
+          eventName: eventName1,
+          dynamodb: {
+            NewImage: {
+              testStationPNumber: {
+                S: 'foo',
+              },
+            },
+            OldImage: {
+              testStationPNumber: {
+                S: 'foo',
+              },
+            },
+          },
+        },
+        {
+          eventName: eventName2,
+          dynamodb: {
+            NewImage: {
+              testStationPNumber: {
+                S: 'foo',
+              },
+              typeOfTest: {
+                S: 'desk-based'
+              },
+            },
+          },
+        },
+      ],
+    } as unknown) as DynamoDBStreamEvent;
+    const mSendResponse: SendResponse = { SuccessCount: eventsProcessed, FailCount: 0 };
+    mocked(sendEvents).mockResolvedValue(mSendResponse);
+
+    await eventHandler(event);
+    expect(sendEvents).toHaveBeenCalledTimes(eventsProcessed);
+  });
 });
+
 
 describe('checkNonFilteredATF', () => {
   it('should return true if the current station is in the secrets', () => {
