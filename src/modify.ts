@@ -16,10 +16,10 @@ logger.debug(
 const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: Callback) => {
   try {
     logger.debug(`Function triggered with '${JSON.stringify(event)}'.`);
-    if (process.env.MODIFY_EVENTS) {
+    if (process.env.PROCESS_MODIFY_EVENTS === 'true') {
       await eventHandler(event);
     } else {
-      logger.debug('Not handling modify events.');
+      logger.info('Not handling modify events.');
     }
 
     logger.info('Data processed successfully.');

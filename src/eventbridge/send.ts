@@ -1,14 +1,13 @@
 import { EventBridge } from 'aws-sdk';
-import { EventEntry } from './EventEntry';
-import { Entries } from './Entries';
-import { SendResponse } from './SendResponse';
 import logger from '../observability/logger';
-import { Differences } from '../utils/differences';
-import { TestActivity } from '../utils/testActivity';
-import { EventType } from '../utils/eventType';
+import { TestAmendment } from '../interfaces/TestAmendment';
+import { TestActivity } from '../interfaces/TestActivity';
+import {
+  EventType, Entries, EventEntry, SendResponse,
+} from '../interfaces/EventBridge';
 
 const eventbridge = new EventBridge();
-const sendEvents = async (events: Array<Differences | TestActivity>, type: EventType): Promise<SendResponse> => {
+const sendEvents = async (events: Array<TestAmendment | TestActivity>, type: EventType): Promise<SendResponse> => {
   logger.info('sendEvents starting');
   logger.info(`${events.length} ${events.length === 1 ? 'event' : 'events'} ready to send to eventbridge.`);
 
@@ -54,11 +53,11 @@ const sendEvents = async (events: Array<Differences | TestActivity>, type: Event
   return sendResponse;
 };
 
-const buildDebugMessage = (event: Differences | TestActivity): string => (isActivity(event)
+const buildDebugMessage = (event: TestAmendment | TestActivity): string => (isActivity(event)
   ? ` (testResultId: '${event.testResultId}', vin: '${event.vin}').`
   : ` (reasonForCreation: '${event.reason}').`);
 
 // eslint-disable-next-line no-prototype-builtins
-const isActivity = (event: Differences | TestActivity): event is TestActivity => event.hasOwnProperty('vin');
+const isActivity = (event: TestAmendment | TestActivity): event is TestActivity => event.hasOwnProperty('vin');
 
 export { sendEvents };

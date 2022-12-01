@@ -4,14 +4,14 @@
   "description": "",
   "main": "src/handler.ts",
   "engines": {
-    "node": "14.*",
-    "npm": "6.*"
+    "node": "16.*",
+    "npm": "8.*"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm-run-all security-checks prettier lint",
+      "pre-commit": "npm run security-checks && npm run prettier && npm run lint",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-      "pre-push": "npm-run-all build test"
+      "pre-push": "npm run build && npm run test"
     }
   },
   "scripts": {

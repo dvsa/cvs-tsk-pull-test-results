@@ -18,7 +18,7 @@ describe('Application entry', () => {
 
   describe('Handler', () => {
     it('GIVEN an event WHEN the eventHandler resolves THEN a callback result is returned', async () => {
-      process.env.MODIFY_EVENTS = 'foobar';
+      process.env.PROCESS_MODIFY_EVENTS = 'true';
       mocked(eventHandler).mockReturnValue(Promise.resolve());
       await handler(mockEvent, null, (error: string | Error, result: string) => {
         expect(error).toBeNull();
@@ -29,7 +29,7 @@ describe('Application entry', () => {
     });
 
     it('GIVEN an event WHEN the eventHandler throws an THEN a callback error is returned', async () => {
-      process.env.MODIFY_EVENTS = 'foobar';
+      process.env.PROCESS_MODIFY_EVENTS = 'true';
       mocked(eventHandler).mockReturnValue(Promise.reject());
       await handler(mockEvent, null, (error: string | Error, result: string) => {
         expect(error).toEqual(new Error('Data processed unsuccessfully.'));
@@ -39,8 +39,8 @@ describe('Application entry', () => {
       expect(eventHandler).toHaveBeenCalledWith(mockEvent);
     });
 
-    it('GIVEN an event WHEN the environment variable NO_MODIFY is truthy THEN a callback result is returned AND the eventHandler is not called', async () => {
-      process.env.MODIFY_EVENTS = '';
+    it(`GIVEN an event WHEN the environment variable PROCESS_MODIFY_EVENTS is not set to 'true' THEN a callback result is returned AND the eventHandler is not called`, async () => {
+      process.env.PROCESS_MODIFY_EVENTS = 'false';
       mocked(eventHandler).mockReturnValue(Promise.resolve());
       await handler(mockEvent, null, (error: string | Error, result: string) => {
         expect(error).toBeNull();

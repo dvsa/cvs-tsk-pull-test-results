@@ -1,18 +1,15 @@
 import logger from '../observability/logger';
-import { Differences, DifferencesEntries } from './differences';
-import { TestResultModel, TestType } from './testResult';
+import { FieldChange, TestAmendment } from '../interfaces/TestAmendment';
+import { TestResultModel, TestType } from '../interfaces/TestResult';
 
 export const extractAmendedBillableTestResults = (currentRecord: TestResultModel, previousRecord: TestResultModel) => {
   const testTypeValuesToCheck = ['testCode'] as const;
   const testResultValuesToAdd = ['vin', 'vrm'] as const;
   const testResultValuesToCheck = ['testStationPNumber', ...testResultValuesToAdd] as const;
 
-  type TestTypesValues = typeof testTypeValuesToCheck[number];
-  type TestResultValues = typeof testResultValuesToCheck[number] | typeof testResultValuesToAdd[number];
-
-  const fieldsChanged: Differences[] = [];
+  const fieldsChanged: TestAmendment[] = [];
   currentRecord.testTypes.forEach((testType) => {
-    const fields: DifferencesEntries[] = [];
+    const fields: FieldChange[] = [];
 
     testTypeValuesToCheck.forEach((key) => {
       const oldTestType: TestType = previousRecord.testTypes.find(
@@ -21,8 +18,8 @@ export const extractAmendedBillableTestResults = (currentRecord: TestResultModel
       if (oldTestType[key] !== testType[key]) {
         fields.push({
           fieldName: key,
-          oldValue: oldTestType[key as TestTypesValues],
-          newValue: testType[key as TestTypesValues],
+          oldValue: oldTestType[key],
+          newValue: testType[key],
         });
       }
     });
@@ -31,8 +28,8 @@ export const extractAmendedBillableTestResults = (currentRecord: TestResultModel
       if (currentRecord[key] !== previousRecord[key]) {
         fields.push({
           fieldName: key,
-          oldValue: previousRecord[key as TestResultValues],
-          newValue: currentRecord[key as TestResultValues],
+          oldValue: previousRecord[key],
+          newValue: currentRecord[key],
         });
       }
     });
@@ -42,8 +39,8 @@ export const extractAmendedBillableTestResults = (currentRecord: TestResultModel
         if (!fields.find((field) => field.fieldName === key)) {
           fields.push({
             fieldName: key,
-            oldValue: previousRecord[key as TestResultValues],
-            newValue: currentRecord[key as TestResultValues],
+            oldValue: previousRecord[key],
+            newValue: currentRecord[key],
           });
         }
       });

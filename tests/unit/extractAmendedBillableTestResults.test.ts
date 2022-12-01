@@ -1,6 +1,6 @@
 import { extractAmendedBillableTestResults } from '../../src/utils/extractAmendedBillableTestResults';
-import { Differences } from '../../src/utils/differences';
-import { TestResultModel } from '../../src/utils/testResult';
+import { TestAmendment } from '../../src/interfaces/TestAmendment';
+import { TestResultModel } from '../../src/interfaces/TestResult';
 
 describe('formatModifyPayload', () => {
   it('GIVEN no changes where made to the record WHEN it should return an empty array', () => {
@@ -41,7 +41,7 @@ describe('formatModifyPayload', () => {
       testTypes: [{ testCode: 'bar', testNumber: 'bar' }],
       reasonForCreation: 'bar',
     } as TestResultModel;
-    const expected: Differences[] = [
+    const expected: TestAmendment[] = [
       {
         reason: currentRecord.reasonForCreation,
         fields: [
@@ -74,7 +74,7 @@ describe('formatModifyPayload', () => {
       testTypes: [{ testCode: 'bar', testNumber: 'bar' }],
       reasonForCreation: 'bar',
     } as TestResultModel;
-    const expected: Differences[] = [];
+    const expected: TestAmendment[] = [];
     expect(extractAmendedBillableTestResults(currentRecord, previousRecord)).toEqual(expected);
   });
   it('GIVEN changes to one test type WHEN one of the values on one of the test types that has changed is relevant to billing THEN they are added to the payload', () => {
@@ -92,7 +92,7 @@ describe('formatModifyPayload', () => {
       ],
       reasonForCreation: 'bar',
     } as TestResultModel;
-    const expected: Differences[] = [
+    const expected: TestAmendment[] = [
       {
         reason: currentRecord.reasonForCreation,
         fields: [
@@ -120,7 +120,7 @@ describe('formatModifyPayload', () => {
   it('GIVEN changes to a test record WHEN the changes happen in the test result AND they are relevant to billing THEN it should add those fields to the payload', () => {
     const currentRecord = { reasonForCreation: 'foo', testStationPNumber: 'foo', testTypes: [{}] } as TestResultModel;
     const previousRecord = { reasonForCreation: 'bar', testStationPNumber: 'bar', testTypes: [{}] } as TestResultModel;
-    const expected: Differences[] = [
+    const expected: TestAmendment[] = [
       {
         reason: currentRecord.reasonForCreation,
         fields: [
@@ -148,7 +148,7 @@ describe('formatModifyPayload', () => {
   it('GIVEN changes to a test record WHEN the changes happen in the test result AND they are not relevant to billing THEN it should return empty array', () => {
     const currentRecord = { reasonForCreation: 'foo', testStationPNumber: 'foo', testTypes: [{}] } as TestResultModel;
     const previousRecord = { reasonForCreation: 'bar', testStationPNumber: 'foo', testTypes: [{}] } as TestResultModel;
-    const expected: Differences[] = [];
+    const expected: TestAmendment[] = [];
     expect(extractAmendedBillableTestResults(currentRecord, previousRecord)).toEqual(expected);
   });
   it('GIVEN changes to a test record WHEN the changes are relevant to billing THEN it should add required fields even if they have not changed', () => {
@@ -164,7 +164,7 @@ describe('formatModifyPayload', () => {
       testTypes: [{}],
       testStationPNumber: 'bar',
     } as TestResultModel;
-    const expected: Differences[] = [
+    const expected: TestAmendment[] = [
       {
         reason: currentRecord.reasonForCreation,
         fields: [
@@ -203,7 +203,7 @@ describe('formatModifyPayload', () => {
       vrm: 'foo',
       testStationPNumber: 'foo',
     } as TestResultModel;
-    const expected: Differences[] = [
+    const expected: TestAmendment[] = [
       {
         reason: currentRecord.reasonForCreation,
         fields: [

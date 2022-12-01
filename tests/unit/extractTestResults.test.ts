@@ -3,8 +3,8 @@
 /* eslint-disable @typescript-eslint/quotes */
 /* eslint-disable quote-props */
 import { extractBillableTestResults } from '../../src/utils/extractTestResults';
-import { TestActivity } from '../../src/utils/testActivity';
-import { TestResultModel } from '../../src/utils/testResult';
+import { TestActivity } from '../../src/interfaces/TestActivity';
+import { TestResultModel } from '../../src/interfaces/TestResult';
 
 describe('extractTestResults', () => {
   let TEST_ACTIVITY: TestActivity[];

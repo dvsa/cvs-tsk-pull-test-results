@@ -3,11 +3,10 @@
 import { EventBridge, Request } from 'aws-sdk';
 import { mocked } from 'ts-jest/utils';
 import { PutEventsResponse, PutEventsRequest, PutEventsResultEntry } from 'aws-sdk/clients/eventbridge';
-import { SendResponse } from '../../src/eventbridge/SendResponse';
-import { TestActivity } from '../../src/utils/testActivity';
+import { SendResponse, EventType } from '../../src/interfaces/EventBridge';
+import { TestActivity } from '../../src/interfaces/TestActivity';
 import { sendEvents } from '../../src/eventbridge/send';
-import { Differences } from '../../src/utils/differences';
-import { EventType } from '../../src/utils/eventType';
+import { TestAmendment } from '../../src/interfaces/TestAmendment';
 
 jest.mock('aws-sdk', () => {
   const mEventBridgeInstance = {
@@ -100,19 +99,19 @@ describe('Send events', () => {
 
   describe('Events sent as differences', () => {
     it('GIVEN one differences event to send WHEN sent THEN one event is returned.', async () => {
-      const mDifferences: Differences[] = [createDifferences(1)];
+      const mDifferences: TestAmendment[] = [createDifferences(1)];
       const mSendResponse: SendResponse = { SuccessCount: 1, FailCount: 0 };
       await expect(sendEvents(mDifferences, EventType.AMENDMENT)).resolves.toEqual(mSendResponse);
     });
 
     it('GIVEN two differences events to send WHEN sent THEN two events are returned.', async () => {
-      const mDifferences: Differences[] = [createDifferences(1), createDifferences(2)];
+      const mDifferences: TestAmendment[] = [createDifferences(1), createDifferences(2)];
       const mSendResponse: SendResponse = { SuccessCount: 2, FailCount: 0 };
       await expect(sendEvents(mDifferences, EventType.AMENDMENT)).resolves.toEqual(mSendResponse);
     });
 
     it('GIVEN an issue with eventbridge WHEN 6 differences events are sent and 1 fails THEN the failure is in the response.', async () => {
-      const mDifferences: Differences[] = [
+      const mDifferences: TestAmendment[] = [
         createDifferences(1),
         createDifferences(1),
         createDifferences(1),
@@ -146,7 +145,7 @@ function createTestResult(resultId?: string): TestActivity {
   return activityEvent;
 }
 
-function createDifferences(qty: number, reasonForCreation = 'foo'): Differences {
+function createDifferences(qty: number, reasonForCreation = 'foo'): TestAmendment {
   const fields = [];
   for (let i = 0; i < qty; i++) {
     fields.push({
