@@ -3,60 +3,34 @@ import { Differences, DifferencesEntries } from './differences';
 import { TestResultModel, TestType } from './testResult';
 
 export const extractAmendedBillableTestResults = (currentRecord: TestResultModel, previousRecord: TestResultModel) => {
-  const testTypeValuesToCheck = ['testCode'] as const;
-  const testResultValuesToAdd = ['vin', 'vrm'] as const;
-  const testResultValuesToCheck = ['testStationPNumber', ...testResultValuesToAdd] as const;
-
-  type TestTypesValues = typeof testTypeValuesToCheck[number];
-  type TestResultValues = typeof testResultValuesToCheck[number] | typeof testResultValuesToAdd[number];
+  const testTypeValues = ['testCode'] as const;
+  const testResultValues = ['testStationPNumber', 'vin', 'vrm'] as const;
 
   const fieldsChanged: Differences[] = [];
-  currentRecord.testTypes.forEach((testType) => {
+  currentRecord.testTypes.forEach((currentTestType) => {
     const fields: DifferencesEntries[] = [];
 
-    testTypeValuesToCheck.forEach((key) => {
-      const oldTestType: TestType = previousRecord.testTypes.find(
-        (previousTestType) => previousTestType.testNumber === testType.testNumber,
-      );
-      if (oldTestType[key] !== testType[key]) {
-        fields.push({
-          fieldName: key,
-          oldValue: oldTestType[key as TestTypesValues],
-          newValue: testType[key as TestTypesValues],
-        });
-      }
-    });
+    const previousTestType: TestType = previousRecord.testTypes.find(
+      (testType) => testType.testNumber === currentTestType.testNumber,
+    );
 
-    testResultValuesToCheck.forEach((key) => {
-      if (currentRecord[key] !== previousRecord[key]) {
-        fields.push({
-          fieldName: key,
-          oldValue: previousRecord[key as TestResultValues],
-          newValue: currentRecord[key as TestResultValues],
-        });
-      }
-    });
+    const hasAnyFieldChanged = testResultValues.some((field) => currentRecord[field] !== previousRecord[field])
+      || testTypeValues.some((field) => currentTestType[field] !== previousTestType[field]);
 
-    if (fields.length) {
-      testResultValuesToAdd.forEach((key) => {
-        if (!fields.find((field) => field.fieldName === key)) {
-          fields.push({
-            fieldName: key,
-            oldValue: previousRecord[key as TestResultValues],
-            newValue: currentRecord[key as TestResultValues],
-          });
-        }
-      });
-
-      logger.debug(`Fields changed for testResultId: ${currentRecord.testResultId}: ${JSON.stringify(fields)}`);
-
-      fieldsChanged.push({
-        reason: currentRecord.reasonForCreation,
-        fields,
-      });
-    } else {
+    if (!hasAnyFieldChanged) {
       logger.debug('No fields have changed which are relevant to billing');
+      return;
     }
+
+    testTypeValues.forEach((field) => fields.push({ fieldName: field, oldValue: previousTestType[field], newValue: currentTestType[field] }));
+    testResultValues.forEach((field) => fields.push({ fieldName: field, oldValue: previousRecord[field], newValue: currentRecord[field] }));
+
+    logger.debug(`Fields changed for testResultId: ${currentRecord.testResultId}: ${JSON.stringify(fields)}`);
+
+    fieldsChanged.push({
+      reason: currentRecord.reasonForCreation,
+      fields,
+    });
   });
 
   return fieldsChanged;

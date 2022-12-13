@@ -39,7 +39,7 @@ describe('Application entry', () => {
       expect(eventHandler).toHaveBeenCalledWith(mockEvent);
     });
 
-    it('GIVEN an event WHEN the environment variable NO_MODIFY is truthy THEN a callback result is returned AND the eventHandler is not called', async () => {
+    it('GIVEN an event WHEN the environment variable MODIFY_EVENTS is falsy THEN a callback result is returned AND the eventHandler is not called', async () => {
       process.env.MODIFY_EVENTS = '';
       mocked(eventHandler).mockReturnValue(Promise.resolve());
       await handler(mockEvent, null, (error: string | Error, result: string) => {
