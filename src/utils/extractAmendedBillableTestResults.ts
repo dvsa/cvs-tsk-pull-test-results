@@ -1,10 +1,14 @@
 import logger from '../observability/logger';
 import { Differences, DifferencesEntries } from './differences';
-import { TestResultModel, TestType } from './testResult';
+import { TestResultModel, TestType, VehicleType } from './testResult';
 
 export const extractAmendedBillableTestResults = (currentRecord: TestResultModel, previousRecord: TestResultModel) => {
   const testTypeValues = ['testCode'] as const;
-  const testResultValues = ['testStationPNumber', 'vin', 'vrm'] as const;
+  const testResultValues = [
+    'testStationPNumber',
+    'vin',
+    currentRecord.vehicleType === VehicleType.TRL ? 'trailerId' : 'vrm',
+  ] as const;
 
   const fieldsChanged: Differences[] = [];
   currentRecord.testTypes.forEach((currentTestType) => {
@@ -23,7 +27,11 @@ export const extractAmendedBillableTestResults = (currentRecord: TestResultModel
     }
 
     testTypeValues.forEach((field) => fields.push({ fieldName: field, oldValue: previousTestType[field], newValue: currentTestType[field] }));
-    testResultValues.forEach((field) => fields.push({ fieldName: field, oldValue: previousRecord[field], newValue: currentRecord[field] }));
+    testResultValues.forEach((field) => fields.push({
+      fieldName: field === 'trailerId' ? 'vrm' : field,
+      oldValue: previousRecord[field],
+      newValue: currentRecord[field],
+    }));
 
     logger.debug(`Fields changed for testResultId: ${currentRecord.testResultId}: ${JSON.stringify(fields)}`);
 

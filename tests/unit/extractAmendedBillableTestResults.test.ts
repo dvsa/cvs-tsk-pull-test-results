@@ -1,6 +1,6 @@
 import { extractAmendedBillableTestResults } from '../../src/utils/extractAmendedBillableTestResults';
 import { Differences } from '../../src/utils/differences';
-import { TestResultModel } from '../../src/utils/testResult';
+import { TestResultModel, VehicleType } from '../../src/utils/testResult';
 
 describe('formatModifyPayload', () => {
   it('GIVEN no changes where made to the record WHEN it should return an empty array', () => {
@@ -224,5 +224,109 @@ describe('formatModifyPayload', () => {
       },
     ];
     expect(extractAmendedBillableTestResults(currentRecord, previousRecord)).toEqual(expected);
+  });
+  it('GIVEN changes to a trl test record WHEN the changes happen in the test result AND they are relevant to billing THEN should add the trailer Id to the VRM field', () => {
+    const currentRecord = {
+      reasonForCreation: 'foo',
+      testStationPNumber: 'foo',
+      vehicleType: VehicleType.TRL,
+      trailerId: 'TRL123',
+      vrm: 'wrongVRM123',
+      testTypes: [{}],
+    } as TestResultModel;
+    const previousRecord = {
+      reasonForCreation: 'bar',
+      testStationPNumber: 'bar',
+      vehicleType: VehicleType.TRL,
+      trailerId: 'TRL1',
+      vrm: 'wrongVRM1',
+      testTypes: [{}],
+    } as TestResultModel;
+    const expected: Differences[] = [
+      {
+        reason: currentRecord.reasonForCreation,
+        fields: [
+          {
+            fieldName: 'testCode',
+            oldValue: previousRecord.testTypes[0].testCode,
+            newValue: currentRecord.testTypes[0].testCode,
+          },
+          {
+            fieldName: 'testStationPNumber',
+            oldValue: previousRecord.testStationPNumber,
+            newValue: currentRecord.testStationPNumber,
+          },
+          {
+            fieldName: 'vin',
+            oldValue: previousRecord.vin,
+            newValue: currentRecord.vin,
+          },
+          {
+            fieldName: 'vrm',
+            oldValue: previousRecord.trailerId,
+            newValue: currentRecord.trailerId,
+          },
+        ],
+      },
+    ];
+    const BILLING_AMENDMENTS = extractAmendedBillableTestResults(currentRecord, previousRecord);
+    const VRM = BILLING_AMENDMENTS[0].fields.find((field) => field.fieldName === 'vrm');
+    expect(VRM.newValue).toEqual(currentRecord.trailerId);
+    expect(VRM.oldValue).toEqual(previousRecord.trailerId);
+    expect(VRM.newValue).not.toEqual(currentRecord.vrm);
+    expect(VRM.oldValue).not.toEqual(previousRecord.vrm);
+    expect(BILLING_AMENDMENTS).toEqual(expected);
+  });
+  it('GIVEN changes to a test record for a vehicle other than a trailer WHEN the changes happen in the test result AND they are relevant to billing THEN the vrm field should not equal the trailerId field', () => {
+    const currentRecord = {
+      reasonForCreation: 'foo',
+      testStationPNumber: 'foo',
+      vehicleType: VehicleType.PSV,
+      trailerId: 'TRL123',
+      vrm: 'PSV123',
+      testTypes: [{}],
+    } as TestResultModel;
+    const previousRecord = {
+      reasonForCreation: 'bar',
+      testStationPNumber: 'bar',
+      vehicleType: VehicleType.PSV,
+      trailerId: 'TRL1',
+      vrm: 'PSV1',
+      testTypes: [{}],
+    } as TestResultModel;
+    const expected: Differences[] = [
+      {
+        reason: currentRecord.reasonForCreation,
+        fields: [
+          {
+            fieldName: 'testCode',
+            oldValue: previousRecord.testTypes[0].testCode,
+            newValue: currentRecord.testTypes[0].testCode,
+          },
+          {
+            fieldName: 'testStationPNumber',
+            oldValue: previousRecord.testStationPNumber,
+            newValue: currentRecord.testStationPNumber,
+          },
+          {
+            fieldName: 'vin',
+            oldValue: previousRecord.vin,
+            newValue: currentRecord.vin,
+          },
+          {
+            fieldName: 'vrm',
+            oldValue: previousRecord.vrm,
+            newValue: currentRecord.vrm,
+          },
+        ],
+      },
+    ];
+    const BILLING_AMENDMENTS = extractAmendedBillableTestResults(currentRecord, previousRecord);
+    const VRM = BILLING_AMENDMENTS[0].fields.find((field) => field.fieldName === 'vrm');
+    expect(VRM.newValue).not.toEqual(currentRecord.trailerId);
+    expect(VRM.oldValue).not.toEqual(previousRecord.trailerId);
+    expect(VRM.newValue).toEqual(currentRecord.vrm);
+    expect(VRM.oldValue).toEqual(previousRecord.vrm);
+    expect(BILLING_AMENDMENTS).toEqual(expected);
   });
 });

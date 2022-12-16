@@ -3,11 +3,12 @@ export interface TestResultModel {
   noOfAxles: number;
   testStationType: string;
   vin: string;
-  vrm: string;
+  vrm?: string;
+  trailerId?: string;
   testStationPNumber: string;
   testStartTimestamp: string;
   testEndTimestamp: string;
-  vehicleType: string;
+  vehicleType: VehicleType;
   testerStaffId: string;
   testResultId: string;
   testerName: string;
@@ -30,4 +31,13 @@ export interface TestType {
 export enum TypeOfTest {
   CONTINGENCY = 'contingency',
   DESK_BASED = 'desk-based',
+}
+
+export enum VehicleType {
+  PSV = 'psv',
+  HGV = 'hgv',
+  TRL = 'trl',
+  CAR = 'car',
+  LGV = 'lgv',
+  MOTORCYCLE = 'motorcycle',
 }
