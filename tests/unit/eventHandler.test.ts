@@ -52,7 +52,7 @@ describe('eventHandler', () => {
     expect(sendEvents).toHaveBeenCalledWith([], EventType.COMPLETION);
     expect(unmarshallSpy).toHaveBeenCalledTimes(1);
     expect(extractBillableTestResults).toHaveBeenCalledTimes(1);
-    expect(extractBillableTestResults).toHaveBeenCalledWith({ testStationPNumber: 'foo' });
+    expect(extractBillableTestResults).toHaveBeenCalledWith({ testStationPNumber: 'foo' }, true);
   });
   it('GIVEN an insert event for a contingency test THEN billable details should be extracted and event sent to eventbridge.', async () => {
     event = {
@@ -80,10 +80,13 @@ describe('eventHandler', () => {
     expect(sendEvents).toHaveBeenCalledWith([], EventType.CONTINGENCY);
     expect(unmarshallSpy).toHaveBeenCalledTimes(1);
     expect(extractBillableTestResults).toHaveBeenCalledTimes(1);
-    expect(extractBillableTestResults).toHaveBeenCalledWith({
-      testStationPNumber: 'foo',
-      typeOfTest: TypeOfTest.CONTINGENCY,
-    });
+    expect(extractBillableTestResults).toHaveBeenCalledWith(
+      {
+        testStationPNumber: 'foo',
+        typeOfTest: TypeOfTest.CONTINGENCY,
+      },
+      true,
+    );
   });
   it('GIVEN an modify event THEN billable details should be extracted and event sent to eventbridge.', async () => {
     event = {
@@ -141,11 +144,11 @@ describe('eventHandler', () => {
     expect(extractBillableTestResults).not.toHaveBeenCalled();
     expect(consoleSpy).toHaveBeenCalledWith(`error: Unhandled event {event: foo}${EOL}`);
   });
-  it('GIVEN a handled event WHEN the event is sent as an unfiltered atf THEN a debug message is logged to the console', async () => {
-    event = ({
+  it('GIVEN a MODIFY event WHEN the event is sent as an unfiltered atf THEN a debug message is logged to the console', async () => {
+    event = {
       Records: [
         {
-          eventName: 'foo',
+          eventName: 'MODIFY',
           dynamodb: {
             NewImage: {
               testStationPNumber: {
@@ -160,14 +163,35 @@ describe('eventHandler', () => {
           },
         },
       ],
-    } as unknown) as DynamoDBStreamEvent;
+    } as DynamoDBStreamEvent;
     // @ts-ignore
     const consoleSpy = jest.spyOn(console._stdout, 'write');
     await eventHandler(event);
     expect(sendEvents).not.toHaveBeenCalled();
     expect(extractAmendedBillableTestResults).not.toHaveBeenCalled();
-    expect(extractBillableTestResults).not.toHaveBeenCalled();
     expect(consoleSpy).toHaveBeenCalledWith(`debug: Event not sent as non filtered ATF${EOL}`);
+  });
+
+  it('GIVEN a INSERT event WHEN the event is sent as an unfiltered atf THEN extractBillableTestResults is called with `isNonFilteredATF` set to false', async () => {
+    event = {
+      Records: [
+        {
+          eventName: 'INSERT',
+          dynamodb: {
+            NewImage: {
+              testStationPNumber: {
+                S: 'bar',
+              },
+            },
+          },
+        },
+      ],
+    } as DynamoDBStreamEvent;
+    // @ts-ignore
+    const consoleSpy = jest.spyOn(console._stdout, 'write');
+    await eventHandler(event);
+    expect(extractAmendedBillableTestResults).not.toHaveBeenCalled();
+    expect(extractBillableTestResults).toHaveBeenCalledWith({ testStationPNumber: 'bar' }, false);
   });
 });
 
