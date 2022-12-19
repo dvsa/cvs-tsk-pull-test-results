@@ -22,27 +22,27 @@ export const extractBillableTestResults = (record: TestResultModel, isNonFiltere
       ? record.testStationPNumber
       : getOverrideTestStation(record.testStationType, testType.testCode);
 
-    if (!testStationPNumber) {
-      return previous;
+    if (testStationPNumber) {
+      previous.push({
+        noOfAxles: record.noOfAxles,
+        testTypeStartTimestamp: record.testStartTimestamp,
+        testTypeEndTimestamp: record.testEndTimestamp,
+        testStationType: record.testStationType,
+        testCode: testType.testCode,
+        vin: record.vin,
+        vrm: record.vehicleType === VehicleType.TRL ? record.trailerId : record.vrm,
+        testStationPNumber,
+        testResult: testType.testResult,
+        certificateNumber: testType.certificateNumber,
+        testTypeName: testType.name,
+        vehicleType: record.vehicleType,
+        testerName: record.testerName,
+        testerStaffId: record.testerStaffId,
+        testResultId: record.testResultId,
+      });
     }
 
-    return previous.concat({
-      noOfAxles: record.noOfAxles,
-      testTypeStartTimestamp: record.testStartTimestamp,
-      testTypeEndTimestamp: record.testEndTimestamp,
-      testStationType: record.testStationType,
-      testCode: testType.testCode,
-      vin: record.vin,
-      vrm: record.vehicleType === VehicleType.TRL ? record.trailerId : record.vrm,
-      testStationPNumber,
-      testResult: testType.testResult,
-      certificateNumber: testType.certificateNumber,
-      testTypeName: testType.name,
-      vehicleType: record.vehicleType,
-      testerName: record.testerName,
-      testerStaffId: record.testerStaffId,
-      testResultId: record.testResultId,
-    });
+    return previous;
   }, [] as TestActivity[]);
 };
 
