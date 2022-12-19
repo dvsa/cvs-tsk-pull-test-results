@@ -17,13 +17,14 @@ export const extractBillableTestResults = (record: TestResultModel, isNonFiltere
     return [];
   }
 
-  return record.testTypes.reduce((previous, testType) => {
+  const activities: TestActivity[] = [];
+  record.testTypes.forEach((testType) => {
     const testStationPNumber = isNonFilteredATF
       ? record.testStationPNumber
       : getOverrideTestStation(record.testStationType, testType.testCode);
 
     if (testStationPNumber) {
-      previous.push({
+      activities.push({
         noOfAxles: record.noOfAxles,
         testTypeStartTimestamp: record.testStartTimestamp,
         testTypeEndTimestamp: record.testEndTimestamp,
@@ -41,9 +42,8 @@ export const extractBillableTestResults = (record: TestResultModel, isNonFiltere
         testResultId: record.testResultId,
       });
     }
-
-    return previous;
-  }, [] as TestActivity[]);
+  });
+  return activities;
 };
 
 /* eslint-disable consistent-return */
