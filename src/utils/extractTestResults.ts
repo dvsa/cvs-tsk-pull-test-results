@@ -12,12 +12,12 @@ import {
 } from './testResult';
 
 export const extractBillableTestResults = (record: TestResultModel, isNonFilteredATF: boolean): TestActivity[] => {
+  const activities: TestActivity[] = [];
   if (!isNonFilteredATF && process.env.DISABLE_PROCESS_NON_MIGRATED_EVENTS) {
     logger.debug('Event not sent as non filtered ATF and processing of non-migrated ATFs turned off');
-    return [];
+    return activities;
   }
 
-  const activities: TestActivity[] = [];
   record.testTypes.forEach((testType) => {
     const testStationPNumber = isNonFilteredATF
       ? record.testStationPNumber
