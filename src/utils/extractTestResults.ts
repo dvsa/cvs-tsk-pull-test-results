@@ -13,7 +13,7 @@ import {
 
 export const extractBillableTestResults = (record: TestResultModel, isNonFilteredATF: boolean): TestActivity[] => {
   if (!isNonFilteredATF && process.env.DISABLE_PROCESS_NON_MIGRATED_EVENTS) {
-    logger.debug('Event not sent as non filtered ATF and processing on non-migrated ATF turned on');
+    logger.debug('Event not sent as non filtered ATF and processing of non-migrated ATFs turned off');
     return [];
   }
 

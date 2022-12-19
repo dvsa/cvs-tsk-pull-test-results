@@ -187,8 +187,6 @@ describe('eventHandler', () => {
         },
       ],
     } as DynamoDBStreamEvent;
-    // @ts-ignore
-    const consoleSpy = jest.spyOn(console._stdout, 'write');
     await eventHandler(event);
     expect(extractAmendedBillableTestResults).not.toHaveBeenCalled();
     expect(extractBillableTestResults).toHaveBeenCalledWith({ testStationPNumber: 'bar' }, false);
