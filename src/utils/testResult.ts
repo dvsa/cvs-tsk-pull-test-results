@@ -1,7 +1,7 @@
 export interface TestResultModel {
   testTypes: TestType[];
   noOfAxles: number;
-  testStationType: string;
+  testStationType: TestStationType;
   vin: string;
   vrm?: string;
   trailerId?: string;
@@ -40,4 +40,42 @@ export enum VehicleType {
   CAR = 'car',
   LGV = 'lgv',
   MOTORCYCLE = 'motorcycle',
+}
+
+export enum OverrideTestStations {
+  GVTS = 'H00313',
+  POTF = 'H00314',
+  ATF = 'P50975',
+}
+
+export const ATF_OVERRIDE_TEST_TYPES = [
+  'art',
+  'arv',
+  'cdv',
+  'cnv',
+  'ddt',
+  'ddv',
+  'drt',
+  'drv',
+  'nft',
+  'nfv',
+  'nnt',
+  'nnv',
+  'npt',
+  'npv',
+  'nvt',
+  'nvv',
+  'tit',
+  'tiv',
+  'trt',
+  'trv',
+  'wbl',
+  'wbs',
+] as const;
+
+export enum TestStationType {
+  ATF = 'atf',
+  GVTS = 'gvts',
+  HQ = 'hq',
+  POTF = 'potf',
 }
