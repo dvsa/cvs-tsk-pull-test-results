@@ -43,9 +43,9 @@ export enum VehicleType {
 }
 
 export enum OverrideTestStations {
-  GVTS = '[TBC1]',
-  POTF = '[TBC2]',
-  ATF = '[TBC2]',
+  GVTS = 'H00313',
+  POTF = 'H00314',
+  ATF = 'P50975',
 }
 
 export const ATF_OVERRIDE_TEST_TYPES = [
