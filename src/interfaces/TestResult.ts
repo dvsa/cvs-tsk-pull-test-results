@@ -42,11 +42,11 @@ export enum VehicleType {
   MOTORCYCLE = 'motorcycle',
 }
 
-export enum OverrideTestStations {
-  GVTS = 'H00313',
-  POTF = 'H00314',
-  ATF = 'P50975',
-}
+export const OverrideTestStations: Record<Exclude<TestStationType, TestStationType.HQ>, string> = {
+  atf: 'P50975',
+  gvts: 'H00313',
+  potf: 'H00314',
+};
 
 export const ATF_OVERRIDE_TEST_TYPES = [
   'art',

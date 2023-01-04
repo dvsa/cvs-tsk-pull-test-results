@@ -48,13 +48,8 @@ export const extractBillableTestResults = (record: TestResultModel, isNonFiltere
 
 /* eslint-disable consistent-return */
 export function getOverrideTestStation(testStationType: TestStationType, testCode: string): string | undefined {
-  if (testStationType === TestStationType.GVTS) {
-    return OverrideTestStations.GVTS;
+  if (testStationType === TestStationType.ATF && !(ATF_OVERRIDE_TEST_TYPES as readonly string[]).includes(testCode)) {
+    return;
   }
-  if (testStationType === TestStationType.POTF) {
-    return OverrideTestStations.POTF;
-  }
-  if (testStationType === TestStationType.ATF && (ATF_OVERRIDE_TEST_TYPES as readonly string[]).includes(testCode)) {
-    return OverrideTestStations.ATF;
-  }
+  return OverrideTestStations[testStationType] as string | undefined;
 }

@@ -203,17 +203,17 @@ describe('extractTestResults', () => {
   const testCases = [
     {
       testStationType: TestStationType.GVTS,
-      testStationPNumber: OverrideTestStations.GVTS,
+      testStationPNumber: OverrideTestStations.gvts,
       testCode: 'not a valid test code',
     },
     {
       testStationType: TestStationType.ATF,
-      testStationPNumber: OverrideTestStations.ATF,
+      testStationPNumber: OverrideTestStations.atf,
       testCode: ATF_OVERRIDE_TEST_TYPES[0],
     },
     {
       testStationType: TestStationType.POTF,
-      testStationPNumber: OverrideTestStations.POTF,
+      testStationPNumber: OverrideTestStations.potf,
       testCode: 'not a valid test code',
     },
   ];
@@ -379,20 +379,20 @@ describe('extractTestResults', () => {
     };
     TEST_ACTIVITY = extractBillableTestResults(mockRecord, false);
     expect(TEST_ACTIVITY).toHaveLength(1);
-    expect(TEST_ACTIVITY[0].testStationPNumber).toEqual(OverrideTestStations.ATF);
+    expect(TEST_ACTIVITY[0].testStationPNumber).toEqual(OverrideTestStations.atf);
   });
 });
 
 describe('getOverrideTestStation', () => {
   it('GIVEN an GVTS test station THEN it returns the GTVS test station P Number', () => {
-    expect(getOverrideTestStation(TestStationType.GVTS, 'foo')).toBe(OverrideTestStations.GVTS);
+    expect(getOverrideTestStation(TestStationType.GVTS, 'foo')).toBe(OverrideTestStations.gvts);
   });
   it('GIVEN an POTF test station THEN it returns the POTF test station P Number', () => {
-    expect(getOverrideTestStation(TestStationType.POTF, 'foo')).toBe(OverrideTestStations.POTF);
+    expect(getOverrideTestStation(TestStationType.POTF, 'foo')).toBe(OverrideTestStations.potf);
   });
 
   it('GIVEN an ATF test station AND the test code is in the test codes to override THEN it returns the ATF test station P Number', () => {
-    expect(getOverrideTestStation(TestStationType.ATF, ATF_OVERRIDE_TEST_TYPES[0])).toBe(OverrideTestStations.ATF);
+    expect(getOverrideTestStation(TestStationType.ATF, ATF_OVERRIDE_TEST_TYPES[0])).toBe(OverrideTestStations.atf);
   });
   it('GIVEN an ATF test station AND the test code is not in the test codes to override THEN it returns undefined', () => {
     expect(getOverrideTestStation(TestStationType.ATF, 'Not a valid test code')).toBeUndefined();
