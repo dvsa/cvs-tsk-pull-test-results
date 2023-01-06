@@ -15,35 +15,37 @@ const eventHandler = async (event: DynamoDBStreamEvent) => {
   const secrets: string[] = await getSecret(process.env.SECRET_NAME);
   // We want to process these in sequence to maintain order of database changes
   for (const record of event.Records) {
-    if (checkNonFilteredATF(record, secrets)) {
-      const currentRecord = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage) as TestResultModel;
-      switch (record.eventName) {
-        case 'INSERT': {
-          if (process.env.PROCESS_DESK_BASED_TESTS !== 'true' && currentRecord.typeOfTest === TypeOfTest.DESK_BASED) {
-            logger.info('Ignoring desk based test');
-            break;
-          }
-
-          const testActivity: TestActivity[] = extractBillableTestResults(currentRecord);
-          const eventType = eventTypeMap.get(currentRecord.typeOfTest) ?? EventType.COMPLETION;
-
-          /* eslint-disable no-await-in-loop */
-          await sendEvents(testActivity, eventType);
+    switch (record.eventName) {
+      case 'INSERT': {
+        const currentRecord = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage) as TestResultModel;
+        if (process.env.PROCESS_DESK_BASED_TESTS !== 'true' && currentRecord.typeOfTest === TypeOfTest.DESK_BASED) {
+          logger.info('Ignoring desk based test');
           break;
         }
-        case 'MODIFY': {
+        const testActivity: TestActivity[] = extractBillableTestResults(
+          currentRecord,
+          checkNonFilteredATF(record, secrets),
+        );
+        const eventType = eventTypeMap.get(currentRecord.typeOfTest) ?? EventType.COMPLETION;
+        /* eslint-disable no-await-in-loop */
+        await sendEvents(testActivity, eventType);
+        break;
+      }
+      case 'MODIFY': {
+        if (checkNonFilteredATF(record, secrets)) {
+          const currentRecord = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage) as TestResultModel;
           const previousRecord = DynamoDB.Converter.unmarshall(record.dynamodb.OldImage) as TestResultModel;
           const amendmentChanges: TestAmendment[] = extractAmendedBillableTestResults(currentRecord, previousRecord);
           /* eslint-disable no-await-in-loop */
           await sendEvents(amendmentChanges, EventType.AMENDMENT);
-          break;
+        } else {
+          logger.info('Event not sent as non filtered ATF');
         }
-        default:
-          logger.error(`Unhandled event {event: ${record.eventName}}`);
-          break;
+        break;
       }
-    } else {
-      logger.info('Event not sent as non filtered ATF');
+      default:
+        logger.error(`Unhandled event {event: ${record.eventName}}`);
+        break;
     }
   }
 };

@@ -64,7 +64,7 @@ describe('eventHandler', () => {
       expect(sendEvents).toHaveBeenCalledWith([], eventType);
       expect(unmarshallSpy).toHaveBeenCalledTimes(1);
       expect(extractBillableTestResults).toHaveBeenCalledTimes(1);
-      expect(extractBillableTestResults).toHaveBeenCalledWith({ testStationPNumber: 'foo', typeOfTest });
+      expect(extractBillableTestResults).toHaveBeenCalledWith({ testStationPNumber: 'foo', typeOfTest }, true);
     },
   );
   it('GIVEN a desk based test result insert WHEN feature toggle is set to false THEN dont handle event', async () => {
@@ -116,10 +116,10 @@ describe('eventHandler', () => {
     expect(consoleSpy).toHaveBeenCalledWith(`error: Unhandled event {event: foo}${EOL}`);
   });
   it('GIVEN a handled event WHEN the event is sent as an unfiltered atf THEN a debug message is logged to the console', async () => {
-    event = ({
+    event = {
       Records: [
         {
-          eventName: 'foo',
+          eventName: 'MODIFY',
           dynamodb: {
             NewImage: {
               testStationPNumber: {
@@ -134,7 +134,7 @@ describe('eventHandler', () => {
           },
         },
       ],
-    } as unknown) as DynamoDBStreamEvent;
+    } as DynamoDBStreamEvent;
     // @ts-ignore
     const consoleSpy = jest.spyOn(console._stdout, 'write');
     await eventHandler(event);
@@ -148,51 +148,74 @@ describe('eventHandler', () => {
     ['MODIFY', 'INSERT', 'false', 1],
     ['INSERT', 'INSERT', 'true', 2],
     ['INSERT', 'INSERT', 'false', 1],
-  ])('GIVEN a handled event contains a contingency %p stream event and a desk-based test %p stream event WHEN PROCESS_DESK_BASED_TESTS is set to %p THEN %p event should be processed', async (eventName1, eventName2, processDeskBasedTests, eventsProcessed) => {
-    process.env.PROCESS_DESK_BASED_TESTS = processDeskBasedTests;
-    event = ({
-      Records: [
-        {
-          eventName: eventName1,
-          dynamodb: {
-            NewImage: {
-              testStationPNumber: {
-                S: 'foo',
+  ])(
+    'GIVEN a handled event contains a contingency %p stream event and a desk-based test %p stream event WHEN PROCESS_DESK_BASED_TESTS is set to %p THEN %p event should be processed',
+    async (eventName1, eventName2, processDeskBasedTests, eventsProcessed) => {
+      process.env.PROCESS_DESK_BASED_TESTS = processDeskBasedTests;
+      event = ({
+        Records: [
+          {
+            eventName: eventName1,
+            dynamodb: {
+              NewImage: {
+                testStationPNumber: {
+                  S: 'foo',
+                },
+                typeOfTest: {
+                  S: 'contingency',
+                },
               },
-              typeOfTest: {
-                S: 'contingency',
-              },
-            },
-            OldImage: {
-              testStationPNumber: {
-                S: 'foo',
-              },
-              typeOfTest: {
-                S: 'contingency',
+              OldImage: {
+                testStationPNumber: {
+                  S: 'foo',
+                },
+                typeOfTest: {
+                  S: 'contingency',
+                },
               },
             },
           },
-        },
+          {
+            eventName: eventName2,
+            dynamodb: {
+              NewImage: {
+                testStationPNumber: {
+                  S: 'foo',
+                },
+                typeOfTest: {
+                  S: 'desk-based',
+                },
+              },
+            },
+          },
+        ],
+      } as unknown) as DynamoDBStreamEvent;
+      const mSendResponse: SendResponse = { SuccessCount: eventsProcessed, FailCount: 0 };
+      mocked(sendEvents).mockResolvedValue(mSendResponse);
+
+      await eventHandler(event);
+      expect(sendEvents).toHaveBeenCalledTimes(eventsProcessed);
+    },
+  );
+
+  it('GIVEN a INSERT event WHEN the event is sent as an unfiltered atf THEN extractBillableTestResults is called with `isNonFilteredATF` set to false', async () => {
+    event = {
+      Records: [
         {
-          eventName: eventName2,
+          eventName: 'INSERT',
           dynamodb: {
             NewImage: {
               testStationPNumber: {
-                S: 'foo',
-              },
-              typeOfTest: {
-                S: 'desk-based',
+                S: 'bar',
               },
             },
           },
         },
       ],
-    } as unknown) as DynamoDBStreamEvent;
-    const mSendResponse: SendResponse = { SuccessCount: eventsProcessed, FailCount: 0 };
-    mocked(sendEvents).mockResolvedValue(mSendResponse);
-
+    } as DynamoDBStreamEvent;
     await eventHandler(event);
-    expect(sendEvents).toHaveBeenCalledTimes(eventsProcessed);
+    expect(extractAmendedBillableTestResults).not.toHaveBeenCalled();
+    expect(extractBillableTestResults).toHaveBeenCalledWith({ testStationPNumber: 'bar' }, false);
   });
 });
 
