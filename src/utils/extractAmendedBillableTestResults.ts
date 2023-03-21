@@ -7,6 +7,7 @@ export const extractAmendedBillableTestResults = (currentRecord: TestResultModel
   const testResultValues = [
     'testStationPNumber',
     'vin',
+    'testStatus',
     currentRecord.vehicleType === VehicleType.TRL ? 'trailerId' : 'vrm',
   ] as const;
 

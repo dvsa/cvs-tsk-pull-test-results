@@ -63,6 +63,11 @@ describe('formatModifyPayload', () => {
             newValue: currentRecord.vin,
           },
           {
+            fieldName: 'testStatus',
+            oldValue: previousRecord.testStatus,
+            newValue: currentRecord.testStatus,
+          },
+          {
             fieldName: 'vrm',
             oldValue: previousRecord.vrm,
             newValue: currentRecord.vrm,
@@ -106,6 +111,11 @@ describe('formatModifyPayload', () => {
             fieldName: 'vin',
             oldValue: previousRecord.vin,
             newValue: currentRecord.vin,
+          },
+          {
+            fieldName: 'testStatus',
+            oldValue: previousRecord.testStatus,
+            newValue: currentRecord.testStatus,
           },
           {
             fieldName: 'vrm',
@@ -152,6 +162,11 @@ describe('formatModifyPayload', () => {
             newValue: currentRecord.vin,
           },
           {
+            fieldName: 'testStatus',
+            oldValue: previousRecord.testStatus,
+            newValue: currentRecord.testStatus,
+          },
+          {
             fieldName: 'vrm',
             oldValue: previousRecord.vrm,
             newValue: currentRecord.vrm,
@@ -175,6 +190,11 @@ describe('formatModifyPayload', () => {
             fieldName: 'vin',
             oldValue: previousRecord.vin,
             newValue: currentRecord.vin,
+          },
+          {
+            fieldName: 'testStatus',
+            oldValue: previousRecord.testStatus,
+            newValue: currentRecord.testStatus,
           },
           {
             fieldName: 'vrm',
@@ -208,6 +228,11 @@ describe('formatModifyPayload', () => {
             fieldName: 'vin',
             oldValue: previousRecord.vin,
             newValue: currentRecord.vin,
+          },
+          {
+            fieldName: 'testStatus',
+            oldValue: previousRecord.testStatus,
+            newValue: currentRecord.testStatus,
           },
           {
             fieldName: 'vrm',
@@ -263,6 +288,11 @@ describe('formatModifyPayload', () => {
             newValue: currentRecord.vin,
           },
           {
+            fieldName: 'testStatus',
+            oldValue: previousRecord.testStatus,
+            newValue: currentRecord.testStatus,
+          },
+          {
             fieldName: 'vrm',
             oldValue: previousRecord.trailerId,
             newValue: currentRecord.trailerId,
@@ -313,6 +343,11 @@ describe('formatModifyPayload', () => {
             fieldName: 'vin',
             oldValue: previousRecord.vin,
             newValue: currentRecord.vin,
+          },
+          {
+            fieldName: 'testStatus',
+            oldValue: previousRecord.testStatus,
+            newValue: currentRecord.testStatus,
           },
           {
             fieldName: 'vrm',
