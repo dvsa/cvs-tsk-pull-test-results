@@ -2,15 +2,9 @@
 /* eslint-disable @typescript-eslint/indent */
 /* eslint-disable @typescript-eslint/quotes */
 /* eslint-disable quote-props */
-import { extractBillableTestResults, getOverrideTestStation } from '../../src/utils/extractTestResults';
+import { extractBillableTestResults } from '../../src/utils/extractTestResults';
 import { TestActivity } from '../../src/interfaces/TestActivity';
-import {
-  ATF_OVERRIDE_TEST_TYPES,
-  OverrideTestStations,
-  TestResultModel,
-  TestStationType,
-  VehicleType,
-} from '../../src/interfaces/TestResult';
+import { TestResultModel, TestStationType, VehicleType } from '../../src/interfaces/TestResult';
 
 describe('extractTestResults', () => {
   let TEST_ACTIVITY: TestActivity[];
@@ -41,7 +35,7 @@ describe('extractTestResults', () => {
         },
       ],
     };
-    TEST_ACTIVITY = extractBillableTestResults(mockRecord, true);
+    TEST_ACTIVITY = extractBillableTestResults(mockRecord);
     const EXPECTED_TEST_ACTIVITY: TestActivity = {
       noOfAxles: 2,
       testTypeStartTimestamp: '2019-01-14T10:36:33.987Z',
@@ -90,7 +84,7 @@ describe('extractTestResults', () => {
         },
       ],
     };
-    TEST_ACTIVITY = extractBillableTestResults(mockRecord, true);
+    TEST_ACTIVITY = extractBillableTestResults(mockRecord);
     const EXPECTED_TEST_ACTIVITY: TestActivity = {
       noOfAxles: 2,
       testTypeStartTimestamp: '2019-01-14T10:36:33.987Z',
@@ -148,7 +142,7 @@ describe('extractTestResults', () => {
         },
       ],
     };
-    TEST_ACTIVITY = extractBillableTestResults(mockRecord, true);
+    TEST_ACTIVITY = extractBillableTestResults(mockRecord);
     expect(TEST_ACTIVITY).toHaveLength(2);
   });
   it('GIVEN a trailer test result WHEN the test result is extracted into an event THEN the event has the tailer id in the vrm field', () => {
@@ -178,7 +172,7 @@ describe('extractTestResults', () => {
         },
       ],
     };
-    TEST_ACTIVITY = extractBillableTestResults(mockRecord, true);
+    TEST_ACTIVITY = extractBillableTestResults(mockRecord);
     const EXPECTED_TEST_ACTIVITY: TestActivity = {
       noOfAxles: 2,
       testTypeStartTimestamp: '2019-01-14T10:36:33.987Z',
@@ -198,206 +192,5 @@ describe('extractTestResults', () => {
     };
     expect(TEST_ACTIVITY[0].vrm).toEqual(mockRecord.trailerId);
     expect(TEST_ACTIVITY).toContainEqual(EXPECTED_TEST_ACTIVITY);
-  });
-
-  const testCases = [
-    {
-      testStationType: TestStationType.GVTS,
-      testStationPNumber: OverrideTestStations.gvts,
-      testCode: 'not a valid test code',
-    },
-    {
-      testStationType: TestStationType.ATF,
-      testStationPNumber: OverrideTestStations.atf,
-      testCode: ATF_OVERRIDE_TEST_TYPES[0],
-    },
-    {
-      testStationType: TestStationType.POTF,
-      testStationPNumber: OverrideTestStations.potf,
-      testCode: 'not a valid test code',
-    },
-  ];
-  it.each(testCases)(
-    'GIVEN data WHEN the test station is not present in the secrets and the toggle is not defined THEN the test station number is changed',
-    (testCase) => {
-      const { testStationType, testStationPNumber, testCode } = testCase;
-      process.env.DISABLE_PROCESS_NON_MIGRATED_EVENTS = '';
-      const mockRecord: TestResultModel = {
-        noOfAxles: 2,
-        testStationType,
-        testEndTimestamp: '2019-01-14T10:36:33.987Z',
-        testStartTimestamp: '2019-01-14T10:36:33.987Z',
-        vin: 'XMGDE02FS0H012303',
-        vrm: 'JY58FPP',
-        testerStaffId: '2',
-        testStationPNumber: 'P99005',
-        vehicleType: VehicleType.PSV,
-        trailerId: 'PSV123',
-        testResultId: '9',
-        testerName: 'Dorel',
-        testStatus: 'submitted',
-        testTypes: [
-          {
-            certificateNumber: '1234',
-            testCode,
-            testTypeId: '1',
-            testResult: 'fail',
-            testTypeEndTimeStamp: '2019-01-14T10:36:33.987Z',
-            testTypeStartTimeStamp: '2019-01-14T10:36:33.987Z',
-            name: 'Annual test',
-            testNumber: 'W084564',
-          },
-        ],
-      };
-      TEST_ACTIVITY = extractBillableTestResults(mockRecord, false);
-      const EXPECTED_TEST_ACTIVITY: TestActivity = {
-        noOfAxles: 2,
-        testTypeStartTimestamp: '2019-01-14T10:36:33.987Z',
-        testTypeEndTimestamp: '2019-01-14T10:36:33.987Z',
-        testStationType,
-        testCode,
-        vin: 'XMGDE02FS0H012303',
-        vrm: 'JY58FPP',
-        testStationPNumber,
-        testResult: 'fail',
-        certificateNumber: '1234',
-        testTypeName: 'Annual test',
-        vehicleType: 'psv',
-        testerName: 'Dorel',
-        testerStaffId: '2',
-        testResultId: '9',
-      };
-      expect(TEST_ACTIVITY).toContainEqual(EXPECTED_TEST_ACTIVITY);
-    },
-  );
-  it.each(testCases)(
-    'GIVEN data WHEN the test station is not present in the secrets and the toggle is defined THEN the events are not sent',
-    (testCase) => {
-      const { testStationType, testCode } = testCase;
-      process.env.DISABLE_PROCESS_NON_MIGRATED_EVENTS = 'defined';
-      const mockRecord: TestResultModel = {
-        noOfAxles: 2,
-        testStationType,
-        testEndTimestamp: '2019-01-14T10:36:33.987Z',
-        testStartTimestamp: '2019-01-14T10:36:33.987Z',
-        vin: 'XMGDE02FS0H012303',
-        vrm: 'JY58FPP',
-        testerStaffId: '2',
-        testStationPNumber: 'P99005',
-        vehicleType: VehicleType.PSV,
-        trailerId: 'PSV123',
-        testResultId: '9',
-        testerName: 'Dorel',
-        testStatus: 'submitted',
-        testTypes: [
-          {
-            certificateNumber: '1234',
-            testCode,
-            testTypeId: '1',
-            testResult: 'fail',
-            testTypeEndTimeStamp: '2019-01-14T10:36:33.987Z',
-            testTypeStartTimeStamp: '2019-01-14T10:36:33.987Z',
-            name: 'Annual test',
-            testNumber: 'W084564',
-          },
-        ],
-      };
-      TEST_ACTIVITY = extractBillableTestResults(mockRecord, false);
-      expect(TEST_ACTIVITY).toHaveLength(0);
-    },
-  );
-  it('GIVEN data WHEN the test station is not present in the secrets AND the toggle is not defined AND the test station is an ATF AND the test code is not in the list THEN activity is not generated', () => {
-    process.env.DISABLE_PROCESS_NON_MIGRATED_EVENTS = '';
-    const mockRecord: TestResultModel = {
-      noOfAxles: 2,
-      testStationType: TestStationType.ATF,
-      testEndTimestamp: '2019-01-14T10:36:33.987Z',
-      testStartTimestamp: '2019-01-14T10:36:33.987Z',
-      vin: 'XMGDE02FS0H012303',
-      vrm: 'JY58FPP',
-      testerStaffId: '2',
-      testStationPNumber: 'P99005',
-      vehicleType: VehicleType.PSV,
-      trailerId: 'PSV123',
-      testResultId: '9',
-      testerName: 'Dorel',
-      testStatus: 'submitted',
-      testTypes: [
-        {
-          certificateNumber: '1234',
-          testCode: 'not a valid test code',
-          testTypeId: '1',
-          testResult: 'fail',
-          testTypeEndTimeStamp: '2019-01-14T10:36:33.987Z',
-          testTypeStartTimeStamp: '2019-01-14T10:36:33.987Z',
-          name: 'Annual test',
-          testNumber: 'W084564',
-        },
-      ],
-    };
-    TEST_ACTIVITY = extractBillableTestResults(mockRecord, false);
-    expect(TEST_ACTIVITY).toHaveLength(0);
-  });
-  it('GIVEN data WHEN the test station is not present in the secrets AND the toggle is not defined AND the test station is an ATF AND one test code is in the list and one is not THEN only one activity is generated', () => {
-    process.env.DISABLE_PROCESS_NON_MIGRATED_EVENTS = '';
-    const mockRecord: TestResultModel = {
-      noOfAxles: 2,
-      testStationType: TestStationType.ATF,
-      testEndTimestamp: '2019-01-14T10:36:33.987Z',
-      testStartTimestamp: '2019-01-14T10:36:33.987Z',
-      vin: 'XMGDE02FS0H012303',
-      vrm: 'JY58FPP',
-      testerStaffId: '2',
-      testStationPNumber: 'P99005',
-      vehicleType: VehicleType.PSV,
-      trailerId: 'PSV123',
-      testResultId: '9',
-      testerName: 'Dorel',
-      testStatus: 'submitted',
-      testTypes: [
-        {
-          certificateNumber: '1234',
-          testCode: 'not a valid test code',
-          testTypeId: '1',
-          testResult: 'fail',
-          testTypeEndTimeStamp: '2019-01-14T10:36:33.987Z',
-          testTypeStartTimeStamp: '2019-01-14T10:36:33.987Z',
-          name: 'Annual test',
-          testNumber: 'W084564',
-        },
-        {
-          certificateNumber: '1234',
-          testCode: ATF_OVERRIDE_TEST_TYPES[0],
-          testTypeId: '1',
-          testResult: 'fail',
-          testTypeEndTimeStamp: '2019-01-14T10:36:33.987Z',
-          testTypeStartTimeStamp: '2019-01-14T10:36:33.987Z',
-          name: 'Annual test',
-          testNumber: 'W084564',
-        },
-      ],
-    };
-    TEST_ACTIVITY = extractBillableTestResults(mockRecord, false);
-    expect(TEST_ACTIVITY).toHaveLength(1);
-    expect(TEST_ACTIVITY[0].testStationPNumber).toEqual(OverrideTestStations.atf);
-  });
-});
-
-describe('getOverrideTestStation', () => {
-  it('GIVEN an GVTS test station THEN it returns the GTVS test station P Number', () => {
-    expect(getOverrideTestStation(TestStationType.GVTS, 'foo')).toBe(OverrideTestStations.gvts);
-  });
-  it('GIVEN an POTF test station THEN it returns the POTF test station P Number', () => {
-    expect(getOverrideTestStation(TestStationType.POTF, 'foo')).toBe(OverrideTestStations.potf);
-  });
-
-  it('GIVEN an ATF test station AND the test code is in the test codes to override THEN it returns the ATF test station P Number', () => {
-    expect(getOverrideTestStation(TestStationType.ATF, ATF_OVERRIDE_TEST_TYPES[0])).toBe(OverrideTestStations.atf);
-  });
-  it('GIVEN an ATF test station AND the test code is not in the test codes to override THEN it returns undefined', () => {
-    expect(getOverrideTestStation(TestStationType.ATF, 'Not a valid test code')).toBeUndefined();
-  });
-  it('GIVEN an unknown test station type THEN it returns undefined', () => {
-    expect(getOverrideTestStation(('foobar' as unknown) as TestStationType, 'foo')).toBeUndefined();
   });
 });

@@ -1,18 +1,16 @@
 /* eslint-disable no-restricted-syntax */
-import { DynamoDBRecord, DynamoDBStreamEvent } from 'aws-lambda';
+import { DynamoDBStreamEvent } from 'aws-lambda';
 import { DynamoDB } from 'aws-sdk';
 import { sendEvents } from './eventbridge/send';
+import { EventType } from './interfaces/EventBridge';
+import { TestActivity } from './interfaces/TestActivity';
+import { TestAmendment } from './interfaces/TestAmendment';
+import { TestResultModel, TypeOfTest } from './interfaces/TestResult';
 import logger from './observability/logger';
 import { extractAmendedBillableTestResults } from './utils/extractAmendedBillableTestResults';
-import { TestAmendment } from './interfaces/TestAmendment';
 import { extractBillableTestResults } from './utils/extractTestResults';
-import { getSecret } from './utils/getSecret';
-import { TestActivity } from './interfaces/TestActivity';
-import { TestResultModel, TypeOfTest } from './interfaces/TestResult';
-import { EventType } from './interfaces/EventBridge';
 
 const eventHandler = async (event: DynamoDBStreamEvent) => {
-  const secrets: string[] = await getSecret(process.env.SECRET_NAME);
   // We want to process these in sequence to maintain order of database changes
   for (const record of event.Records) {
     switch (record.eventName) {
@@ -22,25 +20,18 @@ const eventHandler = async (event: DynamoDBStreamEvent) => {
           logger.info('Ignoring desk based test');
           break;
         }
-        const testActivity: TestActivity[] = extractBillableTestResults(
-          currentRecord,
-          checkNonFilteredATF(record, secrets),
-        );
+        const testActivity: TestActivity[] = extractBillableTestResults(currentRecord);
         const eventType = eventTypeMap.get(currentRecord.typeOfTest) ?? EventType.COMPLETION;
         /* eslint-disable no-await-in-loop */
         await sendEvents(testActivity, eventType);
         break;
       }
       case 'MODIFY': {
-        if (checkNonFilteredATF(record, secrets)) {
-          const currentRecord = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage) as TestResultModel;
-          const previousRecord = DynamoDB.Converter.unmarshall(record.dynamodb.OldImage) as TestResultModel;
-          const amendmentChanges: TestAmendment[] = extractAmendedBillableTestResults(currentRecord, previousRecord);
-          /* eslint-disable no-await-in-loop */
-          await sendEvents(amendmentChanges, EventType.AMENDMENT);
-        } else {
-          logger.info('Event not sent as non filtered ATF');
-        }
+        const currentRecord = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage) as TestResultModel;
+        const previousRecord = DynamoDB.Converter.unmarshall(record.dynamodb.OldImage) as TestResultModel;
+        const amendmentChanges: TestAmendment[] = extractAmendedBillableTestResults(currentRecord, previousRecord);
+        /* eslint-disable no-await-in-loop */
+        await sendEvents(amendmentChanges, EventType.AMENDMENT);
         break;
       }
       default:
@@ -55,11 +46,4 @@ const eventTypeMap = new Map<TypeOfTest, EventType>([
   [TypeOfTest.DESK_BASED, EventType.DESK_BASED],
 ]);
 
-function checkNonFilteredATF(record: DynamoDBRecord, secrets: string[]): boolean {
-  return (
-    secrets.includes(record?.dynamodb?.NewImage?.testStationPNumber?.S)
-    || secrets.includes(record?.dynamodb?.OldImage?.testStationPNumber?.S)
-  );
-}
-
-export { checkNonFilteredATF, eventHandler };
+export { eventHandler };
