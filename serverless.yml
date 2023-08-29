@@ -11,7 +11,7 @@ provider:
   name: aws
   runtime: nodejs18.x
   stage: ${env:NODE_ENV, 'local'}
-  region: ${env:AWS_REGION, 'local'}
+  region: ${env:AWS_REGION, 'eu-west-1'}
   # To load environment variables externally
   # copy ./.env.example to ./.env.local.
   environment:
