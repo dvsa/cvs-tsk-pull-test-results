@@ -1,11 +1,12 @@
 /* eslint-disable import/first */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment */
 process.env.LOG_LEVEL = 'debug';
 import { DynamoDBStreamEvent } from 'aws-lambda';
 import { DynamoDB } from 'aws-sdk';
 import { EOL } from 'os';
-import { mocked } from 'ts-jest/utils';
+import { mocked } from 'jest-mock';
 import { sendEvents } from '../../src/eventbridge/send';
 import { SendResponse, EventType } from '../../src/interfaces/EventBridge';
 import { eventHandler } from '../../src/eventHandler';

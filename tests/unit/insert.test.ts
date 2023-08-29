@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable no-underscore-dangle */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-unsafe-call */
 process.env.LOG_LEVEL = 'debug';
-import { mocked } from 'ts-jest/utils';
+import { mocked } from 'jest-mock';
 import { handler } from '../../src/insert';
 import { eventHandler } from '../../src/eventHandler';
 
@@ -21,7 +21,7 @@ describe('Application entry', () => {
       mocked(eventHandler).mockReturnValue(Promise.resolve());
       await handler(mockEvent, null, (error: string | Error, result: string) => {
         expect(error).toBeNull();
-        expect(result).toEqual('Data processed successfully.');
+        expect(result).toBe('Data processed successfully.');
       });
       expect(eventHandler).toHaveBeenCalled();
       expect(eventHandler).toHaveBeenCalledWith(mockEvent);
