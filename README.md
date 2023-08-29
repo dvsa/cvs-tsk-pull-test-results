@@ -23,7 +23,7 @@ Both lambdas utilise environment variables to enable specific functionality:
 
 ## Dependencies
 
-The project runs on node 19.x with typescript and serverless framework. For further details about project dependencies, please refer to the `package.json` file.
+The project runs on node 18.x with typescript and serverless framework. For further details about project dependencies, please refer to the `package.json` file.
 [nvm](https://github.com/nvm-sh/nvm/blob/master/README.md) is used to manage node versions and configuration is per project using an `.npmrc` file.
 
 ## Running the project
