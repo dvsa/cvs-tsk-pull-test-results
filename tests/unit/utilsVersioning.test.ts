@@ -20,8 +20,8 @@ describe("'Utils' file", () => {
     });
 
     it('should throw an error if a number is not passed in', () => {
-      expect(() => createMajorVersionNumber('1.0.0')).not.toThrowError();
-      expect(() => createMajorVersionNumber('')).toThrowError();
+      expect(() => createMajorVersionNumber('1.0.0')).not.toThrow();
+      expect(() => createMajorVersionNumber('')).toThrow();
     });
   });
 

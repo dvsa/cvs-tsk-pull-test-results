@@ -1,7 +1,8 @@
+/* eslint-disable jest/unbound-method */
 /* eslint-disable no-underscore-dangle */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-unsafe-assignment */
 import { EventBridge, Request } from 'aws-sdk';
-import { mocked } from 'ts-jest/utils';
+import { mocked } from 'jest-mock';
 import { PutEventsResponse, PutEventsRequest, PutEventsResultEntry } from 'aws-sdk/clients/eventbridge';
 import { SendResponse, EventType } from '../../src/interfaces/EventBridge';
 import { TestActivity } from '../../src/interfaces/TestActivity';

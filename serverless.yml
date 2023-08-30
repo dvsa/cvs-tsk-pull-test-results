@@ -9,9 +9,9 @@ plugins:
 provider:
   profile: ${env:AWS_PROVIDER_PROFILE, 'default'}
   name: aws
-  runtime: nodejs16.x
+  runtime: nodejs18.x
   stage: ${env:NODE_ENV, 'local'}
-  region: ${env:AWS_REGION, 'local'}
+  region: ${env:AWS_REGION, 'eu-west-1'}
   # To load environment variables externally
   # copy ./.env.example to ./.env.local.
   environment:
