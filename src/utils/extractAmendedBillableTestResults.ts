@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-object-injection */
 import logger from '../observability/logger';
 import { FieldChange, TestAmendment } from '../interfaces/TestAmendment';
 import { TestResultModel, TestType, VehicleType } from '../interfaces/TestResult';
@@ -26,7 +27,6 @@ export const extractAmendedBillableTestResults = (currentRecord: TestResultModel
       logger.debug('No fields have changed which are relevant to billing');
       return;
     }
-
     testTypeValues.forEach((field) => fields.push({ fieldName: field, oldValue: previousTestType[field], newValue: currentTestType[field] }));
     testResultValues.forEach((field) => fields.push({
       fieldName: field === 'trailerId' ? 'vrm' : field,
