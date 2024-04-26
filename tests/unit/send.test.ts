@@ -1,48 +1,38 @@
+/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable jest/unbound-method */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-unsafe-assignment */
-import { EventBridge, Request } from 'aws-sdk';
-import { mocked } from 'jest-mock';
-import { PutEventsResponse, PutEventsRequest, PutEventsResultEntry } from 'aws-sdk/clients/eventbridge';
+import {
+  EventBridgeClient, PutEventsCommand, PutEventsCommandInput, PutEventsCommandOutput, PutEventsResultEntry,
+} from '@aws-sdk/client-eventbridge';
+import { mockClient } from 'aws-sdk-client-mock';
 import { SendResponse, EventType } from '../../src/interfaces/EventBridge';
 import { TestActivity } from '../../src/interfaces/TestActivity';
 import { sendEvents } from '../../src/eventbridge/send';
 import { TestAmendment } from '../../src/interfaces/TestAmendment';
 
-jest.mock('aws-sdk', () => {
-  const mEventBridgeInstance = {
-    putEvents: jest.fn(),
-  };
-  const mRequestInstance = {
-    promise: jest.fn(),
-  };
-  const mEventBridge = jest.fn(() => mEventBridgeInstance);
-  const mRequest = jest.fn(() => mRequestInstance);
+const mEventBridgeInstance = mockClient(EventBridgeClient);
 
-  return { EventBridge: mEventBridge, Request: mRequest };
-});
-
-type PutEventsWithParams = (params: PutEventsRequest) => AWS.Request<PutEventsResponse, AWS.AWSError>;
-
-const mEventBridgeInstance = new EventBridge();
-const mResultInstance = new Request<PutEventsResponse, AWS.AWSError>(null, null);
-const mPutEventsResponse = { Entries: Array<PutEventsResultEntry>(1) };
-// eslint-disable-next-line @typescript-eslint/unbound-method
-mocked(mEventBridgeInstance.putEvents as PutEventsWithParams).mockImplementation(
-  (params: PutEventsRequest): AWS.Request<PutEventsResponse, AWS.AWSError> => {
+// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+mEventBridgeInstance.on(PutEventsCommand).callsFake(
+  (params: PutEventsCommandInput): PutEventsCommandOutput => {
+    const mPutEventsResponse: PutEventsCommandOutput = {
+      FailedEntryCount: 0,
+      Entries: Array<PutEventsResultEntry>(params.Entries.length),
+      $metadata: undefined,
+    };
     if (params.Entries[0].Detail.includes('\\":\\"HandledError\\"')) {
       mPutEventsResponse.Entries[0] = { ErrorMessage: 'Failed to process event.' };
     } else {
       mPutEventsResponse.Entries[0] = { EventId: '2468' };
     }
-
     if (params.Entries[0].Detail.includes('\\":\\"UnhandledError\\"')) {
-      mResultInstance.promise = jest.fn().mockReturnValue(Promise.reject(new Error('Oh no!')));
+      throw new Error('Oh no!');
     } else {
-      mResultInstance.promise = jest.fn().mockReturnValue(Promise.resolve(mPutEventsResponse));
+      return mPutEventsResponse;
     }
-
-    return mResultInstance;
   },
 );
 
