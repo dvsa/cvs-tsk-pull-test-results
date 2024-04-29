@@ -1,8 +1,4 @@
-/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable jest/unbound-method */
-/* eslint-disable no-underscore-dangle */
 /* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-unsafe-assignment */
 import {
   EventBridgeClient, PutEventsCommand, PutEventsCommandInput, PutEventsCommandOutput, PutEventsResultEntry,

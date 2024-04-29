@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/comma-dangle */
-/* eslint-disable @typescript-eslint/indent */
-/* eslint-disable @typescript-eslint/quotes */
-/* eslint-disable quote-props */
 import { extractBillableTestResults } from '../../src/utils/extractTestResults';
 import { TestActivity } from '../../src/interfaces/TestActivity';
 import { TestResultModel, TestStationType, VehicleType } from '../../src/interfaces/TestResult';
@@ -9,7 +5,7 @@ import { TestResultModel, TestStationType, VehicleType } from '../../src/interfa
 describe('extractTestResults', () => {
   let TEST_ACTIVITY: TestActivity[];
 
-  it(`GIVEN data WITHOUT a certificate number issued WHEN the test result is extracted into an event THEN the event doesn't have a certificate number`, () => {
+  it('GIVEN data WITHOUT a certificate number issued WHEN the test result is extracted into an event THEN the event doesn\'t have a certificate number', () => {
     const mockRecord: TestResultModel = {
       noOfAxles: 2,
       testStationType: TestStationType.GVTS,

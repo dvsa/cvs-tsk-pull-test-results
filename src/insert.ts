@@ -1,7 +1,5 @@
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import 'source-map-support/register';
-import { DynamoDBStreamEvent, Context, Callback } from 'aws-lambda';
+import { Context, Callback } from 'aws-lambda';
 import logger from './observability/logger';
 import { eventHandler } from './eventHandler';
 
@@ -13,7 +11,7 @@ logger.debug(
   `\nRunning Service:\n '${SERVICE}'\n mode: ${NODE_ENV}\n stage: '${AWS_STAGE}'\n region: '${AWS_REGION}'\n\n`,
 );
 
-const handler = async (event: DynamoDBStreamEvent, _context: Context, callback: Callback) => {
+const handler = async (event: any, _context: Context, callback: Callback) => {
   try {
     logger.debug(`Function triggered with '${JSON.stringify(event)}'.`);
     await eventHandler(event);

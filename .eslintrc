@@ -1,3 +1,8 @@
 {
-  "extends": "@dvsa/eslint-config-ts"
+  "extends": "@dvsa/eslint-config-ts",
+  "rules": {
+    "@typescript-eslint/no-explicit-any": 0,
+    "import/first": 0,
+    "no-underscore-dangle": 0
+  }
 }

@@ -48,9 +48,7 @@
     "@aws-sdk/client-eventbridge": "3.556.0",
     "@aws-sdk/util-dynamodb": "3.556.0",
     "@smithy/smithy-client": "2.5.1",
-    "@types/aws-lambda": "8.10.119",
     "aws-lambda": "1.0.7",
-    "dateformat": "5.0.3",
     "source-map-support": "0.5.21",
     "winston": "3.10.0"
   },
@@ -63,6 +61,7 @@
     "@semantic-release/github": "9.0.4",
     "@semantic-release/npm": "10.0.5",
     "@serverless/typescript": "3.30.1",
+    "@types/aws-lambda": "8.10.137",
     "@types/jest": "29.5.4",
     "@types/node": "20.5.7",
     "@types/supertest": "2.0.12",

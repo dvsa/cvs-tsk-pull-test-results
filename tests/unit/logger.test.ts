@@ -1,9 +1,6 @@
-/* eslint-disable no-underscore-dangle */
 /* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-unsafe-assignment */
-import { EOL } from 'os';
-
 process.env.LOG_LEVEL = 'debug';
-// eslint-disable-next-line import/first
+import { EOL } from 'os';
 import logger from '../../src/observability/logger';
 
 describe('logger functions', () => {
