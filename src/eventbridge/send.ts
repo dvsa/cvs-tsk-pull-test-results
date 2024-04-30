@@ -1,4 +1,4 @@
-import { EventBridge } from 'aws-sdk';
+import { EventBridge } from '@aws-sdk/client-eventbridge';
 import logger from '../observability/logger';
 import { TestAmendment } from '../interfaces/TestAmendment';
 import { TestActivity } from '../interfaces/TestActivity';
@@ -34,7 +34,7 @@ const sendEvents = async (events: Array<TestAmendment | TestActivity>, type: Eve
     try {
       logger.debug(`event about to be sent: ${JSON.stringify(params)}`);
       // eslint-disable-next-line no-await-in-loop
-      const putResponse = await eventbridge.putEvents(params).promise();
+      const putResponse = await eventbridge.putEvents(params);
       if (putResponse.Entries[0].EventId) {
         logger.info(`Result sent to eventbridge${buildDebugMessage(event)}`);
         sendResponse.SuccessCount++;

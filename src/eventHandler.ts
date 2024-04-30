@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable no-restricted-syntax */
-import { DynamoDBStreamEvent } from 'aws-lambda';
-import { DynamoDB } from 'aws-sdk';
+import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { sendEvents } from './eventbridge/send';
 import { EventType } from './interfaces/EventBridge';
 import { TestActivity } from './interfaces/TestActivity';
@@ -10,12 +11,12 @@ import logger from './observability/logger';
 import { extractAmendedBillableTestResults } from './utils/extractAmendedBillableTestResults';
 import { extractBillableTestResults } from './utils/extractTestResults';
 
-const eventHandler = async (event: DynamoDBStreamEvent) => {
+const eventHandler = async (event: any) => {
   // We want to process these in sequence to maintain order of database changes
   for (const record of event.Records) {
     switch (record.eventName) {
       case 'INSERT': {
-        const currentRecord = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage) as TestResultModel;
+        const currentRecord = unmarshall(record.dynamodb.NewImage) as TestResultModel;
         if (process.env.PROCESS_DESK_BASED_TESTS !== 'true' && currentRecord.typeOfTest === TypeOfTest.DESK_BASED) {
           logger.info('Ignoring desk based test');
           break;
@@ -27,8 +28,8 @@ const eventHandler = async (event: DynamoDBStreamEvent) => {
         break;
       }
       case 'MODIFY': {
-        const currentRecord = DynamoDB.Converter.unmarshall(record.dynamodb.NewImage) as TestResultModel;
-        const previousRecord = DynamoDB.Converter.unmarshall(record.dynamodb.OldImage) as TestResultModel;
+        const currentRecord = unmarshall(record.dynamodb.NewImage) as TestResultModel;
+        const previousRecord = unmarshall(record.dynamodb.OldImage) as TestResultModel;
         const amendmentChanges: TestAmendment[] = extractAmendedBillableTestResults(currentRecord, previousRecord);
         /* eslint-disable no-await-in-loop */
         await sendEvents(amendmentChanges, EventType.AMENDMENT);

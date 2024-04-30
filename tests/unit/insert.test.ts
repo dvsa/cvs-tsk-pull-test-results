@@ -1,8 +1,3 @@
-/* eslint-disable import/first */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-unsafe-call */
 process.env.LOG_LEVEL = 'debug';
 import { mocked } from 'jest-mock';
 import { handler } from '../../src/insert';
