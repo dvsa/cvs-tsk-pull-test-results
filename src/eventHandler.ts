@@ -30,6 +30,8 @@ const eventHandler = async (event: any) => {
       case 'MODIFY': {
         const currentRecord = unmarshall(record.dynamodb.NewImage) as TestResultModel;
         const previousRecord = unmarshall(record.dynamodb.OldImage) as TestResultModel;
+        logger.info('current record: ', JSON.stringify(currentRecord));
+        logger.info('previous record: ', JSON.stringify(previousRecord));
         const amendmentChanges: TestAmendment[] = extractAmendedBillableTestResults(currentRecord, previousRecord);
         /* eslint-disable no-await-in-loop */
         await sendEvents(amendmentChanges, EventType.AMENDMENT);

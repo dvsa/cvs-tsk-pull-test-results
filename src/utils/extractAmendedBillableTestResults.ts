@@ -19,6 +19,8 @@ export const extractAmendedBillableTestResults = (currentRecord: TestResultModel
     const previousTestType: TestType = previousRecord.testTypes.find(
       (testType) => testType.testNumber === currentTestType.testNumber,
     );
+    logger.info('current test type: ', currentTestType);
+    logger.info('previous test type: ', currentTestType);
 
     const hasAnyFieldChanged = testResultValues.some((field) => currentRecord[field] !== previousRecord[field])
       || testTypeValues.some((field) => currentTestType[field] !== previousTestType[field]);
