@@ -4,7 +4,6 @@ import { FieldChange, TestAmendment } from '../interfaces/TestAmendment';
 import { TestResultModel, TestType, VehicleType } from '../interfaces/TestResult';
 
 export const extractAmendedBillableTestResults = (currentRecord: TestResultModel, previousRecord: TestResultModel) => {
-  const testTypeValues = ['testCode'] as const;
   const testResultValues = [
     'testStationPNumber',
     'vin',
@@ -19,15 +18,17 @@ export const extractAmendedBillableTestResults = (currentRecord: TestResultModel
     const previousTestType: TestType = previousRecord.testTypes.find(
       (testType) => testType.testNumber === currentTestType.testNumber,
     );
-
+    logger.info(`current test code: ${JSON.stringify(currentTestType.testCode)}`);
+    logger.info(`previous test type: ${JSON.stringify(previousTestType)}`);
+    logger.info(`previous record test code: ${JSON.stringify(previousTestType.testCode)}`);
     const hasAnyFieldChanged = testResultValues.some((field) => currentRecord[field] !== previousRecord[field])
       || currentTestType.testCode !== previousTestType.testCode;
 
     if (!hasAnyFieldChanged) {
-      logger.debug('No fields have changed which are relevant to billing');
+      logger.info('No fields have changed which are relevant to billing');
       return;
     }
-    testTypeValues.forEach((field) => fields.push({ fieldName: field, oldValue: previousTestType[field], newValue: currentTestType[field] }));
+    fields.push({ fieldName: 'testCode', oldValue: previousTestType.testCode, newValue: currentTestType.testCode });
     testResultValues.forEach((field) => fields.push({
       fieldName: field === 'trailerId' ? 'vrm' : field,
       oldValue: previousRecord[field],
