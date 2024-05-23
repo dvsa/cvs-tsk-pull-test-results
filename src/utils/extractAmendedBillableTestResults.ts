@@ -21,7 +21,7 @@ export const extractAmendedBillableTestResults = (currentRecord: TestResultModel
     );
 
     const hasAnyFieldChanged = testResultValues.some((field) => currentRecord[field] !== previousRecord[field])
-      || testTypeValues.some((field) => currentTestType[field] !== previousTestType[field]);
+      || currentTestType.testCode !== previousTestType.testCode;
 
     if (!hasAnyFieldChanged) {
       logger.debug('No fields have changed which are relevant to billing');
