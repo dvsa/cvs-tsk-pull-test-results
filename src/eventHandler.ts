@@ -14,10 +14,14 @@ import { extractAmendedBillableTestResults } from './utils/extractAmendedBillabl
 import { extractBillableTestResults } from './utils/extractTestResults';
 
 const eventHandler = async (event: SQSEvent) => {
+  logger.info(event);
   // We want to process these in sequence to maintain order of database changes
   for (const record of event.Records) {
+    logger.info(record);
     const snsRecord: SNSMessage = JSON.parse(record.body) as SNSMessage;
+    logger.info(snsRecord);
     const dynamoDBEventStr = snsRecord.Message;
+    logger.info(dynamoDBEventStr);
 
     if (dynamoDBEventStr) {
       const dynamoDBEvent = JSON.parse(dynamoDBEventStr);
