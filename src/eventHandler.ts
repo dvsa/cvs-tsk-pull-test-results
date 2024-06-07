@@ -2,6 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable no-restricted-syntax */
 import { unmarshall } from '@aws-sdk/util-dynamodb';
+import { DynamoDBRecord, SNSMessage, SQSEvent } from 'aws-lambda';
+import { AttributeValue } from '@aws-sdk/client-dynamodb';
 import { sendEvents } from './eventbridge/send';
 import { EventType } from './interfaces/EventBridge';
 import { TestActivity } from './interfaces/TestActivity';
@@ -10,8 +12,6 @@ import { TestResultModel, TypeOfTest } from './interfaces/TestResult';
 import logger from './observability/logger';
 import { extractAmendedBillableTestResults } from './utils/extractAmendedBillableTestResults';
 import { extractBillableTestResults } from './utils/extractTestResults';
-import {DynamoDBRecord, SNSMessage, SQSEvent} from "aws-lambda";
-import {AttributeValue} from "@aws-sdk/client-dynamodb";
 
 const eventHandler = async (event: SQSEvent) => {
   // We want to process these in sequence to maintain order of database changes
@@ -27,7 +27,7 @@ const eventHandler = async (event: SQSEvent) => {
 
       switch (dbRecord.eventName) {
         case 'INSERT': {
-          const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
+          const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as any);
           if (process.env.PROCESS_DESK_BASED_TESTS !== 'true' && currentRecord.typeOfTest === TypeOfTest.DESK_BASED) {
             logger.info('Ignoring desk based test');
             break;
@@ -52,7 +52,7 @@ const eventHandler = async (event: SQSEvent) => {
       }
     }
   }
-}
+};
 
 const eventTypeMap = new Map<TypeOfTest, EventType>([
   [TypeOfTest.CONTINGENCY, EventType.CONTINGENCY],
