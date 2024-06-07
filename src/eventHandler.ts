@@ -16,40 +16,40 @@ import {AttributeValue} from "@aws-sdk/client-dynamodb";
 const eventHandler = async (event: SQSEvent) => {
   // We want to process these in sequence to maintain order of database changes
   for (const record of event.Records) {
-    const snsRecord : SNSMessage = JSON.parse(record.body) as SNSMessage;
-    const dbEventStr = snsRecord.Message;
-    let dbRecord: DynamoDBRecord;
-    if(dbEventStr){
-       dbRecord = JSON.parse(dbEventStr) as DynamoDBRecord;
-    }
-   //const dbRecord = JSON.parse(JSON.parse(sqsRecord.body).Message) as DynamoDBRecord;
-    switch (dbRecord.eventName) {
-      case 'INSERT': {
-        const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
-        if (process.env.PROCESS_DESK_BASED_TESTS !== 'true' && currentRecord.typeOfTest === TypeOfTest.DESK_BASED) {
-          logger.info('Ignoring desk based test');
+    const snsRecord: SNSMessage = JSON.parse(record.body) as SNSMessage;
+    const dynamoDBEventStr = snsRecord.Message;
+    if (dynamoDBEventStr) {
+      const dynamoDBEvent = JSON.parse(dynamoDBEventStr);
+      const dbRecord: DynamoDBRecord = dynamoDBEvent as DynamoDBRecord;
+
+      switch (dbRecord.eventName) {
+        case 'INSERT': {
+          const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
+          if (process.env.PROCESS_DESK_BASED_TESTS !== 'true' && currentRecord.typeOfTest === TypeOfTest.DESK_BASED) {
+            logger.info('Ignoring desk based test');
+            break;
+          }
+          const testActivity: TestActivity[] = extractBillableTestResults(currentRecord);
+          const eventType = eventTypeMap.get(currentRecord.typeOfTest) ?? EventType.COMPLETION;
+          /* eslint-disable no-await-in-loop */
+          await sendEvents(testActivity, eventType);
           break;
         }
-        const testActivity: TestActivity[] = extractBillableTestResults(currentRecord);
-        const eventType = eventTypeMap.get(currentRecord.typeOfTest) ?? EventType.COMPLETION;
-        /* eslint-disable no-await-in-loop */
-        await sendEvents(testActivity, eventType);
-        break;
+        case 'MODIFY': {
+          const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
+          const previousRecord = unmarshall(dbRecord.dynamodb.OldImage as Record<string, AttributeValue>) as TestResultModel;
+          const amendmentChanges: TestAmendment[] = extractAmendedBillableTestResults(currentRecord, previousRecord);
+          /* eslint-disable no-await-in-loop */
+          await sendEvents(amendmentChanges, EventType.AMENDMENT);
+          break;
+        }
+        default:
+          logger.error(`Unhandled event {event: ${dbRecord.eventName}}`);
+          break;
       }
-      case 'MODIFY': {
-        const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
-        const previousRecord = unmarshall(dbRecord.dynamodb.OldImage as Record<string, AttributeValue>) as TestResultModel;
-        const amendmentChanges: TestAmendment[] = extractAmendedBillableTestResults(currentRecord, previousRecord);
-        /* eslint-disable no-await-in-loop */
-        await sendEvents(amendmentChanges, EventType.AMENDMENT);
-        break;
-      }
-      default:
-        logger.error(`Unhandled event {event: ${dbRecord.eventName}}`);
-        break;
     }
   }
-};
+}
 
 const eventTypeMap = new Map<TypeOfTest, EventType>([
   [TypeOfTest.CONTINGENCY, EventType.CONTINGENCY],
