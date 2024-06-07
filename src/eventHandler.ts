@@ -18,9 +18,12 @@ const eventHandler = async (event: SQSEvent) => {
   for (const record of event.Records) {
     const snsRecord: SNSMessage = JSON.parse(record.body) as SNSMessage;
     const dynamoDBEventStr = snsRecord.Message;
+
     if (dynamoDBEventStr) {
       const dynamoDBEvent = JSON.parse(dynamoDBEventStr);
+      logger.info(dynamoDBEvent);
       const dbRecord: DynamoDBRecord = dynamoDBEvent as DynamoDBRecord;
+      logger.info(dbRecord);
 
       switch (dbRecord.eventName) {
         case 'INSERT': {
