@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 process.env.LOG_LEVEL = 'debug';
-import { DynamoDBStreamEvent } from 'aws-lambda';
+import {SQSEvent, SQSMessageAttributes, SQSRecordAttributes} from 'aws-lambda';
 import { EOL } from 'os';
 import { mocked } from 'jest-mock';
 import { sendEvents } from '../../src/eventbridge/send';
@@ -16,7 +16,7 @@ jest.mock('../../src/utils/extractTestResults');
 jest.mock('../../src/utils/extractAmendedBillableTestResults');
 
 describe('eventHandler', () => {
-  let event: DynamoDBStreamEvent;
+  let event: SQSEvent;
   mocked(extractBillableTestResults).mockReturnValue([]);
   mocked(extractAmendedBillableTestResults).mockReturnValue([]);
   afterEach(() => {
@@ -34,19 +34,31 @@ describe('eventHandler', () => {
       event = {
         Records: [
           {
-            eventName: 'INSERT',
-            dynamodb: {
-              NewImage: {
-                testStationPNumber: {
-                  S: 'foo',
+            messageId: "test",
+            receiptHandle: "test",
+            attributes: {} as SQSRecordAttributes,
+            messageAttributes: {},
+            body: JSON.stringify({
+              Type: 'Notification',
+              MessageId: 'some-message-id',
+              TopicArn: 'arn:aws:sns:us-east-1:123456789012:my-topic',
+              Subject: 'Test Subject',
+              Message: JSON.stringify({
+                eventName: 'INSERT',
+                dynamodb: {
+                  NewImage: {
+                    testStationPNumber: {
+                      S: 'foo',
+                    },
+                    typeOfTest: typeOfTest ? {S: typeOfTest} : { NULL: true },
+                  },
                 },
-                typeOfTest: typeOfTest
-                  ? {
-                    S: typeOfTest,
-                  }
-                  : { NULL: true },
-              },
-            },
+              }),
+            }),
+            awsRegion: "",
+            eventSource: "",
+            eventSourceARN: "",
+            md5OfBody: "",
           },
         ],
       };
@@ -64,18 +76,27 @@ describe('eventHandler', () => {
     event = {
       Records: [
         {
-          eventName: 'INSERT',
-          dynamodb: {
-            NewImage: {
-              testStationPNumber: {
-                S: 'foo',
+          awsRegion: "", eventSource: "", eventSourceARN: "", md5OfBody: "",
+          messageId: "test",
+          receiptHandle: "test",
+          attributes: {} as SQSRecordAttributes,
+          messageAttributes: {} as SQSMessageAttributes,
+          body: JSON.stringify({
+            Message : JSON.stringify({
+              eventName: 'INSERT',
+              dynamodb: {
+                NewImage: {
+                  testStationPNumber: {
+                    S: 'foo',
+                  },
+                  typeOfTest: {
+                    S: 'desk-based',
+                  },
+                },
               },
-              typeOfTest: {
-                S: 'desk-based',
-              },
-            },
-          },
-        },
+            }),
+          }),
+        }
       ],
     };
     await eventHandler(event);
@@ -83,20 +104,29 @@ describe('eventHandler', () => {
     expect(extractBillableTestResults).toHaveBeenCalledTimes(0);
   });
   it('GIVEN an unhandled event THEN error in logged to the console', async () => {
-    event = ({
+    event = {
       Records: [
         {
-          eventName: 'foo',
-          dynamodb: {
-            NewImage: {
-              testStationPNumber: {
-                S: 'foo',
+          awsRegion: "", eventSource: "", eventSourceARN: "", md5OfBody: "",
+          messageId: "test",
+          receiptHandle: "test",
+          attributes: {} as SQSRecordAttributes,
+          messageAttributes: {} as SQSMessageAttributes,
+          body: JSON.stringify({
+            Message : JSON.stringify({
+              eventName: 'foo',
+              dynamodb: {
+                NewImage: {
+                  testStationPNumber: {
+                    S: 'foo',
+                  },
+                },
               },
-            },
-          },
-        },
+            }),
+          }),
+        }
       ],
-    } as unknown) as DynamoDBStreamEvent;
+    };
     // @ts-ignore
     const consoleSpy = jest.spyOn(console._stdout, 'write');
     await eventHandler(event);
@@ -115,44 +145,62 @@ describe('eventHandler', () => {
     'GIVEN a handled event contains a contingency %p stream event and a desk-based test %p stream event WHEN PROCESS_DESK_BASED_TESTS is set to %p THEN %p event should be processed',
     async (eventName1, eventName2, processDeskBasedTests, eventsProcessed) => {
       process.env.PROCESS_DESK_BASED_TESTS = processDeskBasedTests;
-      event = ({
+      event = {
         Records: [
           {
-            eventName: eventName1,
-            dynamodb: {
-              NewImage: {
-                testStationPNumber: {
-                  S: 'foo',
+            awsRegion: "", eventSource: "", eventSourceARN: "", md5OfBody: "",
+            messageId: "test",
+            receiptHandle: "test",
+            attributes: {} as SQSRecordAttributes,
+            messageAttributes: {} as SQSMessageAttributes,
+            body: JSON.stringify({
+              Message : JSON.stringify({
+                eventName: eventName1,
+                dynamodb: {
+                  NewImage: {
+                    testStationPNumber: {
+                      S: 'foo',
+                    },
+                    typeOfTest: {
+                      S: 'contingency',
+                    },
+                  },
+                  OldImage: {
+                    testStationPNumber: {
+                      S: 'foo',
+                    },
+                    typeOfTest: {
+                      S: 'contingency',
+                    },
+                  },
                 },
-                typeOfTest: {
-                  S: 'contingency',
-                },
-              },
-              OldImage: {
-                testStationPNumber: {
-                  S: 'foo',
-                },
-                typeOfTest: {
-                  S: 'contingency',
-                },
-              },
-            },
+              }),
+            }),
           },
           {
-            eventName: eventName2,
-            dynamodb: {
-              NewImage: {
-                testStationPNumber: {
-                  S: 'foo',
+            awsRegion: "", eventSource: "", eventSourceARN: "", md5OfBody: "",
+            messageId: "test",
+            receiptHandle: "test",
+            attributes: {} as SQSRecordAttributes,
+            messageAttributes: {} as SQSMessageAttributes,
+            body: JSON.stringify({
+              Message : JSON.stringify({
+                eventName: eventName2,
+                dynamodb: {
+                  NewImage: {
+                    testStationPNumber: {
+                      S: 'foo',
+                    },
+                    typeOfTest: {
+                      S: 'desk-based',
+                    },
+                  },
                 },
-                typeOfTest: {
-                  S: 'desk-based',
-                },
-              },
-            },
-          },
-        ],
-      } as unknown) as DynamoDBStreamEvent;
+              })
+            }),
+          }
+        ]
+      };
       const mSendResponse: SendResponse = { SuccessCount: eventsProcessed, FailCount: 0 };
       mocked(sendEvents).mockResolvedValue(mSendResponse);
 

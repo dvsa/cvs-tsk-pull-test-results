@@ -10,13 +10,22 @@ import { TestResultModel, TypeOfTest } from './interfaces/TestResult';
 import logger from './observability/logger';
 import { extractAmendedBillableTestResults } from './utils/extractAmendedBillableTestResults';
 import { extractBillableTestResults } from './utils/extractTestResults';
+import {DynamoDBRecord, SNSMessage, SQSEvent} from "aws-lambda";
+import {AttributeValue} from "@aws-sdk/client-dynamodb";
 
-const eventHandler = async (event: any) => {
+const eventHandler = async (event: SQSEvent) => {
   // We want to process these in sequence to maintain order of database changes
   for (const record of event.Records) {
-    switch (record.eventName) {
+    const snsRecord : SNSMessage = JSON.parse(record.body) as SNSMessage;
+    const dbEventStr = snsRecord.Message;
+    let dbRecord: DynamoDBRecord;
+    if(dbEventStr){
+       dbRecord = JSON.parse(dbEventStr) as DynamoDBRecord;
+    }
+   //const dbRecord = JSON.parse(JSON.parse(sqsRecord.body).Message) as DynamoDBRecord;
+    switch (dbRecord.eventName) {
       case 'INSERT': {
-        const currentRecord = unmarshall(record.dynamodb.NewImage) as TestResultModel;
+        const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
         if (process.env.PROCESS_DESK_BASED_TESTS !== 'true' && currentRecord.typeOfTest === TypeOfTest.DESK_BASED) {
           logger.info('Ignoring desk based test');
           break;
@@ -28,15 +37,15 @@ const eventHandler = async (event: any) => {
         break;
       }
       case 'MODIFY': {
-        const currentRecord = unmarshall(record.dynamodb.NewImage) as TestResultModel;
-        const previousRecord = unmarshall(record.dynamodb.OldImage) as TestResultModel;
+        const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
+        const previousRecord = unmarshall(dbRecord.dynamodb.OldImage as Record<string, AttributeValue>) as TestResultModel;
         const amendmentChanges: TestAmendment[] = extractAmendedBillableTestResults(currentRecord, previousRecord);
         /* eslint-disable no-await-in-loop */
         await sendEvents(amendmentChanges, EventType.AMENDMENT);
         break;
       }
       default:
-        logger.error(`Unhandled event {event: ${record.eventName}}`);
+        logger.error(`Unhandled event {event: ${dbRecord.eventName}}`);
         break;
     }
   }
