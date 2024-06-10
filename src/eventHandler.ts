@@ -20,11 +20,7 @@ const eventHandler = async (event: SQSEvent) => {
     const dynamoDBEventStr = snsRecord.Message;
 
     if (dynamoDBEventStr) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const dynamoDBEvent = JSON.parse(dynamoDBEventStr);
-      logger.info(dynamoDBEvent);
-      const dbRecord: DynamoDBRecord = dynamoDBEvent as DynamoDBRecord;
-      logger.info(dbRecord);
+      const dbRecord: DynamoDBRecord = JSON.parse(dynamoDBEventStr) as DynamoDBRecord;
 
       switch (dbRecord.eventName) {
         case 'INSERT': {
