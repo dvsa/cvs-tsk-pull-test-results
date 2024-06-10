@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-unsafe-call */
+import {SQSEvent, SQSMessageAttributes, SQSRecordAttributes} from "aws-lambda";
+
 process.env.LOG_LEVEL = 'debug';
 import { mocked } from 'jest-mock';
 import { handler } from '../../src/modify';
@@ -9,7 +11,29 @@ import { eventHandler } from '../../src/eventHandler';
 jest.mock('../../src/eventHandler');
 
 describe('Application entry', () => {
-  const mockEvent = { Records: [{ awsRegion: 'bar' }] };
+  const mockEvent : SQSEvent = {
+    Records: [
+      {
+        awsRegion: "bar", eventSource: "", eventSourceARN: "", md5OfBody: "",
+        messageId: "test",
+        receiptHandle: "test",
+        attributes: {} as SQSRecordAttributes,
+        messageAttributes: {} as SQSMessageAttributes,
+        body: JSON.stringify({
+          Message : JSON.stringify({
+            eventName: 'foobar',
+            dynamodb: {
+              NewImage: {
+                testStationPNumber: {
+                  S: 'foo',
+                },
+              },
+            },
+          }),
+        }),
+      }
+    ],
+  };
   afterEach(() => {
     jest.clearAllMocks();
   });

@@ -14,26 +14,24 @@ import { extractAmendedBillableTestResults } from './utils/extractAmendedBillabl
 import { extractBillableTestResults } from './utils/extractTestResults';
 
 const eventHandler = async (event: SQSEvent) => {
-  logger.info(event);
   // We want to process these in sequence to maintain order of database changes
   for (const record of event.Records) {
-    logger.info(record);
     const snsRecord: SNSMessage = JSON.parse(record.body) as SNSMessage;
-    logger.info(snsRecord);
     const dynamoDBEventStr = snsRecord.Message;
-    logger.info(dynamoDBEventStr);
 
     if (dynamoDBEventStr) {
       const dynamoDBEvent = JSON.parse(dynamoDBEventStr);
-      logger.info(dynamoDBEvent);
       const dbRecord: DynamoDBRecord = dynamoDBEvent as DynamoDBRecord;
-      logger.info(dbRecord);
 
       switch (dbRecord.eventName) {
-        case 'INSERT': {
-          const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as any);
+        case "INSERT": {
+          const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
           if (process.env.PROCESS_DESK_BASED_TESTS !== 'true' && currentRecord.typeOfTest === TypeOfTest.DESK_BASED) {
             logger.info('Ignoring desk based test');
+            break;
+          }
+          if (currentRecord.testStatus === "cancelled"){
+            logger.info("Ignoring cancelled test");
             break;
           }
           const testActivity: TestActivity[] = extractBillableTestResults(currentRecord);
@@ -42,7 +40,7 @@ const eventHandler = async (event: SQSEvent) => {
           await sendEvents(testActivity, eventType);
           break;
         }
-        case 'MODIFY': {
+        case "MODIFY": {
           const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
           const previousRecord = unmarshall(dbRecord.dynamodb.OldImage as Record<string, AttributeValue>) as TestResultModel;
           const amendmentChanges: TestAmendment[] = extractAmendedBillableTestResults(currentRecord, previousRecord);

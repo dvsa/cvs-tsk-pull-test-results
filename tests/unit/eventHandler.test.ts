@@ -135,6 +135,42 @@ describe('eventHandler', () => {
     expect(extractBillableTestResults).not.toHaveBeenCalled();
     expect(consoleSpy).toHaveBeenCalledWith(`error: Unhandled event {event: foo}${EOL}`);
   });
+  it("Given a handled event which contains a cancelled test status THEN info logged to the console and test is skipped", async () => {
+    event = {
+      Records: [
+        {
+          awsRegion: "", eventSource: "", eventSourceARN: "", md5OfBody: "",
+          messageId: "test",
+          receiptHandle: "test",
+          attributes: {} as SQSRecordAttributes,
+          messageAttributes: {} as SQSMessageAttributes,
+          body: JSON.stringify({
+            Message : JSON.stringify({
+              eventName: 'INSERT',
+              dynamodb: {
+                NewImage: {
+                  testStationPNumber: {
+                    S: 'foo',
+                  },
+                  testStatus : {
+                    S: 'cancelled',
+                  },
+                },
+              },
+            }),
+          }),
+        }
+      ],
+    };
+    // @ts-ignore
+    const consoleSpy = jest.spyOn(console._stdout, 'write');
+    await eventHandler(event);
+    expect(sendEvents).not.toHaveBeenCalled();
+    expect(extractAmendedBillableTestResults).not.toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith("info: Ignoring cancelled test\n");
+
+
+  });
 
   it.each([
     ['MODIFY', 'INSERT', 'true', 2],
