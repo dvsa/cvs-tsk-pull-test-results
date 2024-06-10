@@ -26,7 +26,7 @@ const eventHandler = async (event: SQSEvent) => {
     if (dynamoDBEventStr) {
       const dynamoDBEvent = JSON.parse(dynamoDBEventStr);
       logger.info(dynamoDBEvent);
-      const dbRecord: DynamoDBRecord = dynamoDBEvent as DynamoDBRecord;
+      const dbRecord: DynamoDBRecord = JSON.parse(dynamoDBEvent) as DynamoDBRecord;
       logger.info(dbRecord);
 
       switch (dbRecord.eventName) {
