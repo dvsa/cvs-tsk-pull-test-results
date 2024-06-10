@@ -1,4 +1,4 @@
-import {SQSEvent, SQSMessageAttributes, SQSRecordAttributes} from "aws-lambda";
+import { SQSEvent, SQSMessageAttributes, SQSRecordAttributes } from 'aws-lambda';
 
 process.env.LOG_LEVEL = 'debug';
 import { mocked } from 'jest-mock';
@@ -11,13 +11,16 @@ describe('Application entry', () => {
   const mockEvent : SQSEvent = {
     Records: [
       {
-        awsRegion: "bar", eventSource: "", eventSourceARN: "", md5OfBody: "",
-        messageId: "test",
-        receiptHandle: "test",
+        awsRegion: 'bar',
+        eventSource: '',
+        eventSourceARN: '',
+        md5OfBody: '',
+        messageId: 'test',
+        receiptHandle: 'test',
         attributes: {} as SQSRecordAttributes,
         messageAttributes: {} as SQSMessageAttributes,
         body: JSON.stringify({
-          Message : JSON.stringify({
+          Message: JSON.stringify({
             eventName: 'foobar',
             dynamodb: {
               NewImage: {
@@ -28,7 +31,7 @@ describe('Application entry', () => {
             },
           }),
         }),
-      }
+      },
     ],
   };
   afterEach(() => {
