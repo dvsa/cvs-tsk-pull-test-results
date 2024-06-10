@@ -23,16 +23,14 @@ describe('Application entry', () => {
         attributes: {} as SQSRecordAttributes,
         messageAttributes: {} as SQSMessageAttributes,
         body: JSON.stringify({
-          Message: JSON.stringify({
-            eventName: 'foobar',
-            dynamodb: {
-              NewImage: {
-                testStationPNumber: {
-                  S: 'foo',
-                },
+          eventName: 'foobar',
+          dynamodb: {
+            NewImage: {
+              testStationPNumber: {
+                S: 'foo',
               },
             },
-          }),
+          },
         }),
       },
     ],

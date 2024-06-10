@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable no-restricted-syntax */
 import { unmarshall } from '@aws-sdk/util-dynamodb';
-import { DynamoDBRecord, SNSMessage, SQSEvent } from 'aws-lambda';
+import { DynamoDBRecord, SQSEvent } from 'aws-lambda';
 import { AttributeValue } from '@aws-sdk/client-dynamodb';
 import { sendEvents } from './eventbridge/send';
 import { EventType } from './interfaces/EventBridge';
@@ -16,42 +16,33 @@ import { extractBillableTestResults } from './utils/extractTestResults';
 const eventHandler = async (event: SQSEvent) => {
   // We want to process these in sequence to maintain order of database changes
   for (const record of event.Records) {
-    const snsRecord: SNSMessage = JSON.parse(record.body) as SNSMessage;
-    const dynamoDBEventStr = snsRecord.Message;
+    const dbRecord = JSON.parse(record.body) as DynamoDBRecord;
 
-    if (dynamoDBEventStr) {
-      const dbRecord: DynamoDBRecord = JSON.parse(dynamoDBEventStr) as DynamoDBRecord;
-
-      switch (dbRecord.eventName) {
-        case 'INSERT': {
-          const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
-          if (process.env.PROCESS_DESK_BASED_TESTS !== 'true' && currentRecord.typeOfTest === TypeOfTest.DESK_BASED) {
-            logger.info('Ignoring desk based test');
-            break;
-          }
-          if (currentRecord.testStatus === 'cancelled') {
-            logger.info('Ignoring cancelled test');
-            break;
-          }
-          const testActivity: TestActivity[] = extractBillableTestResults(currentRecord);
-
-          const eventType = eventTypeMap.get(currentRecord.typeOfTest) ?? EventType.COMPLETION;
-          /* eslint-disable no-await-in-loop */
-          await sendEvents(testActivity, eventType);
+    switch (dbRecord.eventName) {
+      case 'INSERT': {
+        const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
+        if (process.env.PROCESS_DESK_BASED_TESTS !== 'true' && currentRecord.typeOfTest === TypeOfTest.DESK_BASED) {
+          logger.info('Ignoring desk based test');
           break;
         }
-        case 'MODIFY': {
-          const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
-          const previousRecord = unmarshall(dbRecord.dynamodb.OldImage as Record<string, AttributeValue>) as TestResultModel;
-          const amendmentChanges: TestAmendment[] = extractAmendedBillableTestResults(currentRecord, previousRecord);
-          /* eslint-disable no-await-in-loop */
-          await sendEvents(amendmentChanges, EventType.AMENDMENT);
-          break;
-        }
-        default:
-          logger.error(`Unhandled event {event: ${dbRecord.eventName}}`);
-          break;
+        const testActivity: TestActivity[] = extractBillableTestResults(currentRecord);
+
+        const eventType = eventTypeMap.get(currentRecord.typeOfTest) ?? EventType.COMPLETION;
+        /* eslint-disable no-await-in-loop */
+        await sendEvents(testActivity, eventType);
+        break;
       }
+      case 'MODIFY': {
+        const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
+        const previousRecord = unmarshall(dbRecord.dynamodb.OldImage as Record<string, AttributeValue>) as TestResultModel;
+        const amendmentChanges: TestAmendment[] = extractAmendedBillableTestResults(currentRecord, previousRecord);
+        /* eslint-disable no-await-in-loop */
+        await sendEvents(amendmentChanges, EventType.AMENDMENT);
+        break;
+      }
+      default:
+        logger.error(`Unhandled event {event: ${dbRecord.eventName}}`);
+        break;
     }
   }
 };

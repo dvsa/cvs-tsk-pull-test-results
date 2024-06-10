@@ -43,17 +43,15 @@ describe('eventHandler', () => {
               MessageId: 'some-message-id',
               TopicArn: 'arn:aws:sns:us-east-1:123456789012:my-topic',
               Subject: 'Test Subject',
-              Message: JSON.stringify({
-                eventName: 'INSERT',
-                dynamodb: {
-                  NewImage: {
-                    testStationPNumber: {
-                      S: 'foo',
-                    },
-                    typeOfTest: typeOfTest ? { S: typeOfTest } : { NULL: true },
+              eventName: 'INSERT',
+              dynamodb: {
+                NewImage: {
+                  testStationPNumber: {
+                    S: 'foo',
                   },
+                  typeOfTest: typeOfTest ? { S: typeOfTest } : { NULL: true },
                 },
-              }),
+              },
             }),
             awsRegion: '',
             eventSource: '',
@@ -85,19 +83,17 @@ describe('eventHandler', () => {
           attributes: {} as SQSRecordAttributes,
           messageAttributes: {} as SQSMessageAttributes,
           body: JSON.stringify({
-            Message: JSON.stringify({
-              eventName: 'INSERT',
-              dynamodb: {
-                NewImage: {
-                  testStationPNumber: {
-                    S: 'foo',
-                  },
-                  typeOfTest: {
-                    S: 'desk-based',
-                  },
+            eventName: 'INSERT',
+            dynamodb: {
+              NewImage: {
+                testStationPNumber: {
+                  S: 'foo',
+                },
+                typeOfTest: {
+                  S: 'desk-based',
                 },
               },
-            }),
+            },
           }),
         },
       ],
@@ -119,16 +115,14 @@ describe('eventHandler', () => {
           attributes: {} as SQSRecordAttributes,
           messageAttributes: {} as SQSMessageAttributes,
           body: JSON.stringify({
-            Message: JSON.stringify({
-              eventName: 'foo',
-              dynamodb: {
-                NewImage: {
-                  testStationPNumber: {
-                    S: 'foo',
-                  },
+            eventName: 'foo',
+            dynamodb: {
+              NewImage: {
+                testStationPNumber: {
+                  S: 'foo',
                 },
               },
-            }),
+            },
           }),
         },
       ],
@@ -140,43 +134,6 @@ describe('eventHandler', () => {
     expect(extractAmendedBillableTestResults).not.toHaveBeenCalled();
     expect(extractBillableTestResults).not.toHaveBeenCalled();
     expect(consoleSpy).toHaveBeenCalledWith(`error: Unhandled event {event: foo}${EOL}`);
-  });
-  it('Given a handled event which contains a cancelled test status THEN info logged to the console and test is skipped', async () => {
-    event = {
-      Records: [
-        {
-          awsRegion: '',
-          eventSource: '',
-          eventSourceARN: '',
-          md5OfBody: '',
-          messageId: 'test',
-          receiptHandle: 'test',
-          attributes: {} as SQSRecordAttributes,
-          messageAttributes: {} as SQSMessageAttributes,
-          body: JSON.stringify({
-            Message: JSON.stringify({
-              eventName: 'INSERT',
-              dynamodb: {
-                NewImage: {
-                  testStationPNumber: {
-                    S: 'foo',
-                  },
-                  testStatus: {
-                    S: 'cancelled',
-                  },
-                },
-              },
-            }),
-          }),
-        },
-      ],
-    };
-    // @ts-ignore
-    const consoleSpy = jest.spyOn(console._stdout, 'write');
-    await eventHandler(event);
-    expect(sendEvents).not.toHaveBeenCalled();
-    expect(extractAmendedBillableTestResults).not.toHaveBeenCalled();
-    expect(consoleSpy).toHaveBeenCalledWith('info: Ignoring cancelled test\n');
   });
 
   it.each([
@@ -200,27 +157,25 @@ describe('eventHandler', () => {
             attributes: {} as SQSRecordAttributes,
             messageAttributes: {} as SQSMessageAttributes,
             body: JSON.stringify({
-              Message: JSON.stringify({
-                eventName: eventName1,
-                dynamodb: {
-                  NewImage: {
-                    testStationPNumber: {
-                      S: 'foo',
-                    },
-                    typeOfTest: {
-                      S: 'contingency',
-                    },
+              eventName: eventName1,
+              dynamodb: {
+                NewImage: {
+                  testStationPNumber: {
+                    S: 'foo',
                   },
-                  OldImage: {
-                    testStationPNumber: {
-                      S: 'foo',
-                    },
-                    typeOfTest: {
-                      S: 'contingency',
-                    },
+                  typeOfTest: {
+                    S: 'contingency',
                   },
                 },
-              }),
+                OldImage: {
+                  testStationPNumber: {
+                    S: 'foo',
+                  },
+                  typeOfTest: {
+                    S: 'contingency',
+                  },
+                },
+              },
             }),
           },
           {
@@ -233,19 +188,17 @@ describe('eventHandler', () => {
             attributes: {} as SQSRecordAttributes,
             messageAttributes: {} as SQSMessageAttributes,
             body: JSON.stringify({
-              Message: JSON.stringify({
-                eventName: eventName2,
-                dynamodb: {
-                  NewImage: {
-                    testStationPNumber: {
-                      S: 'foo',
-                    },
-                    typeOfTest: {
-                      S: 'desk-based',
-                    },
+              eventName: eventName2,
+              dynamodb: {
+                NewImage: {
+                  testStationPNumber: {
+                    S: 'foo',
+                  },
+                  typeOfTest: {
+                    S: 'desk-based',
                   },
                 },
-              }),
+              },
             }),
           },
         ],
