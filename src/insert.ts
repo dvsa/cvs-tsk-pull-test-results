@@ -1,5 +1,5 @@
 import 'source-map-support/register';
-import {Context, Callback, SQSEvent} from 'aws-lambda';
+import { Context, Callback, SQSEvent } from 'aws-lambda';
 import logger from './observability/logger';
 import { eventHandler } from './eventHandler';
 

@@ -20,27 +20,31 @@ const eventHandler = async (event: SQSEvent) => {
     const dynamoDBEventStr = snsRecord.Message;
 
     if (dynamoDBEventStr) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const dynamoDBEvent = JSON.parse(dynamoDBEventStr);
+      logger.info(dynamoDBEvent);
       const dbRecord: DynamoDBRecord = dynamoDBEvent as DynamoDBRecord;
+      logger.info(dbRecord);
 
       switch (dbRecord.eventName) {
-        case "INSERT": {
+        case 'INSERT': {
           const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
           if (process.env.PROCESS_DESK_BASED_TESTS !== 'true' && currentRecord.typeOfTest === TypeOfTest.DESK_BASED) {
             logger.info('Ignoring desk based test');
             break;
           }
-          if (currentRecord.testStatus === "cancelled"){
-            logger.info("Ignoring cancelled test");
+          if (currentRecord.testStatus === 'cancelled') {
+            logger.info('Ignoring cancelled test');
             break;
           }
           const testActivity: TestActivity[] = extractBillableTestResults(currentRecord);
+
           const eventType = eventTypeMap.get(currentRecord.typeOfTest) ?? EventType.COMPLETION;
           /* eslint-disable no-await-in-loop */
           await sendEvents(testActivity, eventType);
           break;
         }
-        case "MODIFY": {
+        case 'MODIFY': {
           const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
           const previousRecord = unmarshall(dbRecord.dynamodb.OldImage as Record<string, AttributeValue>) as TestResultModel;
           const amendmentChanges: TestAmendment[] = extractAmendedBillableTestResults(currentRecord, previousRecord);

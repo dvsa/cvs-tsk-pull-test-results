@@ -1,7 +1,7 @@
 import { TestActivity } from '../interfaces/TestActivity';
-import { VehicleType } from '../interfaces/TestResult';
+import { TestResultModel, VehicleType } from '../interfaces/TestResult';
 
-export const extractBillableTestResults = (record: any): TestActivity[] => {
+export const extractBillableTestResults = (record: TestResultModel): TestActivity[] => {
   const activities: TestActivity[] = [];
 
   record.testTypes.forEach((testType) => {
