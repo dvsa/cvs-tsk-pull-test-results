@@ -2,6 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable no-restricted-syntax */
 import { unmarshall } from '@aws-sdk/util-dynamodb';
+import { DynamoDBRecord, SQSEvent } from 'aws-lambda';
+import { AttributeValue } from '@aws-sdk/client-dynamodb';
 import { sendEvents } from './eventbridge/send';
 import { EventType } from './interfaces/EventBridge';
 import { TestActivity } from './interfaces/TestActivity';
@@ -11,32 +13,35 @@ import logger from './observability/logger';
 import { extractAmendedBillableTestResults } from './utils/extractAmendedBillableTestResults';
 import { extractBillableTestResults } from './utils/extractTestResults';
 
-const eventHandler = async (event: any) => {
+const eventHandler = async (event: SQSEvent) => {
   // We want to process these in sequence to maintain order of database changes
   for (const record of event.Records) {
-    switch (record.eventName) {
+    const dbRecord = JSON.parse(record.body) as DynamoDBRecord;
+
+    switch (dbRecord.eventName) {
       case 'INSERT': {
-        const currentRecord = unmarshall(record.dynamodb.NewImage) as TestResultModel;
+        const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
         if (process.env.PROCESS_DESK_BASED_TESTS !== 'true' && currentRecord.typeOfTest === TypeOfTest.DESK_BASED) {
           logger.info('Ignoring desk based test');
           break;
         }
         const testActivity: TestActivity[] = extractBillableTestResults(currentRecord);
+
         const eventType = eventTypeMap.get(currentRecord.typeOfTest) ?? EventType.COMPLETION;
         /* eslint-disable no-await-in-loop */
         await sendEvents(testActivity, eventType);
         break;
       }
       case 'MODIFY': {
-        const currentRecord = unmarshall(record.dynamodb.NewImage) as TestResultModel;
-        const previousRecord = unmarshall(record.dynamodb.OldImage) as TestResultModel;
+        const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
+        const previousRecord = unmarshall(dbRecord.dynamodb.OldImage as Record<string, AttributeValue>) as TestResultModel;
         const amendmentChanges: TestAmendment[] = extractAmendedBillableTestResults(currentRecord, previousRecord);
         /* eslint-disable no-await-in-loop */
         await sendEvents(amendmentChanges, EventType.AMENDMENT);
         break;
       }
       default:
-        logger.error(`Unhandled event {event: ${record.eventName}}`);
+        logger.error(`Unhandled event {event: ${dbRecord.eventName}}`);
         break;
     }
   }

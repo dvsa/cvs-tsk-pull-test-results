@@ -1,3 +1,5 @@
+import { SQSEvent, SQSMessageAttributes, SQSRecordAttributes } from 'aws-lambda';
+
 process.env.LOG_LEVEL = 'debug';
 import { mocked } from 'jest-mock';
 import { handler } from '../../src/insert';
@@ -6,7 +8,30 @@ import { eventHandler } from '../../src/eventHandler';
 jest.mock('../../src/eventHandler');
 
 describe('Application entry', () => {
-  const mockEvent = { Records: [{ awsRegion: 'bar' }] };
+  const mockEvent : SQSEvent = {
+    Records: [
+      {
+        awsRegion: 'bar',
+        eventSource: '',
+        eventSourceARN: '',
+        md5OfBody: '',
+        messageId: 'test',
+        receiptHandle: 'test',
+        attributes: {} as SQSRecordAttributes,
+        messageAttributes: {} as SQSMessageAttributes,
+        body: JSON.stringify({
+          eventName: 'foobar',
+          dynamodb: {
+            NewImage: {
+              testStationPNumber: {
+                S: 'foo',
+              },
+            },
+          },
+        }),
+      },
+    ],
+  };
   afterEach(() => {
     jest.clearAllMocks();
   });
