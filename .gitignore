@@ -40,7 +40,11 @@ reports
 *.map
 
 # npm audit results
-npm-audit.html 
+npm-audit.html
 
 # vsocde files
 .vscode
+
+# Idea specific hidden files
+.idea/**
+*.iml

@@ -1,0 +1,1 @@
+npm run security-checks && npm run prettier && npm run lint
