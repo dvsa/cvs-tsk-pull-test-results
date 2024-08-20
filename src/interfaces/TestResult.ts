@@ -1,7 +1,9 @@
+import { TestStationTypes } from '@dvsa/cvs-type-definitions/types/v1/enums/testStationType.enum';
+
 export interface TestResultModel {
   testTypes: TestType[];
   noOfAxles: number;
-  testStationType: TestStationType;
+  testStationType: TestStationTypes;
   vin: string;
   vrm?: string;
   trailerId?: string;
@@ -40,11 +42,4 @@ export enum VehicleType {
   CAR = 'car',
   LGV = 'lgv',
   MOTORCYCLE = 'motorcycle',
-}
-
-export enum TestStationType {
-  ATF = 'atf',
-  GVTS = 'gvts',
-  HQ = 'hq',
-  POTF = 'potf',
 }

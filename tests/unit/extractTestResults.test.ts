@@ -1,6 +1,7 @@
+import { TestStationTypes } from '@dvsa/cvs-type-definitions/types/v1/enums/testStationType.enum';
 import { extractBillableTestResults } from '../../src/utils/extractTestResults';
 import { TestActivity } from '../../src/interfaces/TestActivity';
-import { TestResultModel, TestStationType, VehicleType } from '../../src/interfaces/TestResult';
+import { TestResultModel, VehicleType } from '../../src/interfaces/TestResult';
 
 describe('extractTestResults', () => {
   let TEST_ACTIVITY: TestActivity[];
@@ -8,7 +9,7 @@ describe('extractTestResults', () => {
   it('GIVEN data WITHOUT a certificate number issued WHEN the test result is extracted into an event THEN the event doesn\'t have a certificate number', () => {
     const mockRecord: TestResultModel = {
       noOfAxles: 2,
-      testStationType: TestStationType.GVTS,
+      testStationType: TestStationTypes.GVTS,
       testEndTimestamp: '2019-01-14T10:36:33.987Z',
       testStartTimestamp: '2019-01-14T10:36:33.987Z',
       vin: 'XMGDE02FS0H012303',
@@ -55,7 +56,7 @@ describe('extractTestResults', () => {
   it('GIVEN data WITH a certificate number issued WHEN the test result is extracted into an event THEN the event has certificate number', () => {
     const mockRecord: TestResultModel = {
       noOfAxles: 2,
-      testStationType: TestStationType.GVTS,
+      testStationType: TestStationTypes.GVTS,
       testEndTimestamp: '2019-01-14T10:36:33.987Z',
       testStartTimestamp: '2019-01-14T10:36:33.987Z',
       vin: 'XMGDE02FS0H012303',
@@ -104,7 +105,7 @@ describe('extractTestResults', () => {
   it('GIVEN data with two test types WHEN test results are extracted into events THEN expect two events to be generated', () => {
     const mockRecord: TestResultModel = {
       noOfAxles: 2,
-      testStationType: TestStationType.GVTS,
+      testStationType: TestStationTypes.GVTS,
       testEndTimestamp: 'foo',
       testStartTimestamp: 'bar',
       vin: 'XMGDE02FS0H012303',
@@ -144,7 +145,7 @@ describe('extractTestResults', () => {
   it('GIVEN a trailer test result WHEN the test result is extracted into an event THEN the event has the tailer id in the vrm field', () => {
     const mockRecord: TestResultModel = {
       noOfAxles: 2,
-      testStationType: TestStationType.GVTS,
+      testStationType: TestStationTypes.GVTS,
       testEndTimestamp: '2019-01-14T10:36:33.987Z',
       testStartTimestamp: '2019-01-14T10:36:33.987Z',
       vin: 'XMGDE02FS0H012303',
