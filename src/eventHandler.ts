@@ -4,11 +4,13 @@
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { DynamoDBRecord, SQSEvent } from 'aws-lambda';
 import { AttributeValue } from '@aws-sdk/client-dynamodb';
+// eslint-disable-next-line import/no-unresolved
+import { TestResultSchema } from '@dvsa/cvs-type-definitions/types/v1/test-result';
+import { TypeOfTest } from '@dvsa/cvs-type-definitions/types/v1/enums/typeOfTest.enum';
 import { sendEvents } from './eventbridge/send';
 import { EventType } from './interfaces/EventBridge';
 import { TestActivity } from './interfaces/TestActivity';
 import { TestAmendment } from './interfaces/TestAmendment';
-import { TestResultModel, TypeOfTest } from './interfaces/TestResult';
 import logger from './observability/logger';
 import { extractAmendedBillableTestResults } from './utils/extractAmendedBillableTestResults';
 import { extractBillableTestResults } from './utils/extractTestResults';
@@ -20,7 +22,8 @@ const eventHandler = async (event: SQSEvent) => {
 
     switch (dbRecord.eventName) {
       case 'INSERT': {
-        const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
+        const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultSchema;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
         if (process.env.PROCESS_DESK_BASED_TESTS !== 'true' && currentRecord.typeOfTest === TypeOfTest.DESK_BASED) {
           logger.info('Ignoring desk based test');
           break;
@@ -33,8 +36,8 @@ const eventHandler = async (event: SQSEvent) => {
         break;
       }
       case 'MODIFY': {
-        const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultModel;
-        const previousRecord = unmarshall(dbRecord.dynamodb.OldImage as Record<string, AttributeValue>) as TestResultModel;
+        const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultSchema;
+        const previousRecord = unmarshall(dbRecord.dynamodb.OldImage as Record<string, AttributeValue>) as TestResultSchema;
         const amendmentChanges: TestAmendment[] = extractAmendedBillableTestResults(currentRecord, previousRecord);
         /* eslint-disable no-await-in-loop */
         await sendEvents(amendmentChanges, EventType.AMENDMENT);

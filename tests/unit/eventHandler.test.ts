@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 process.env.LOG_LEVEL = 'debug';
 import { SQSEvent, SQSMessageAttributes, SQSRecordAttributes } from 'aws-lambda';
+import { TypeOfTest } from '@dvsa/cvs-type-definitions/types/v1/enums/typeOfTest.enum';
 import { EOL } from 'os';
 import { mocked } from 'jest-mock';
 import { sendEvents } from '../../src/eventbridge/send';
@@ -9,7 +10,6 @@ import { SendResponse, EventType } from '../../src/interfaces/EventBridge';
 import { eventHandler } from '../../src/eventHandler';
 import { extractAmendedBillableTestResults } from '../../src/utils/extractAmendedBillableTestResults';
 import { extractBillableTestResults } from '../../src/utils/extractTestResults';
-import { TypeOfTest } from '../../src/interfaces/TestResult';
 
 jest.mock('../../src/eventbridge/send');
 jest.mock('../../src/utils/extractTestResults');

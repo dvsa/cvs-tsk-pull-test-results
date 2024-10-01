@@ -1,21 +1,24 @@
 /* eslint-disable security/detect-object-injection */
+// eslint-disable-next-line import/no-unresolved
+import { TestResultSchema, VehicleType } from '@dvsa/cvs-type-definitions/types/v1/test-result';
+// eslint-disable-next-line import/no-unresolved
+import { TestTypeSchema } from '@dvsa/cvs-type-definitions/types/v1/test-type';
 import logger from '../observability/logger';
 import { FieldChange, TestAmendment } from '../interfaces/TestAmendment';
-import { TestResultModel, TestType, VehicleType } from '../interfaces/TestResult';
 
-export const extractAmendedBillableTestResults = (currentRecord: TestResultModel, previousRecord: TestResultModel) => {
+export const extractAmendedBillableTestResults = (currentRecord: TestResultSchema, previousRecord: TestResultSchema) => {
   const testResultValues = [
     'testStationPNumber',
     'vin',
     'testStatus',
-    currentRecord.vehicleType === VehicleType.TRL ? 'trailerId' : 'vrm',
+    currentRecord.vehicleType === 'trl' as VehicleType ? 'trailerId' : 'vrm',
   ] as const;
 
   const fieldsChanged: TestAmendment[] = [];
   currentRecord.testTypes.forEach((currentTestType) => {
     const fields: FieldChange[] = [];
 
-    const previousTestType: TestType = previousRecord.testTypes.find(
+    const previousTestType: TestTypeSchema = previousRecord.testTypes.find(
       (testType) => testType.testNumber === currentTestType.testNumber,
     );
     if (previousTestType) {
