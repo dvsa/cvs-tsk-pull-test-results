@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable no-restricted-syntax */
+/* eslint-disable import/no-unresolved */
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { DynamoDBRecord, SQSEvent } from 'aws-lambda';
 import { AttributeValue } from '@aws-sdk/client-dynamodb';
-// eslint-disable-next-line import/no-unresolved
 import { TestResultSchema } from '@dvsa/cvs-type-definitions/types/v1/test-result';
 import { TypeOfTest } from '@dvsa/cvs-type-definitions/types/v1/enums/typeOfTest.enum';
 import { sendEvents } from './eventbridge/send';

@@ -1,7 +1,6 @@
+/* eslint-disable import/no-unresolved */
 import { TestStationTypes } from '@dvsa/cvs-type-definitions/types/v1/enums/testStationType.enum';
-// eslint-disable-next-line import/no-unresolved
 import { TestResultSchema, VehicleType } from '@dvsa/cvs-type-definitions/types/v1/test-result';
-// eslint-disable-next-line import/no-unresolved
 import { TestTypeSchema } from '@dvsa/cvs-type-definitions/types/v1/test-type';
 import { TestResults } from '@dvsa/cvs-type-definitions/types/v1/enums/testResult.enum';
 import { TestStatus } from '@dvsa/cvs-type-definitions/types/v1/enums/testStatus.enum';
