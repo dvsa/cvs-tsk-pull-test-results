@@ -1,5 +1,4 @@
-/* eslint-disable import/no-unresolved */
-import { TestResultSchema, VehicleType } from '@dvsa/cvs-type-definitions/types/v1/test-result';
+import type { TestResultSchema, VehicleType } from '@dvsa/cvs-type-definitions/types/v1/test-result';
 import { TestResults } from '@dvsa/cvs-type-definitions/types/v1/enums/testResult.enum';
 import { TestActivity } from '../interfaces/TestActivity';
 

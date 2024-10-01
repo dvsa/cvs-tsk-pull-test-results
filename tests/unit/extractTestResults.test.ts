@@ -1,7 +1,6 @@
-/* eslint-disable import/no-unresolved */
 import { TestStationTypes } from '@dvsa/cvs-type-definitions/types/v1/enums/testStationType.enum';
-import { TestResultSchema, VehicleType } from '@dvsa/cvs-type-definitions/types/v1/test-result';
-import { TestTypeSchema } from '@dvsa/cvs-type-definitions/types/v1/test-type';
+import type { TestResultSchema, VehicleType } from '@dvsa/cvs-type-definitions/types/v1/test-result';
+import type { TestTypeSchema } from '@dvsa/cvs-type-definitions/types/v1/test-type';
 import { TestResults } from '@dvsa/cvs-type-definitions/types/v1/enums/testResult.enum';
 import { TestStatus } from '@dvsa/cvs-type-definitions/types/v1/enums/testStatus.enum';
 import { extractBillableTestResults } from '../../src/utils/extractTestResults';

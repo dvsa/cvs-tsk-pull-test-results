@@ -1,7 +1,6 @@
 /* eslint-disable security/detect-object-injection */
-/* eslint-disable import/no-unresolved */
-import { TestResultSchema, VehicleType } from '@dvsa/cvs-type-definitions/types/v1/test-result';
-import { TestTypeSchema } from '@dvsa/cvs-type-definitions/types/v1/test-type';
+import type { TestResultSchema, VehicleType } from '@dvsa/cvs-type-definitions/types/v1/test-result';
+import type { TestTypeSchema } from '@dvsa/cvs-type-definitions/types/v1/test-type';
 import logger from '../observability/logger';
 import { FieldChange, TestAmendment } from '../interfaces/TestAmendment';
 
