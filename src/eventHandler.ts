@@ -23,8 +23,7 @@ const eventHandler = async (event: SQSEvent) => {
     switch (dbRecord.eventName) {
       case 'INSERT': {
         const currentRecord = unmarshall(dbRecord.dynamodb.NewImage as Record<string, AttributeValue>) as TestResultSchema;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-        if (process.env.PROCESS_DESK_BASED_TESTS !== 'true' && currentRecord.typeOfTest === TypeOfTest.DESK_BASED) {
+        if (process.env.PROCESS_DESK_BASED_TESTS !== 'true' && currentRecord.typeOfTest === TypeOfTest.DESK_BASED as TypeOfTest) {
           logger.info('Ignoring desk based test');
           break;
         }
