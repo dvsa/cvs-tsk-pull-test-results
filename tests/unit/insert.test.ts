@@ -39,24 +39,12 @@ describe('Application entry', () => {
   });
 
   describe('Handler', () => {
-    it('GIVEN an event WHEN the eventHandler resolves THEN a callback result is returned', async () => {
-      mocked(eventHandler).mockReturnValue(Promise.resolve({ batchItemFailures: [] } as SQSBatchResponse));
-      await handler(mockEvent, null, (error: string | Error, result: string) => {
-        expect(error).toBeNull();
-        expect(result).toBe('Data processed successfully.');
-      });
+    it('GIVEN an event WHEN the eventHandler throws an error THEN return the sqsBatchResponse with failed records', async () => {
+      mocked(eventHandler).mockReturnValue(Promise.resolve({ batchItemFailures: [{ itemIdentifier: 'test' }] } as SQSBatchResponse));
+      const sqsBatchResponse = await handler(mockEvent);
       expect(eventHandler).toHaveBeenCalled();
       expect(eventHandler).toHaveBeenCalledWith(mockEvent);
-    });
-
-    it('GIVEN an event WHEN the eventHandler throws an error THEN a call back error is returned and', async () => {
-      mocked(eventHandler).mockReturnValue(Promise.reject());
-      await handler(mockEvent, null, (error: string | Error, result: string) => {
-        expect(error).toEqual(new Error('Data processed unsuccessfully.'));
-        expect(result).toBeUndefined();
-      });
-      expect(eventHandler).toHaveBeenCalled();
-      expect(eventHandler).toHaveBeenCalledWith(mockEvent);
+      expect(sqsBatchResponse.batchItemFailures.length).toBeGreaterThan(0);
     });
   });
 });
