@@ -1,7 +1,5 @@
 import 'source-map-support/register';
-import {
-  SQSEvent, SQSBatchResponse,
-} from 'aws-lambda';
+import { SQSEvent, SQSBatchResponse } from 'aws-lambda';
 import logger from './observability/logger';
 import { eventHandler } from './eventHandler';
 
