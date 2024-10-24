@@ -1,5 +1,5 @@
 import 'source-map-support/register';
-import { Context, Callback, SQSEvent } from 'aws-lambda';
+import { SQSEvent, SQSBatchResponse } from 'aws-lambda';
 import logger from './observability/logger';
 import { eventHandler } from './eventHandler';
 
@@ -11,18 +11,12 @@ logger.debug(
   `\nRunning Service:\n '${SERVICE}'\n mode: ${NODE_ENV}\n stage: '${AWS_STAGE}'\n region: '${AWS_REGION}'\n\n`,
 );
 
-const handler = async (event: SQSEvent, _context: Context, callback: Callback) => {
-  try {
-    logger.debug(`Function triggered with '${JSON.stringify(event)}'.`);
-    await eventHandler(event);
+const handler = async (event: SQSEvent): Promise<SQSBatchResponse> => {
+  logger.debug(`Function triggered with '${JSON.stringify(event)}'.`);
+  const batchItemFailures = await eventHandler(event);
 
-    logger.info('Data processed successfully.');
-    callback(null, 'Data processed successfully.');
-  } catch (error) {
-    logger.info('Data processed unsuccessfully.');
-    logger.error('', error);
-    callback(new Error('Data processed unsuccessfully.'));
-  }
+  logger.info(`Data processed successfully with ${batchItemFailures.batchItemFailures.length} failures`);
+  return batchItemFailures;
 };
 
 export { handler };
