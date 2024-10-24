@@ -42,36 +42,22 @@ describe('Application entry', () => {
   });
 
   describe('Handler', () => {
-    it('GIVEN an event WHEN the eventHandler resolves THEN a callback result is returned', async () => {
+    it('GIVEN an event WHEN the eventHandler throws an error THEN return the sqsBatchResponse with failed records', async () => {
       process.env.PROCESS_MODIFY_EVENTS = 'true';
-      mocked(eventHandler).mockReturnValue(Promise.resolve({ batchItemFailures: [] } as SQSBatchResponse));
-      await handler(mockEvent, null, (error: string | Error, result: string) => {
-        expect(error).toBeNull();
-        expect(result).toBe('Data processed successfully.');
-      });
-      expect(eventHandler).toHaveBeenCalled();
-      expect(eventHandler).toHaveBeenCalledWith(mockEvent);
-    });
+      mocked(eventHandler).mockReturnValue(Promise.resolve({ batchItemFailures: [{ itemIdentifier: 'test' }] } as SQSBatchResponse));
+      const sqsBatchResponse = await handler(mockEvent);
 
-    it('GIVEN an event WHEN the eventHandler throws an THEN a callback error is returned', async () => {
-      process.env.PROCESS_MODIFY_EVENTS = 'true';
-      mocked(eventHandler).mockReturnValue(Promise.reject());
-      await handler(mockEvent, null, (error: string | Error, result: string) => {
-        expect(error).toEqual(new Error('Data processed unsuccessfully.'));
-        expect(result).toBeUndefined();
-      });
       expect(eventHandler).toHaveBeenCalled();
       expect(eventHandler).toHaveBeenCalledWith(mockEvent);
+      expect(sqsBatchResponse.batchItemFailures.length).toBeGreaterThan(0);
     });
 
     it("GIVEN an event WHEN the environment variable PROCESS_MODIFY_EVENTS is not set to 'true' THEN a callback result is returned AND the eventHandler is not called", async () => {
       process.env.PROCESS_MODIFY_EVENTS = 'false';
       mocked(eventHandler).mockReturnValue(Promise.resolve({ batchItemFailures: [] } as SQSBatchResponse));
-      await handler(mockEvent, null, (error: string | Error, result: string) => {
-        expect(error).toBeNull();
-        expect(result).toBe('Data processed successfully.');
-      });
+      const sqsBatchResponse = await handler(mockEvent);
       expect(eventHandler).not.toHaveBeenCalled();
+      expect(sqsBatchResponse.batchItemFailures).toHaveLength(0);
     });
   });
 });

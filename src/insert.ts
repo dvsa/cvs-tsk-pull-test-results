@@ -1,7 +1,5 @@
 import 'source-map-support/register';
-import {
-  SQSEvent, SQSBatchResponse,
-} from 'aws-lambda';
+import { SQSEvent, SQSBatchResponse } from 'aws-lambda';
 import logger from './observability/logger';
 import { eventHandler } from './eventHandler';
 
@@ -14,9 +12,8 @@ logger.debug(
 );
 
 const handler = async (event: SQSEvent): Promise<SQSBatchResponse> => {
-  let batchItemFailures: SQSBatchResponse = { batchItemFailures: [] };
   logger.debug(`Function triggered with '${JSON.stringify(event)}'.`);
-  batchItemFailures = await eventHandler(event);
+  const batchItemFailures = await eventHandler(event);
 
   logger.info(`Data processed successfully with ${batchItemFailures.batchItemFailures.length} failures`);
   return batchItemFailures;
