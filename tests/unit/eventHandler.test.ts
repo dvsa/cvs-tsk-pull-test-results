@@ -210,4 +210,30 @@ describe('eventHandler', () => {
       expect(sendEvents).toHaveBeenCalledTimes(eventsProcessed);
     },
   );
+  it('GIVEN an event that throws an error THEN it should be caught and added to batch failures', async () => {
+    const errorMessageId = 'errorMessageId';
+    event = {
+      Records: [
+        {
+          messageId: errorMessageId,
+          receiptHandle: 'test',
+          attributes: {} as SQSRecordAttributes,
+          messageAttributes: {} as SQSMessageAttributes,
+          body: 'Invalid JSON Test',
+          awsRegion: '',
+          eventSource: '',
+          eventSourceARN: '',
+          md5OfBody: '',
+        },
+      ],
+    };
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const result = await eventHandler(event);
+
+    expect(result.batchItemFailures).toHaveLength(1);
+    expect(result.batchItemFailures[0].itemIdentifier).toBe(errorMessageId);
+    expect(consoleSpy).toHaveBeenCalled();
+    consoleSpy.mockRestore();
+  });
 });
