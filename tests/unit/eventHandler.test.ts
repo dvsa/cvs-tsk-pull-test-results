@@ -1,10 +1,8 @@
-/* eslint-disable import/first */
-/* eslint-disable no-underscore-dangle */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 process.env.LOG_LEVEL = 'debug';
-import { DynamoDBStreamEvent } from 'aws-lambda';
-import { DynamoDB } from 'aws-sdk';
+import { SQSEvent, SQSMessageAttributes, SQSRecordAttributes } from 'aws-lambda';
+import { TypeOfTest } from '@dvsa/cvs-type-definitions/types/v1/enums/typeOfTest.enum';
 import { EOL } from 'os';
 import { mocked } from 'jest-mock';
 import { sendEvents } from '../../src/eventbridge/send';
@@ -12,14 +10,13 @@ import { SendResponse, EventType } from '../../src/interfaces/EventBridge';
 import { eventHandler } from '../../src/eventHandler';
 import { extractAmendedBillableTestResults } from '../../src/utils/extractAmendedBillableTestResults';
 import { extractBillableTestResults } from '../../src/utils/extractTestResults';
-import { TypeOfTest } from '../../src/interfaces/TestResult';
 
 jest.mock('../../src/eventbridge/send');
 jest.mock('../../src/utils/extractTestResults');
 jest.mock('../../src/utils/extractAmendedBillableTestResults');
 
 describe('eventHandler', () => {
-  let event: DynamoDBStreamEvent;
+  let event: SQSEvent;
   mocked(extractBillableTestResults).mockReturnValue([]);
   mocked(extractAmendedBillableTestResults).mockReturnValue([]);
   afterEach(() => {
@@ -27,7 +24,7 @@ describe('eventHandler', () => {
   });
 
   it.each([
-    ['VTA', undefined, EventType.COMPLETION],
+    ['VTA', null, EventType.COMPLETION],
     ['contingency', TypeOfTest.CONTINGENCY, EventType.CONTINGENCY],
     ['desk based', TypeOfTest.DESK_BASED, EventType.DESK_BASED],
   ])(
@@ -37,29 +34,37 @@ describe('eventHandler', () => {
       event = {
         Records: [
           {
-            eventName: 'INSERT',
-            dynamodb: {
-              NewImage: {
-                testStationPNumber: {
-                  S: 'foo',
+            messageId: 'test',
+            receiptHandle: 'test',
+            attributes: {} as SQSRecordAttributes,
+            messageAttributes: {},
+            body: JSON.stringify({
+              Type: 'Notification',
+              MessageId: 'some-message-id',
+              TopicArn: 'arn:aws:sns:us-east-1:123456789012:my-topic',
+              Subject: 'Test Subject',
+              eventName: 'INSERT',
+              dynamodb: {
+                NewImage: {
+                  testStationPNumber: {
+                    S: 'foo',
+                  },
+                  typeOfTest: typeOfTest ? { S: typeOfTest } : { NULL: true },
                 },
-                typeOfTest: typeOfTest
-                  ? {
-                    S: typeOfTest,
-                  }
-                  : undefined,
               },
-            },
+            }),
+            awsRegion: '',
+            eventSource: '',
+            eventSourceARN: '',
+            md5OfBody: '',
           },
         ],
       };
-      const unmarshallSpy = jest.spyOn(DynamoDB.Converter, 'unmarshall');
       const mSendResponse: SendResponse = { SuccessCount: 1, FailCount: 0 };
       mocked(sendEvents).mockResolvedValue(mSendResponse);
       await eventHandler(event);
       expect(sendEvents).toHaveBeenCalledTimes(1);
       expect(sendEvents).toHaveBeenCalledWith([], eventType);
-      expect(unmarshallSpy).toHaveBeenCalledTimes(1);
       expect(extractBillableTestResults).toHaveBeenCalledTimes(1);
       expect(extractBillableTestResults).toHaveBeenCalledWith({ testStationPNumber: 'foo', typeOfTest });
     },
@@ -69,41 +74,59 @@ describe('eventHandler', () => {
     event = {
       Records: [
         {
-          eventName: 'INSERT',
-          dynamodb: {
-            NewImage: {
-              testStationPNumber: {
-                S: 'foo',
-              },
-              typeOfTest: {
-                S: 'desk-based',
+          awsRegion: '',
+          eventSource: '',
+          eventSourceARN: '',
+          md5OfBody: '',
+          messageId: 'test',
+          receiptHandle: 'test',
+          attributes: {} as SQSRecordAttributes,
+          messageAttributes: {} as SQSMessageAttributes,
+          body: JSON.stringify({
+            eventName: 'INSERT',
+            dynamodb: {
+              NewImage: {
+                testStationPNumber: {
+                  S: 'foo',
+                },
+                typeOfTest: {
+                  S: 'desk-based',
+                },
               },
             },
-          },
+          }),
         },
       ],
     };
-    const unmarshallSpy = jest.spyOn(DynamoDB.Converter, 'unmarshall');
     await eventHandler(event);
-    expect(unmarshallSpy).toHaveBeenCalledTimes(1);
     expect(sendEvents).toHaveBeenCalledTimes(0);
     expect(extractBillableTestResults).toHaveBeenCalledTimes(0);
   });
   it('GIVEN an unhandled event THEN error in logged to the console', async () => {
-    event = ({
+    event = {
       Records: [
         {
-          eventName: 'foo',
-          dynamodb: {
-            NewImage: {
-              testStationPNumber: {
-                S: 'foo',
+          awsRegion: '',
+          eventSource: '',
+          eventSourceARN: '',
+          md5OfBody: '',
+          messageId: 'test',
+          receiptHandle: 'test',
+          attributes: {} as SQSRecordAttributes,
+          messageAttributes: {} as SQSMessageAttributes,
+          body: JSON.stringify({
+            eventName: 'foo',
+            dynamodb: {
+              NewImage: {
+                testStationPNumber: {
+                  S: 'foo',
+                },
               },
             },
-          },
+          }),
         },
       ],
-    } as unknown) as DynamoDBStreamEvent;
+    };
     // @ts-ignore
     const consoleSpy = jest.spyOn(console._stdout, 'write');
     await eventHandler(event);
@@ -122,44 +145,64 @@ describe('eventHandler', () => {
     'GIVEN a handled event contains a contingency %p stream event and a desk-based test %p stream event WHEN PROCESS_DESK_BASED_TESTS is set to %p THEN %p event should be processed',
     async (eventName1, eventName2, processDeskBasedTests, eventsProcessed) => {
       process.env.PROCESS_DESK_BASED_TESTS = processDeskBasedTests;
-      event = ({
+      event = {
         Records: [
           {
-            eventName: eventName1,
-            dynamodb: {
-              NewImage: {
-                testStationPNumber: {
-                  S: 'foo',
+            awsRegion: '',
+            eventSource: '',
+            eventSourceARN: '',
+            md5OfBody: '',
+            messageId: 'test',
+            receiptHandle: 'test',
+            attributes: {} as SQSRecordAttributes,
+            messageAttributes: {} as SQSMessageAttributes,
+            body: JSON.stringify({
+              eventName: eventName1,
+              dynamodb: {
+                NewImage: {
+                  testStationPNumber: {
+                    S: 'foo',
+                  },
+                  typeOfTest: {
+                    S: 'contingency',
+                  },
                 },
-                typeOfTest: {
-                  S: 'contingency',
+                OldImage: {
+                  testStationPNumber: {
+                    S: 'foo',
+                  },
+                  typeOfTest: {
+                    S: 'contingency',
+                  },
                 },
               },
-              OldImage: {
-                testStationPNumber: {
-                  S: 'foo',
-                },
-                typeOfTest: {
-                  S: 'contingency',
-                },
-              },
-            },
+            }),
           },
           {
-            eventName: eventName2,
-            dynamodb: {
-              NewImage: {
-                testStationPNumber: {
-                  S: 'foo',
-                },
-                typeOfTest: {
-                  S: 'desk-based',
+            awsRegion: '',
+            eventSource: '',
+            eventSourceARN: '',
+            md5OfBody: '',
+            messageId: 'test',
+            receiptHandle: 'test',
+            attributes: {} as SQSRecordAttributes,
+            messageAttributes: {} as SQSMessageAttributes,
+            body: JSON.stringify({
+              eventName: eventName2,
+              dynamodb: {
+                NewImage: {
+                  testStationPNumber: {
+                    S: 'foo',
+                  },
+                  typeOfTest: {
+                    S: 'desk-based',
+                  },
                 },
               },
-            },
+            }),
           },
         ],
-      } as unknown) as DynamoDBStreamEvent;
+      };
       const mSendResponse: SendResponse = { SuccessCount: eventsProcessed, FailCount: 0 };
       mocked(sendEvents).mockResolvedValue(mSendResponse);
 
@@ -167,4 +210,30 @@ describe('eventHandler', () => {
       expect(sendEvents).toHaveBeenCalledTimes(eventsProcessed);
     },
   );
+  it('GIVEN an event that throws an error THEN it should be caught and added to batch failures', async () => {
+    const errorMessageId = 'errorMessageId';
+    event = {
+      Records: [
+        {
+          messageId: errorMessageId,
+          receiptHandle: 'test',
+          attributes: {} as SQSRecordAttributes,
+          messageAttributes: {} as SQSMessageAttributes,
+          body: 'Invalid JSON Test',
+          awsRegion: '',
+          eventSource: '',
+          eventSourceARN: '',
+          md5OfBody: '',
+        },
+      ],
+    };
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const result = await eventHandler(event);
+
+    expect(result.batchItemFailures).toHaveLength(1);
+    expect(result.batchItemFailures[0].itemIdentifier).toBe(errorMessageId);
+    expect(consoleSpy).toHaveBeenCalled();
+    consoleSpy.mockRestore();
+  });
 });
