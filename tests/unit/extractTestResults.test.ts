@@ -1,40 +1,40 @@
-/* eslint-disable @typescript-eslint/comma-dangle */
-/* eslint-disable @typescript-eslint/indent */
-/* eslint-disable @typescript-eslint/quotes */
-/* eslint-disable quote-props */
+import { TestStationTypes } from '@dvsa/cvs-type-definitions/types/v1/enums/testStationType.enum';
+import type { TestResultSchema, VehicleType } from '@dvsa/cvs-type-definitions/types/v1/test-result';
+import type { TestTypeSchema } from '@dvsa/cvs-type-definitions/types/v1/test-type';
+import { TestResults } from '@dvsa/cvs-type-definitions/types/v1/enums/testResult.enum';
+import { TestStatus } from '@dvsa/cvs-type-definitions/types/v1/enums/testStatus.enum';
 import { extractBillableTestResults } from '../../src/utils/extractTestResults';
 import { TestActivity } from '../../src/interfaces/TestActivity';
-import { TestResultModel, TestStationType, VehicleType } from '../../src/interfaces/TestResult';
 
 describe('extractTestResults', () => {
   let TEST_ACTIVITY: TestActivity[];
 
-  it(`GIVEN data WITHOUT a certificate number issued WHEN the test result is extracted into an event THEN the event doesn't have a certificate number`, () => {
-    const mockRecord: TestResultModel = {
+  it('GIVEN data WITHOUT a certificate number issued WHEN the test result is extracted into an event THEN the event doesn\'t have a certificate number', () => {
+    const mockRecord: TestResultSchema = {
       noOfAxles: 2,
-      testStationType: TestStationType.GVTS,
+      testStationType: TestStationTypes.GVTS,
       testEndTimestamp: '2019-01-14T10:36:33.987Z',
       testStartTimestamp: '2019-01-14T10:36:33.987Z',
       vin: 'XMGDE02FS0H012303',
       vrm: 'JY58FPP',
       testerStaffId: '2',
       testStationPNumber: 'P99005',
-      vehicleType: VehicleType.PSV,
+      vehicleType: 'psv' as VehicleType,
       testResultId: '9',
       testerName: 'Dorel',
-      testStatus: 'submitted',
+      testStatus: TestStatus.SUBMITTED,
       testTypes: [
         {
           testCode: 'aas',
           testTypeId: '1',
-          testResult: 'fail',
-          testTypeEndTimeStamp: '2019-01-14T10:36:33.987Z',
-          testTypeStartTimeStamp: '2019-01-14T10:36:33.987Z',
+          testResult: TestResults.FAIL,
+          testTypeEndTimestamp: '2019-01-14T10:36:33.987Z',
+          testTypeStartTimestamp: '2019-01-14T10:36:33.987Z',
           name: 'Annual test',
           testNumber: 'W084564',
-        },
+        } as TestTypeSchema,
       ],
-    };
+    } as TestResultSchema;
     TEST_ACTIVITY = extractBillableTestResults(mockRecord);
     const EXPECTED_TEST_ACTIVITY: TestActivity = {
       noOfAxles: 2,
@@ -57,33 +57,33 @@ describe('extractTestResults', () => {
   });
 
   it('GIVEN data WITH a certificate number issued WHEN the test result is extracted into an event THEN the event has certificate number', () => {
-    const mockRecord: TestResultModel = {
+    const mockRecord: TestResultSchema = {
       noOfAxles: 2,
-      testStationType: TestStationType.GVTS,
+      testStationType: TestStationTypes.GVTS,
       testEndTimestamp: '2019-01-14T10:36:33.987Z',
       testStartTimestamp: '2019-01-14T10:36:33.987Z',
       vin: 'XMGDE02FS0H012303',
       vrm: 'JY58FPP',
       testerStaffId: '2',
       testStationPNumber: 'P99005',
-      vehicleType: VehicleType.PSV,
+      vehicleType: 'psv' as VehicleType,
       trailerId: 'PSV123',
       testResultId: '9',
       testerName: 'Dorel',
-      testStatus: 'submitted',
+      testStatus: TestStatus.SUBMITTED,
       testTypes: [
         {
           certificateNumber: '1234',
           testCode: 'aas',
           testTypeId: '1',
-          testResult: 'fail',
-          testTypeEndTimeStamp: '2019-01-14T10:36:33.987Z',
-          testTypeStartTimeStamp: '2019-01-14T10:36:33.987Z',
+          testResult: TestResults.FAIL,
+          testTypeEndTimestamp: '2019-01-14T10:36:33.987Z',
+          testTypeStartTimestamp: '2019-01-14T10:36:33.987Z',
           name: 'Annual test',
           testNumber: 'W084564',
-        },
+        } as TestTypeSchema,
       ],
-    };
+    } as TestResultSchema;
     TEST_ACTIVITY = extractBillableTestResults(mockRecord);
     const EXPECTED_TEST_ACTIVITY: TestActivity = {
       noOfAxles: 2,
@@ -106,72 +106,72 @@ describe('extractTestResults', () => {
   });
 
   it('GIVEN data with two test types WHEN test results are extracted into events THEN expect two events to be generated', () => {
-    const mockRecord: TestResultModel = {
+    const mockRecord: TestResultSchema = {
       noOfAxles: 2,
-      testStationType: TestStationType.GVTS,
+      testStationType: TestStationTypes.GVTS,
       testEndTimestamp: 'foo',
       testStartTimestamp: 'bar',
       vin: 'XMGDE02FS0H012303',
       vrm: 'JY58FPP',
       testerStaffId: '2',
       testStationPNumber: 'P99005',
-      vehicleType: VehicleType.PSV,
+      vehicleType: 'psv' as VehicleType,
       testResultId: '9',
       testerName: 'Dorel',
-      testStatus: 'submitted',
+      testStatus: TestStatus.SUBMITTED,
       testTypes: [
         {
           certificateNumber: '1234',
           testCode: 'aas',
           testTypeId: '1',
-          testResult: 'fail',
-          testTypeEndTimeStamp: '2019-01-14T10:36:33.987Z',
-          testTypeStartTimeStamp: '2019-01-14T10:36:33.987Z',
+          testResult: TestResults.FAIL,
+          testTypeEndTimestamp: '2019-01-14T10:36:33.987Z',
+          testTypeStartTimestamp: '2019-01-14T10:36:33.987Z',
           name: 'Annual test',
           testNumber: 'W084564',
-        },
+        } as TestTypeSchema,
         {
           certificateNumber: '1234',
           testCode: 'aas',
           testTypeId: '1',
-          testResult: 'fail',
-          testTypeEndTimeStamp: '2019-01-14T10:36:33.987Z',
-          testTypeStartTimeStamp: '2019-01-14T10:36:33.987Z',
+          testResult: TestResults.FAIL,
+          testTypeEndTimestamp: '2019-01-14T10:36:33.987Z',
+          testTypeStartTimestamp: '2019-01-14T10:36:33.987Z',
           name: 'Annual test',
           testNumber: 'W084564',
-        },
+        } as TestTypeSchema,
       ],
-    };
+    } as TestResultSchema;
     TEST_ACTIVITY = extractBillableTestResults(mockRecord);
     expect(TEST_ACTIVITY).toHaveLength(2);
   });
   it('GIVEN a trailer test result WHEN the test result is extracted into an event THEN the event has the tailer id in the vrm field', () => {
-    const mockRecord: TestResultModel = {
+    const mockRecord: TestResultSchema = {
       noOfAxles: 2,
-      testStationType: TestStationType.GVTS,
+      testStationType: TestStationTypes.GVTS,
       testEndTimestamp: '2019-01-14T10:36:33.987Z',
       testStartTimestamp: '2019-01-14T10:36:33.987Z',
       vin: 'XMGDE02FS0H012303',
       trailerId: 'TRL123',
       testerStaffId: '2',
       testStationPNumber: 'P99005',
-      vehicleType: VehicleType.TRL,
+      vehicleType: 'trl' as VehicleType,
       testResultId: '9',
       testerName: 'Dorel',
-      testStatus: 'submitted',
+      testStatus: TestStatus.SUBMITTED,
       testTypes: [
         {
           certificateNumber: '1234',
           testCode: 'aas',
           testTypeId: '1',
-          testResult: 'fail',
-          testTypeEndTimeStamp: '2019-01-14T10:36:33.987Z',
-          testTypeStartTimeStamp: '2019-01-14T10:36:33.987Z',
+          testResult: TestResults.FAIL,
+          testTypeEndTimestamp: '2019-01-14T10:36:33.987Z',
+          testTypeStartTimestamp: '2019-01-14T10:36:33.987Z',
           name: 'Annual test',
           testNumber: 'W084564',
-        },
+        } as TestTypeSchema,
       ],
-    };
+    } as TestResultSchema;
     TEST_ACTIVITY = extractBillableTestResults(mockRecord);
     const EXPECTED_TEST_ACTIVITY: TestActivity = {
       noOfAxles: 2,

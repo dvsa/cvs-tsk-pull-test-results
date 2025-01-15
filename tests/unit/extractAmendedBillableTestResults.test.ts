@@ -1,31 +1,31 @@
+import type { TestResultSchema, VehicleType } from '@dvsa/cvs-type-definitions/types/v1/test-result';
 import { extractAmendedBillableTestResults } from '../../src/utils/extractAmendedBillableTestResults';
 import { TestAmendment } from '../../src/interfaces/TestAmendment';
-import { TestResultModel, VehicleType } from '../../src/interfaces/TestResult';
 
 describe('formatModifyPayload', () => {
   it('GIVEN no changes where made to the record WHEN it should return an empty array', () => {
-    const currentRecord = { testTypes: [{ testCode: 'foo', testNumber: 'bar' }] } as TestResultModel;
-    const previousRecord = { testTypes: [{ testCode: 'foo', testNumber: 'bar' }] } as TestResultModel;
+    const currentRecord = { testTypes: [{ testCode: 'foo', testNumber: 'bar' }] } as TestResultSchema;
+    const previousRecord = { testTypes: [{ testCode: 'foo', testNumber: 'bar' }] } as TestResultSchema;
     expect(extractAmendedBillableTestResults(currentRecord, previousRecord)).toEqual([]);
   });
   it('GIVEN changes made to the test record WHEN changes are not relevant to billing THEN it should return an empty array', () => {
     const currentRecord = {
       testResultId: 'foo',
       testTypes: [{ testCode: 'foo', testNumber: 'bar' }],
-    } as TestResultModel;
+    } as TestResultSchema;
     const previousRecord = {
       testResultId: 'bar',
       testTypes: [{ testCode: 'foo', testNumber: 'bar' }],
-    } as TestResultModel;
+    } as TestResultSchema;
     expect(extractAmendedBillableTestResults(currentRecord, previousRecord)).toEqual([]);
   });
   it('GIVEN changes to the test types WHEN the changes are not relevant to billing THEN it should return an empty array', () => {
     const currentRecord = {
       testTypes: [{ testCode: 'foo', testNumber: 'bar', name: 'foo' }],
-    } as TestResultModel;
+    } as TestResultSchema;
     const previousRecord = {
       testTypes: [{ testCode: 'foo', testNumber: 'bar', name: 'bar' }],
-    } as TestResultModel;
+    } as TestResultSchema;
     expect(extractAmendedBillableTestResults(currentRecord, previousRecord)).toEqual([]);
   });
   it('GIVEN changes to the test record WHEN changes made to the test types are relevant to billing THEN it should add required fields to the payload', () => {
@@ -35,14 +35,14 @@ describe('formatModifyPayload', () => {
       testStationPNumber: '123',
       testTypes: [{ testCode: 'foo', testNumber: 'bar' }],
       reasonForCreation: 'foo',
-    } as TestResultModel;
+    } as TestResultSchema;
     const previousRecord = {
       vin: '123',
       vrm: 'B18 123',
       testStationPNumber: '123',
       testTypes: [{ testCode: 'bar', testNumber: 'bar' }],
       reasonForCreation: 'bar',
-    } as TestResultModel;
+    } as TestResultSchema;
     const expected: TestAmendment[] = [
       {
         reason: currentRecord.reasonForCreation,
@@ -85,14 +85,14 @@ describe('formatModifyPayload', () => {
         { testCode: 'foo', testNumber: 'foo' },
       ],
       reasonForCreation: 'foo',
-    } as TestResultModel;
+    } as TestResultSchema;
     const previousRecord = {
       testTypes: [
         { testCode: 'bar', testNumber: 'bar' },
         { testCode: 'foo', testNumber: 'foo' },
       ],
       reasonForCreation: 'bar',
-    } as TestResultModel;
+    } as TestResultSchema;
     const expected: TestAmendment[] = [
       {
         reason: currentRecord.reasonForCreation,
@@ -134,14 +134,14 @@ describe('formatModifyPayload', () => {
         { testCode: 'foo', testNumber: 'foo' },
       ],
       reasonForCreation: 'foo',
-    } as TestResultModel;
+    } as TestResultSchema;
     const previousRecord = {
       testTypes: [
         { testCode: 'bar', testNumber: 'bar' },
         { testCode: 'foobar', testNumber: 'foo' },
       ],
       reasonForCreation: 'bar',
-    } as TestResultModel;
+    } as TestResultSchema;
     const expected: TestAmendment[] = [
       {
         reason: currentRecord.reasonForCreation,
@@ -208,8 +208,8 @@ describe('formatModifyPayload', () => {
   });
 
   it('GIVEN changes to a test record WHEN the changes happen in the test result AND they are relevant to billing THEN it should add those fields to the payload', () => {
-    const currentRecord = { reasonForCreation: 'foo', testStationPNumber: 'foo', testTypes: [{}] } as TestResultModel;
-    const previousRecord = { reasonForCreation: 'bar', testStationPNumber: 'bar', testTypes: [{}] } as TestResultModel;
+    const currentRecord = { reasonForCreation: 'foo', testStationPNumber: 'foo', testTypes: [{}] } as TestResultSchema;
+    const previousRecord = { reasonForCreation: 'bar', testStationPNumber: 'bar', testTypes: [{}] } as TestResultSchema;
     const expected: TestAmendment[] = [
       {
         reason: currentRecord.reasonForCreation,
@@ -246,8 +246,8 @@ describe('formatModifyPayload', () => {
   });
 
   it('GIVEN changes to a test record WHEN the changes happen in the test result AND they are not relevant to billing THEN it should return empty array', () => {
-    const currentRecord = { reasonForCreation: 'foo', testStationPNumber: 'foo', testTypes: [{}] } as TestResultModel;
-    const previousRecord = { reasonForCreation: 'bar', testStationPNumber: 'foo', testTypes: [{}] } as TestResultModel;
+    const currentRecord = { reasonForCreation: 'foo', testStationPNumber: 'foo', testTypes: [{}] } as TestResultSchema;
+    const previousRecord = { reasonForCreation: 'bar', testStationPNumber: 'foo', testTypes: [{}] } as TestResultSchema;
     const expected: TestAmendment[] = [];
     expect(extractAmendedBillableTestResults(currentRecord, previousRecord)).toEqual(expected);
   });
@@ -255,19 +255,19 @@ describe('formatModifyPayload', () => {
     const currentRecord = {
       reasonForCreation: 'foo',
       testStationPNumber: 'foo',
-      vehicleType: VehicleType.TRL,
+      vehicleType: 'trl' as VehicleType,
       trailerId: 'TRL123',
       vrm: 'wrongVRM123',
       testTypes: [{}],
-    } as TestResultModel;
+    } as TestResultSchema;
     const previousRecord = {
       reasonForCreation: 'bar',
       testStationPNumber: 'bar',
-      vehicleType: VehicleType.TRL,
+      vehicleType: 'trl' as VehicleType,
       trailerId: 'TRL1',
       vrm: 'wrongVRM1',
       testTypes: [{}],
-    } as TestResultModel;
+    } as TestResultSchema;
     const expected: TestAmendment[] = [
       {
         reason: currentRecord.reasonForCreation,
@@ -312,19 +312,19 @@ describe('formatModifyPayload', () => {
     const currentRecord = {
       reasonForCreation: 'foo',
       testStationPNumber: 'foo',
-      vehicleType: VehicleType.PSV,
+      vehicleType: 'psv' as VehicleType,
       trailerId: 'TRL123',
       vrm: 'PSV123',
       testTypes: [{}],
-    } as TestResultModel;
+    } as TestResultSchema;
     const previousRecord = {
       reasonForCreation: 'bar',
       testStationPNumber: 'bar',
-      vehicleType: VehicleType.PSV,
+      vehicleType: 'psv' as VehicleType,
       trailerId: 'TRL1',
       vrm: 'PSV1',
       testTypes: [{}],
-    } as TestResultModel;
+    } as TestResultSchema;
     const expected: TestAmendment[] = [
       {
         reason: currentRecord.reasonForCreation,
