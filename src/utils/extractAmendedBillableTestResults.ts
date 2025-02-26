@@ -1,45 +1,46 @@
 /* eslint-disable security/detect-object-injection */
+import type { TestResultSchema, VehicleType } from '@dvsa/cvs-type-definitions/types/v1/test-result';
+import type { TestTypeSchema } from '@dvsa/cvs-type-definitions/types/v1/test-type';
 import logger from '../observability/logger';
 import { FieldChange, TestAmendment } from '../interfaces/TestAmendment';
-import { TestResultModel, TestType, VehicleType } from '../interfaces/TestResult';
 
-export const extractAmendedBillableTestResults = (currentRecord: TestResultModel, previousRecord: TestResultModel) => {
-  const testTypeValues = ['testCode'] as const;
+export const extractAmendedBillableTestResults = (currentRecord: TestResultSchema, previousRecord: TestResultSchema) => {
   const testResultValues = [
     'testStationPNumber',
     'vin',
     'testStatus',
-    currentRecord.vehicleType === VehicleType.TRL ? 'trailerId' : 'vrm',
+    currentRecord.vehicleType === 'trl' as VehicleType ? 'trailerId' : 'vrm',
   ] as const;
 
   const fieldsChanged: TestAmendment[] = [];
   currentRecord.testTypes.forEach((currentTestType) => {
     const fields: FieldChange[] = [];
 
-    const previousTestType: TestType = previousRecord.testTypes.find(
+    const previousTestType: TestTypeSchema = previousRecord.testTypes.find(
       (testType) => testType.testNumber === currentTestType.testNumber,
     );
+    if (previousTestType) {
+      const hasAnyFieldChanged = testResultValues.some((field) => currentRecord[field] !== previousRecord[field])
+      || currentTestType.testCode !== previousTestType.testCode;
 
-    const hasAnyFieldChanged = testResultValues.some((field) => currentRecord[field] !== previousRecord[field])
-      || testTypeValues.some((field) => currentTestType[field] !== previousTestType[field]);
+      if (!hasAnyFieldChanged) {
+        logger.debug('No fields have changed which are relevant to billing');
+        return;
+      }
+      fields.push({ fieldName: 'testCode', oldValue: previousTestType.testCode, newValue: currentTestType.testCode });
+      testResultValues.forEach((field) => fields.push({
+        fieldName: field === 'trailerId' ? 'vrm' : field,
+        oldValue: previousRecord[field],
+        newValue: currentRecord[field],
+      }));
 
-    if (!hasAnyFieldChanged) {
-      logger.debug('No fields have changed which are relevant to billing');
-      return;
+      logger.debug(`Fields changed for testResultId: ${currentRecord.testResultId}: ${JSON.stringify(fields)}`);
+
+      fieldsChanged.push({
+        reason: currentRecord.reasonForCreation,
+        fields,
+      });
     }
-    testTypeValues.forEach((field) => fields.push({ fieldName: field, oldValue: previousTestType[field], newValue: currentTestType[field] }));
-    testResultValues.forEach((field) => fields.push({
-      fieldName: field === 'trailerId' ? 'vrm' : field,
-      oldValue: previousRecord[field],
-      newValue: currentRecord[field],
-    }));
-
-    logger.debug(`Fields changed for testResultId: ${currentRecord.testResultId}: ${JSON.stringify(fields)}`);
-
-    fieldsChanged.push({
-      reason: currentRecord.reasonForCreation,
-      fields,
-    });
   });
 
   return fieldsChanged;
