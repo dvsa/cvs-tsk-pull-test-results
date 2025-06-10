@@ -1,6 +1,6 @@
 /* eslint-disable security/detect-object-injection */
 import type { TestResultSchema, VehicleType } from '@dvsa/cvs-type-definitions/types/v1/test-result';
-import type { TestTypeSchema } from '@dvsa/cvs-type-definitions/types/v1/test-type';
+import type { TestResultTestTypeSchema } from '@dvsa/cvs-type-definitions/types/v1/test-result-test-type';
 import logger from '../observability/logger';
 import { FieldChange, TestAmendment } from '../interfaces/TestAmendment';
 
@@ -16,7 +16,7 @@ export const extractAmendedBillableTestResults = (currentRecord: TestResultSchem
   currentRecord.testTypes.forEach((currentTestType) => {
     const fields: FieldChange[] = [];
 
-    const previousTestType: TestTypeSchema = previousRecord.testTypes.find(
+    const previousTestType: TestResultTestTypeSchema = previousRecord.testTypes.find(
       (testType) => testType.testNumber === currentTestType.testNumber,
     );
     if (previousTestType) {

@@ -1,6 +1,6 @@
 import { TestStationTypes } from '@dvsa/cvs-type-definitions/types/v1/enums/testStationType.enum';
 import type { TestResultSchema, VehicleType } from '@dvsa/cvs-type-definitions/types/v1/test-result';
-import type { TestTypeSchema } from '@dvsa/cvs-type-definitions/types/v1/test-type';
+import type { TestResultTestTypeSchema } from '@dvsa/cvs-type-definitions/types/v1/test-result-test-type';
 import { TestResults } from '@dvsa/cvs-type-definitions/types/v1/enums/testResult.enum';
 import { TestStatus } from '@dvsa/cvs-type-definitions/types/v1/enums/testStatus.enum';
 import { extractBillableTestResults } from '../../src/utils/extractTestResults';
@@ -32,7 +32,7 @@ describe('extractTestResults', () => {
           testTypeStartTimestamp: '2019-01-14T10:36:33.987Z',
           name: 'Annual test',
           testNumber: 'W084564',
-        } as TestTypeSchema,
+        } as TestResultTestTypeSchema,
       ],
     } as TestResultSchema;
     TEST_ACTIVITY = extractBillableTestResults(mockRecord);
@@ -81,7 +81,7 @@ describe('extractTestResults', () => {
           testTypeStartTimestamp: '2019-01-14T10:36:33.987Z',
           name: 'Annual test',
           testNumber: 'W084564',
-        } as TestTypeSchema,
+        } as TestResultTestTypeSchema,
       ],
     } as TestResultSchema;
     TEST_ACTIVITY = extractBillableTestResults(mockRecord);
@@ -129,7 +129,7 @@ describe('extractTestResults', () => {
           testTypeStartTimestamp: '2019-01-14T10:36:33.987Z',
           name: 'Annual test',
           testNumber: 'W084564',
-        } as TestTypeSchema,
+        } as TestResultTestTypeSchema,
         {
           certificateNumber: '1234',
           testCode: 'aas',
@@ -139,7 +139,7 @@ describe('extractTestResults', () => {
           testTypeStartTimestamp: '2019-01-14T10:36:33.987Z',
           name: 'Annual test',
           testNumber: 'W084564',
-        } as TestTypeSchema,
+        } as TestResultTestTypeSchema,
       ],
     } as TestResultSchema;
     TEST_ACTIVITY = extractBillableTestResults(mockRecord);
@@ -169,7 +169,7 @@ describe('extractTestResults', () => {
           testTypeStartTimestamp: '2019-01-14T10:36:33.987Z',
           name: 'Annual test',
           testNumber: 'W084564',
-        } as TestTypeSchema,
+        } as TestResultTestTypeSchema,
       ],
     } as TestResultSchema;
     TEST_ACTIVITY = extractBillableTestResults(mockRecord);
